@@ -3,7 +3,6 @@
 import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { ChevronLeft, ChevronRight } from "lucide-react"
 
 // Import step components
 import { Step1StructureType } from "@/components/configurator/step1-structure-type"
@@ -35,8 +34,8 @@ export interface ConfigurationData {
 }
 
 const steps = [
-  { id: 1, title: "Tipo Struttura", description: "Scegli il tipo di struttura", icon: "🏗️" },
-  { id: 2, title: "Modello", description: "Seleziona il modello", icon: "📐" },
+  { id: 1, title: "Modello", description: "Seleziona il modello", icon: "📐" },
+  { id: 2, title: "Tipo Struttura", description: "Scegli il tipo di struttura", icon: "🏗️" },
   { id: 3, title: "Dimensioni", description: "Imposta le dimensioni", icon: "📏" },
   { id: 4, title: "Copertura", description: "Scegli la copertura", icon: "🏠" },
   { id: 5, title: "Colori", description: "Seleziona i colori", icon: "🎨" },
@@ -67,9 +66,9 @@ export default function ConfiguratorePage() {
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <Step1StructureType configuration={configuration} updateConfiguration={updateConfiguration} />
-      case 2:
         return <Step2Model configuration={configuration} updateConfiguration={updateConfiguration} />
+      case 2:
+        return <Step1StructureType configuration={configuration} updateConfiguration={updateConfiguration} />
       case 3:
         return <Step3Dimensions configuration={configuration} updateConfiguration={updateConfiguration} />
       case 4:
@@ -189,17 +188,21 @@ export default function ConfiguratorePage() {
             disabled={currentStep === 1}
             className="flex items-center gap-2 bg-white border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-50"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
             Indietro
           </Button>
 
           {currentStep < 7 && (
             <Button
               onClick={nextStep}
-              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300 border border-orange-800"
             >
               Avanti
-              <ChevronRight className="w-4 h-4" />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </Button>
           )}
         </div>

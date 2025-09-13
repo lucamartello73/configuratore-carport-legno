@@ -28,6 +28,7 @@ const navigation = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { name: "Configurazioni", href: "/admin/configurations", icon: FileText },
   { name: "Modelli", href: "/admin/models", icon: Package },
+  { name: "Tipi Struttura", href: "/admin/structure-types", icon: Settings },
   { name: "Colori", href: "/admin/colors", icon: Palette },
   { name: "Superfici", href: "/admin/surfaces", icon: Settings },
   { name: "Prezzi", href: "/admin/pricing", icon: DollarSign },
