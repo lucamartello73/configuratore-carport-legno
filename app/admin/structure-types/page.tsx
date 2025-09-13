@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AdminLayout } from "@/components/admin/admin-layout"
 import { createClient } from "@/lib/supabase/client"
 import { Plus, Edit, Trash2, Save, X } from "lucide-react"
+import { ImageUpload } from "@/components/admin/image-upload"
 
 interface StructureType {
   id: string
@@ -219,11 +220,11 @@ export default function StructureTypesPage() {
                   </Select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">URL Immagine</label>
-                  <Input
-                    value={formData.image}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, image: e.target.value }))}
-                    placeholder="https://example.com/image.jpg"
+                  <ImageUpload
+                    currentImage={formData.image}
+                    onImageUploaded={(url) => setFormData((prev) => ({ ...prev, image: url }))}
+                    folder="structure-types"
+                    label="Immagine Tipo Struttura"
                   />
                 </div>
               </div>

@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { AdminLayout } from "@/components/admin/admin-layout"
 import { createClient } from "@/lib/supabase/client"
 import { Plus, Edit, Trash2 } from "lucide-react"
+import { ImageUpload } from "@/components/admin/image-upload"
 
 interface Model {
   id: string
@@ -149,11 +150,11 @@ export default function ModelsPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="image">URL Immagine</Label>
-                <Input
-                  id="image"
-                  value={editingModel.image || ""}
-                  onChange={(e) => setEditingModel({ ...editingModel, image: e.target.value })}
+                <ImageUpload
+                  currentImage={editingModel.image}
+                  onImageUploaded={(url) => setEditingModel({ ...editingModel, image: url })}
+                  folder="models"
+                  label="Immagine Modello"
                 />
               </div>
               <div className="flex gap-2">

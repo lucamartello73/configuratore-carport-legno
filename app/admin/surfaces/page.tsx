@@ -9,12 +9,14 @@ import { Textarea } from "@/components/ui/textarea"
 import { AdminLayout } from "@/components/admin/admin-layout"
 import { createClient } from "@/lib/supabase/client"
 import { Plus, Edit, Trash2 } from "lucide-react"
+import { ImageUpload } from "@/components/admin/image-upload"
 
 interface Surface {
   id: string
   name: string
   description: string
   price_per_sqm: number
+  image?: string // added image field
 }
 
 export default function SurfacesPage() {
@@ -50,6 +52,7 @@ export default function SurfacesPage() {
           name: editingSurface.name,
           description: editingSurface.description,
           price_per_sqm: editingSurface.price_per_sqm,
+          image: editingSurface.image, // added image field
           updated_at: new Date().toISOString(),
         })
         .eq("id", editingSurface.id)
@@ -65,6 +68,7 @@ export default function SurfacesPage() {
           name: editingSurface.name,
           description: editingSurface.description,
           price_per_sqm: editingSurface.price_per_sqm,
+          image: editingSurface.image, // added image field
         },
       ])
 
@@ -148,6 +152,14 @@ export default function SurfacesPage() {
                   onChange={(e) => setEditingSurface({ ...editingSurface, price_per_sqm: Number(e.target.value) })}
                 />
               </div>
+              <div>
+                <ImageUpload
+                  currentImage={editingSurface.image}
+                  onImageUploaded={(url) => setEditingSurface({ ...editingSurface, image: url })}
+                  folder="surfaces"
+                  label="Immagine Superficie"
+                />
+              </div>
               <div className="flex gap-2">
                 <Button onClick={handleSave} className="bg-orange-500 hover:bg-orange-600 text-white">
                   Salva
@@ -178,6 +190,13 @@ export default function SurfacesPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {surfaces.map((surface) => (
                 <div key={surface.id} className="border rounded-lg p-4 bg-green-50">
+                  {surface.image && (
+                    <img
+                      src={surface.image || "/placeholder.svg"}
+                      alt={surface.name}
+                      className="w-full h-32 object-cover rounded-lg mb-4"
+                    />
+                  )}
                   <h3 className="font-semibold text-green-800 mb-2">{surface.name}</h3>
                   <p className="text-green-600 text-sm mb-3">{surface.description}</p>
                   <p className="font-semibold text-green-800 mb-4">€{surface.price_per_sqm}/m²</p>

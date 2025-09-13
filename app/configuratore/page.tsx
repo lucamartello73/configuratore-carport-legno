@@ -195,15 +195,38 @@ export default function ConfiguratorePage() {
           </Button>
 
           {currentStep < 7 && (
-            <Button
+            <button
               onClick={nextStep}
-              className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300 border border-orange-800"
+              style={{
+                background: "#dc2626",
+                backgroundColor: "#dc2626",
+                color: "#ffffff",
+                fontWeight: "bold",
+                fontSize: "14px",
+                padding: "8px 16px",
+                borderRadius: "6px",
+                border: "2px solid #991b1b",
+                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                transition: "all 0.3s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#b91c1c"
+                e.currentTarget.style.background = "#b91c1c"
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "#dc2626"
+                e.currentTarget.style.background = "#dc2626"
+              }}
             >
               Avanti
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg style={{ width: "16px", height: "16px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
-            </Button>
+            </button>
           )}
         </div>
       </div>
