@@ -6,6 +6,51 @@ export function createClient() {
   return {
     from: (table: string) => ({
       select: (columns = "*") => ({
+        ilike: (column: string, pattern: string) => ({
+          maybeSingle: () => ({
+            then: async (resolve: (result: { data: any | null; error: any }) => void) => {
+              try {
+                const encodedPattern = encodeURIComponent(pattern)
+                const response = await fetch(
+                  `${supabaseUrl}/rest/v1/${table}?select=${columns}&${column}=ilike.${encodedPattern}`,
+                  {
+                    headers: {
+                      apikey: supabaseKey,
+                      Authorization: `Bearer ${supabaseKey}`,
+                      "Content-Type": "application/json",
+                    },
+                  },
+                )
+                const data = await response.json()
+                // maybeSingle returns the first item or null if no items found
+                resolve({ data: data && data.length > 0 ? data[0] : null, error: null })
+              } catch (error) {
+                console.error("Supabase ilike error:", error)
+                resolve({ data: null, error })
+              }
+            },
+          }),
+          then: async (resolve: (result: { data: any[]; error: null }) => void) => {
+            try {
+              const encodedPattern = encodeURIComponent(pattern)
+              const response = await fetch(
+                `${supabaseUrl}/rest/v1/${table}?select=${columns}&${column}=ilike.${encodedPattern}`,
+                {
+                  headers: {
+                    apikey: supabaseKey,
+                    Authorization: `Bearer ${supabaseKey}`,
+                    "Content-Type": "application/json",
+                  },
+                },
+              )
+              const data = await response.json()
+              resolve({ data: data || [], error: null })
+            } catch (error) {
+              console.error("Supabase ilike error:", error)
+              resolve({ data: [], error: null })
+            }
+          },
+        }),
         eq: (column: string, value: any) => ({
           order: (orderColumn: string, options?: { ascending?: boolean }) => ({
             then: async (resolve: (result: { data: any[]; error: null }) => void) => {
@@ -83,7 +128,73 @@ export function createClient() {
           }
         },
       }),
-      insert: (values: any[]) => ({
+      insert: (values: any) => ({
+        select: (columns = "*") => ({
+          single: () => ({
+            then: async (resolve: (result: { data: any; error: any }) => void) => {
+              try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/${table}`, {
+                  method: "POST",
+                  headers: {
+                    apikey: supabaseKey,
+                    Authorization: `Bearer ${supabaseKey}`,
+                    "Content-Type": "application/json",
+                    Prefer: "return=representation",
+                  },
+                  body: JSON.stringify(values),
+                })
+
+                if (response.ok) {
+                  const data = await response.json()
+                  resolve({ data: data && data.length > 0 ? data[0] : null, error: null })
+                } else {
+                  const errorText = await response.text()
+                  let errorObj
+                  try {
+                    errorObj = JSON.parse(errorText)
+                  } catch {
+                    errorObj = { message: errorText }
+                  }
+                  resolve({ data: null, error: errorObj })
+                }
+              } catch (error) {
+                console.error("Supabase insert error:", error)
+                resolve({ data: null, error })
+              }
+            },
+          }),
+          then: async (resolve: (result: { data: any[]; error: any }) => void) => {
+            try {
+              const response = await fetch(`${supabaseUrl}/rest/v1/${table}`, {
+                method: "POST",
+                headers: {
+                  apikey: supabaseKey,
+                  Authorization: `Bearer ${supabaseKey}`,
+                  "Content-Type": "application/json",
+                  Prefer: "return=representation",
+                },
+                body: JSON.stringify(values),
+              })
+
+              if (response.ok) {
+                const data = await response.json()
+                resolve({ data: data || [], error: null })
+              } else {
+                const errorText = await response.text()
+                let errorObj
+                try {
+                  errorObj = JSON.parse(errorText)
+                } catch {
+                  errorObj = { message: errorText }
+                }
+                resolve({ data: [], error: errorObj })
+              }
+            } catch (error) {
+              console.error("Supabase insert error:", error)
+              resolve({ data: [], error })
+            }
+          },
+        }),
         then: async (resolve: (result: { data: any; error: any }) => void) => {
           try {
             const response = await fetch(`${supabaseUrl}/rest/v1/${table}`, {
@@ -94,14 +205,20 @@ export function createClient() {
                 "Content-Type": "application/json",
                 Prefer: "return=minimal",
               },
-              body: JSON.stringify(values[0]),
+              body: JSON.stringify(values),
             })
 
             if (response.ok) {
               resolve({ data: null, error: null })
             } else {
-              const error = await response.text()
-              resolve({ data: null, error: { message: error } })
+              const errorText = await response.text()
+              let errorObj
+              try {
+                errorObj = JSON.parse(errorText)
+              } catch {
+                errorObj = { message: errorText }
+              }
+              resolve({ data: null, error: errorObj })
             }
           } catch (error) {
             console.error("Supabase insert error:", error)
@@ -127,8 +244,14 @@ export function createClient() {
               if (response.ok) {
                 resolve({ data: null, error: null })
               } else {
-                const error = await response.text()
-                resolve({ data: null, error: { message: error } })
+                const errorText = await response.text()
+                let errorObj
+                try {
+                  errorObj = JSON.parse(errorText)
+                } catch {
+                  errorObj = { message: errorText }
+                }
+                resolve({ data: null, error: errorObj })
               }
             } catch (error) {
               console.error("Supabase update error:", error)
@@ -153,8 +276,14 @@ export function createClient() {
               if (response.ok) {
                 resolve({ data: null, error: null })
               } else {
-                const error = await response.text()
-                resolve({ data: null, error: { message: error } })
+                const errorText = await response.text()
+                let errorObj
+                try {
+                  errorObj = JSON.parse(errorText)
+                } catch {
+                  errorObj = { message: errorText }
+                }
+                resolve({ data: null, error: errorObj })
               }
             } catch (error) {
               console.error("Supabase delete error:", error)
