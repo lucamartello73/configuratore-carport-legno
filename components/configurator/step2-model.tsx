@@ -69,6 +69,10 @@ export function Step2Model({ configuration, updateConfiguration }: Step2Props) {
                 src={model.image || "/placeholder.svg?height=200&width=300&query=carport model"}
                 alt={model.name}
                 className="w-full h-48 object-cover rounded-lg mb-4"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.src = "/placeholder.svg?height=200&width=300"
+                }}
               />
               <h3 className="text-xl font-semibold text-green-800 mb-2">{model.name}</h3>
               <p className="text-green-600 mb-3">{model.description}</p>

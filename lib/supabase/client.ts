@@ -6,6 +6,45 @@ export function createClient() {
   return {
     from: (table: string) => ({
       select: (columns = "*") => ({
+        eq: (column: string, value: any) => ({
+          order: (orderColumn: string, options?: { ascending?: boolean }) => ({
+            then: async (resolve: (result: { data: any[]; error: null }) => void) => {
+              try {
+                const response = await fetch(
+                  `${supabaseUrl}/rest/v1/${table}?select=${columns}&${column}=eq.${value}&order=${orderColumn}.${options?.ascending ? "asc" : "desc"}`,
+                  {
+                    headers: {
+                      apikey: supabaseKey,
+                      Authorization: `Bearer ${supabaseKey}`,
+                      "Content-Type": "application/json",
+                    },
+                  },
+                )
+                const data = await response.json()
+                resolve({ data: data || [], error: null })
+              } catch (error) {
+                console.error("Supabase error:", error)
+                resolve({ data: [], error: null })
+              }
+            },
+          }),
+          then: async (resolve: (result: { data: any[]; error: null }) => void) => {
+            try {
+              const response = await fetch(`${supabaseUrl}/rest/v1/${table}?select=${columns}&${column}=eq.${value}`, {
+                headers: {
+                  apikey: supabaseKey,
+                  Authorization: `Bearer ${supabaseKey}`,
+                  "Content-Type": "application/json",
+                },
+              })
+              const data = await response.json()
+              resolve({ data: data || [], error: null })
+            } catch (error) {
+              console.error("Supabase error:", error)
+              resolve({ data: [], error: null })
+            }
+          },
+        }),
         order: (column: string, options?: { ascending?: boolean }) => ({
           then: async (resolve: (result: { data: any[]; error: null }) => void) => {
             try {

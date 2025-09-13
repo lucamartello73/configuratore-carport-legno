@@ -109,6 +109,10 @@ export function Step1StructureType({ configuration, updateConfiguration }: Step1
                   src={type.image || "/placeholder.svg?height=200&width=300&query=carport structure"}
                   alt={type.name}
                   className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement
+                    target.src = "/placeholder.svg?height=200&width=300"
+                  }}
                 />
                 {selectedType === type.id && (
                   <div className="absolute top-2 right-2 bg-orange-500 text-white rounded-full p-2">
