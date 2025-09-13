@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { createClient } from "@/lib/supabase/client"
 import type { ConfigurationData } from "@/app/configuratore/page"
 
@@ -107,9 +106,6 @@ export function Step5Colors({ configuration, updateConfiguration }: Step5Props) 
               >
                 <div className="w-full h-16 rounded-lg mb-2 border" style={{ backgroundColor: color.hex_value }} />
                 <p className="text-sm font-medium text-gray-900">{color.name}</p>
-                {color.price_modifier > 0 && (
-                  <Badge className="bg-orange-500 text-white text-xs mt-1">+€{color.price_modifier}</Badge>
-                )}
               </div>
             ))}
           </div>
@@ -138,9 +134,6 @@ export function Step5Colors({ configuration, updateConfiguration }: Step5Props) 
               >
                 <div className="w-full h-16 rounded-lg mb-2 border" style={{ backgroundColor: color.hex_value }} />
                 <p className="text-sm font-medium text-gray-900">{color.name}</p>
-                {color.price_modifier > 0 && (
-                  <Badge className="bg-orange-500 text-white text-xs mt-1">+€{color.price_modifier}</Badge>
-                )}
               </div>
             ))}
           </div>

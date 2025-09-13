@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { createClient } from "@/lib/supabase/client"
 import type { ConfigurationData } from "@/app/configuratore/page"
 
@@ -73,7 +72,6 @@ export function Step2Model({ configuration, updateConfiguration }: Step2Props) {
               />
               <h3 className="text-xl font-semibold text-green-800 mb-2">{model.name}</h3>
               <p className="text-green-600 mb-3">{model.description}</p>
-              <Badge className="bg-orange-500 text-white">€{model.base_price.toLocaleString()}</Badge>
             </CardContent>
           </Card>
         ))}

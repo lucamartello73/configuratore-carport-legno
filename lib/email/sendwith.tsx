@@ -24,30 +24,29 @@ export async function sendEmail(emailData: EmailData) {
   }
 
   try {
-    const response = await fetch("https://api.sendwith.email/api/send", {
+    const requestBody = {
+      to: emailData.to,
+      from: emailData.from || adminEmail,
+      subject: emailData.subject,
+      text: emailData.html
+        .replace(/<[^>]*>/g, "")
+        .replace(/&nbsp;/g, " ")
+        .trim(),
+    }
+
+    console.log("[v0] SendWith request body:", JSON.stringify(requestBody, null, 2))
+
+    const response = await fetch("https://api.sendwith.me/send", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+        "X-API-Key": apiKey,
       },
-      body: JSON.stringify({
-        message: {
-          to: {
-            email: emailData.to,
-            name: "",
-          },
-          from: {
-            email: emailData.from || adminEmail,
-            name: "Carport Configurator",
-          },
-          subject: emailData.subject,
-          body: "Configurazione carport ricevuta. Controlla l'email HTML per i dettagli completi.",
-          HTMLbody: emailData.html,
-        },
-      }),
+      body: JSON.stringify(requestBody),
     })
 
     const responseText = await response.text()
+    console.log("[v0] SendWith response:", response.status, responseText)
 
     if (!response.ok) {
       console.error(`SendWith API error: ${response.status} ${response.statusText}`, responseText)
@@ -59,8 +58,8 @@ export async function sendEmail(emailData: EmailData) {
     try {
       result = JSON.parse(responseText)
     } catch (jsonError) {
-      console.error("Failed to parse JSON response:", responseText)
-      throw new Error(`Invalid JSON response from SendWith API: ${responseText}`)
+      // If it's not JSON, treat as success if status is OK
+      result = { message: responseText }
     }
 
     return { success: true, data: result }
@@ -71,62 +70,54 @@ export async function sendEmail(emailData: EmailData) {
 }
 
 export async function sendConfigurationNotification(data: ConfigurationEmailData) {
-  const customerEmailHtml = `
-    <div>
-      <h1>Configurazione Carport Ricevuta</h1>
-      
-      <p>Gentile ${data.customerName},</p>
-      
-      <p>Grazie per aver configurato il tuo carport personalizzato. Abbiamo ricevuto la tua richiesta e ti contatteremo presto per finalizzare il progetto.</p>
-      
-      <h3>Dettagli Configurazione</h3>
-      <p><strong>ID Configurazione:</strong> ${data.configurationId}</p>
-      <p><strong>Tipo Struttura:</strong> ${data.structureType}</p>
-      <p><strong>Dimensioni:</strong> ${data.dimensions}</p>
-      <p><strong>Prezzo Totale:</strong> €${data.totalPrice.toLocaleString()}</p>
-      
-      <p>Il nostro team tecnico esaminerà la tua configurazione e ti contatterà entro 24-48 ore per discutere i dettagli e organizzare un sopralluogo.</p>
-      
-      <p><strong>Prezzo Totale: €${data.totalPrice.toLocaleString()}</strong></p>
-      
-      <p>Se hai domande, non esitare a contattarci. Grazie per aver scelto i nostri servizi!</p>
-      
-      <p>Carport Configurator - Il tuo partner per carport personalizzati</p>
-    </div>
+  const customerEmailText = `
+Configurazione Carport Ricevuta
+
+Gentile ${data.customerName},
+
+Grazie per aver configurato il tuo carport personalizzato. Abbiamo ricevuto la tua richiesta e ti contatteremo presto per finalizzare il progetto.
+
+Dettagli Configurazione:
+- ID Configurazione: ${data.configurationId}
+- Tipo Struttura: ${data.structureType}
+- Dimensioni: ${data.dimensions}
+
+Il nostro team tecnico esaminerà la tua configurazione e ti contatterà entro 24-48 ore per discutere i dettagli, organizzare un sopralluogo e fornirti un preventivo personalizzato.
+
+Se hai domande, non esitare a contattarci. Grazie per aver scelto i nostri servizi!
+
+Carport Configurator - Il tuo partner per carport personalizzati
   `
 
-  const adminEmailHtml = `
-    <div>
-      <h1>Nuova Configurazione Carport</h1>
-      
-      <p>È stata ricevuta una nuova configurazione carport.</p>
-      
-      <h3>Dettagli Cliente</h3>
-      <p><strong>Nome:</strong> ${data.customerName}</p>
-      <p><strong>Email:</strong> ${data.customerEmail}</p>
-      <p><strong>ID Configurazione:</strong> ${data.configurationId}</p>
-      
-      <h3>Dettagli Configurazione</h3>
-      <p><strong>Tipo Struttura:</strong> ${data.structureType}</p>
-      <p><strong>Dimensioni:</strong> ${data.dimensions}</p>
-      <p><strong>Prezzo Totale:</strong> €${data.totalPrice.toLocaleString()}</p>
-      
-      <p><strong>Accedi al pannello admin per visualizzare i dettagli completi</strong></p>
-    </div>
+  const adminEmailText = `
+Nuova Configurazione Carport
+
+È stata ricevuta una nuova configurazione carport.
+
+Dettagli Cliente:
+- Nome: ${data.customerName}
+- Email: ${data.customerEmail}
+- ID Configurazione: ${data.configurationId}
+
+Dettagli Configurazione:
+- Tipo Struttura: ${data.structureType}
+- Dimensioni: ${data.dimensions}
+
+Accedi al pannello admin per visualizzare i dettagli completi e calcolare il preventivo.
   `
 
   // Send email to customer
   const customerResult = await sendEmail({
     to: data.customerEmail,
     subject: "Configurazione Carport Ricevuta - Grazie per la tua richiesta",
-    html: customerEmailHtml,
+    html: customerEmailText,
   })
 
   // Send notification to admin
   const adminResult = await sendEmail({
     to: process.env.ADMIN_EMAIL || "admin@carport.com",
     subject: `Nuova Configurazione Carport - ${data.customerName}`,
-    html: adminEmailHtml,
+    html: adminEmailText,
   })
 
   return {

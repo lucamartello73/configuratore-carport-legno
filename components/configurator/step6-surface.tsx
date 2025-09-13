@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { createClient } from "@/lib/supabase/client"
 import type { ConfigurationData } from "@/app/configuratore/page"
 
@@ -61,8 +60,6 @@ export function Step6Surface({ configuration, updateConfiguration }: Step6Props)
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {surfaces.map((surface) => {
-          const totalPrice = surfaceArea * surface.price_per_sqm
-
           return (
             <Card
               key={surface.id}
@@ -79,12 +76,6 @@ export function Step6Surface({ configuration, updateConfiguration }: Step6Props)
                 />
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">{surface.name}</h3>
                 <p className="text-gray-700 mb-3">{surface.description}</p>
-                <div className="space-y-2">
-                  <Badge className="bg-green-500 text-white">€{surface.price_per_sqm}/m²</Badge>
-                  {surfaceArea > 0 && (
-                    <Badge className="bg-orange-500 text-white ml-2">Totale: €{totalPrice.toFixed(0)}</Badge>
-                  )}
-                </div>
               </CardContent>
             </Card>
           )

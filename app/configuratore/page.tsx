@@ -27,7 +27,6 @@ export interface ConfigurationData {
   coverageColorId: string
   surfaceId: string
   packageType: string
-  totalPrice: number
   customerName: string
   customerEmail: string
   customerPhone: string

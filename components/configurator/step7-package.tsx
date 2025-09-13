@@ -1,14 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { createClient } from "@/lib/supabase/client"
 import type { ConfigurationData } from "@/app/configuratore/page"
-import { CheckCircle } from "lucide-react"
+import { CheckCircle, Wrench, Package } from "lucide-react"
 import { saveConfiguration } from "@/app/actions/save-configuration"
 
 interface Step7Props {
@@ -18,22 +16,30 @@ interface Step7Props {
 
 const packageTypes = [
   {
-    id: "base",
-    name: "Pacchetto Base",
-    description: "Solo struttura e copertura",
-    priceModifier: 0,
+    id: "chiavi-in-mano",
+    name: "Servizio Chiavi in Mano",
+    description: "Trasporto, montaggio e installazione completa inclusi",
+    icon: Wrench,
+    recommended: true,
+    features: [
+      "Trasporto della pergola al tuo indirizzo",
+      "Montaggio professionale da parte dei nostri tecnici",
+      "Installazione e messa in opera completa",
+    ],
+    note: "Risparmia tempo e assicurati un montaggio perfetto",
   },
   {
-    id: "completo",
-    name: "Pacchetto Completo",
-    description: "Include installazione e superficie",
-    priceModifier: 500,
-  },
-  {
-    id: "premium",
-    name: "Pacchetto Premium",
-    description: "Include tutto + garanzia estesa",
-    priceModifier: 1000,
+    id: "fai-da-te",
+    name: "Solo Struttura - Fai da Te",
+    description: "Ricevi solo la struttura per il montaggio autonomo",
+    icon: Package,
+    recommended: false,
+    features: [
+      "Struttura completa con tutti i componenti",
+      "Supporto telefonico per il montaggio",
+      "Garanzia sui materiali",
+    ],
+    note: "Richiede competenze di base nel montaggio",
   },
 ]
 
@@ -50,84 +56,6 @@ export function Step7Package({ configuration, updateConfiguration }: Step7Props)
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [totalPrice, setTotalPrice] = useState(0)
-
-  useEffect(() => {
-    calculateTotalPrice()
-  }, [configuration, selectedPackage])
-
-  const calculateTotalPrice = async () => {
-    if (!configuration.modelId) return
-
-    const supabase = createClient()
-    let price = 0
-
-    // Get base model price
-    if (configuration.modelId) {
-      const { data: model } = await supabase
-        .from("carport_models")
-        .select("base_price")
-        .eq("id", configuration.modelId)
-        .single()
-
-      if (model) price += model.base_price
-    }
-
-    // Add coverage price modifier
-    if (configuration.coverageId) {
-      const { data: coverage } = await supabase
-        .from("carport_coverage_types")
-        .select("price_modifier")
-        .eq("id", configuration.coverageId)
-        .single()
-
-      if (coverage) price += coverage.price_modifier
-    }
-
-    // Add color price modifiers
-    if (configuration.structureColorId) {
-      const { data: color } = await supabase
-        .from("carport_colors")
-        .select("price_modifier")
-        .eq("id", configuration.structureColorId)
-        .single()
-
-      if (color) price += color.price_modifier
-    }
-
-    if (configuration.coverageColorId) {
-      const { data: color } = await supabase
-        .from("carport_colors")
-        .select("price_modifier")
-        .eq("id", configuration.coverageColorId)
-        .single()
-
-      if (color) price += color.price_modifier
-    }
-
-    // Add surface price
-    if (configuration.surfaceId && configuration.width && configuration.depth) {
-      const { data: surface } = await supabase
-        .from("carport_surfaces")
-        .select("price_per_sqm")
-        .eq("id", configuration.surfaceId)
-        .single()
-
-      if (surface) {
-        const surfaceArea = (configuration.width * configuration.depth) / 10000
-        price += surface.price_per_sqm * surfaceArea
-      }
-    }
-
-    // Add package modifier
-    const packageData = packageTypes.find((p) => p.id === selectedPackage)
-    if (packageData) {
-      price += packageData.priceModifier
-    }
-
-    setTotalPrice(price)
-    updateConfiguration({ totalPrice: price, packageType: selectedPackage, ...customerData })
-  }
 
   const handleSubmit = async () => {
     if (!selectedPackage || !customerData.name || !customerData.email || !customerData.phone) {
@@ -186,7 +114,7 @@ export function Step7Package({ configuration, updateConfiguration }: Step7Props)
         customer_cap: customerData.cap,
         customer_province: customerData.province,
         package_type: selectedPackage,
-        total_price: totalPrice,
+        total_price: 0,
         status: "nuovo",
       }
 
@@ -209,7 +137,7 @@ export function Step7Package({ configuration, updateConfiguration }: Step7Props)
               customerName: customerData.name,
               customerEmail: customerData.email,
               configurationId: result.data.id,
-              totalPrice,
+              totalPrice: 0,
               structureType: configuration.structureType || "Non specificato",
               dimensions: `${configuration.width}×${configuration.depth}×${configuration.height} cm`,
             }),
@@ -235,11 +163,9 @@ export function Step7Package({ configuration, updateConfiguration }: Step7Props)
         <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Configurazione Inviata!</h2>
         <p className="text-gray-700 mb-6">
-          Grazie per aver configurato il tuo carport. Ti contatteremo presto per finalizzare il progetto.
+          Grazie per aver configurato il tuo carport. Ti contatteremo presto per finalizzare il progetto e fornirti un
+          preventivo personalizzato.
         </p>
-        <Badge className="bg-orange-500 text-white text-lg px-4 py-2">
-          Prezzo Totale: €{totalPrice.toLocaleString()}
-        </Badge>
       </div>
     )
   }
@@ -248,25 +174,58 @@ export function Step7Package({ configuration, updateConfiguration }: Step7Props)
     <div className="space-y-8">
       {/* Package Selection */}
       <div>
-        <h3 className="text-gray-900 font-semibold mb-4">Seleziona il pacchetto</h3>
-        <div className="grid md:grid-cols-3 gap-4">
-          {packageTypes.map((pkg) => (
-            <Card
-              key={pkg.id}
-              className={`cursor-pointer transition-all ${
-                selectedPackage === pkg.id ? "ring-2 ring-orange-500 bg-orange-50" : "hover:bg-green-50"
-              }`}
-              onClick={() => setSelectedPackage(pkg.id)}
-            >
-              <CardContent className="p-4">
-                <h4 className="font-semibold text-gray-900">{pkg.name}</h4>
-                <p className="text-sm text-gray-700 mb-2">{pkg.description}</p>
-                <Badge className="bg-orange-500 text-white">
-                  {pkg.priceModifier > 0 ? `+€${pkg.priceModifier}` : "Incluso"}
-                </Badge>
-              </CardContent>
-            </Card>
-          ))}
+        <h3 className="text-gray-900 font-semibold mb-2">Tipo di Servizio</h3>
+        <p className="text-gray-600 mb-6">
+          Scegli se vuoi il servizio completo di installazione o preferisci montare la pergola autonomamente
+        </p>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          {packageTypes.map((pkg) => {
+            const IconComponent = pkg.icon
+            return (
+              <Card
+                key={pkg.id}
+                className={`cursor-pointer transition-all relative ${
+                  selectedPackage === pkg.id
+                    ? "ring-2 ring-orange-500 bg-orange-50"
+                    : "hover:bg-gray-50 border-gray-200"
+                }`}
+                onClick={() => setSelectedPackage(pkg.id)}
+              >
+                {pkg.recommended && (
+                  <div className="absolute -top-2 left-4 bg-orange-500 text-white text-xs px-2 py-1 rounded">
+                    Consigliato
+                  </div>
+                )}
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      <IconComponent className="w-8 h-8 text-orange-500" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 mb-2">{pkg.name}</h4>
+                      <p className="text-sm text-gray-600 mb-4">{pkg.description}</p>
+
+                      <div className="space-y-2 mb-4">
+                        <p className="text-sm font-medium text-gray-700">Include:</p>
+                        {pkg.features.map((feature, index) => (
+                          <div key={index} className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-gray-600">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="flex items-start gap-2">
+                        <span className="text-sm">💡</span>
+                        <p className="text-sm text-gray-600 italic">{pkg.note}</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
       </div>
 
@@ -341,19 +300,6 @@ export function Step7Package({ configuration, updateConfiguration }: Step7Props)
         </CardContent>
       </Card>
 
-      {/* Price Summary */}
-      <Card className="bg-green-50">
-        <CardHeader>
-          <CardTitle className="text-gray-900">Riepilogo Prezzo</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-gray-900 mb-2">€{totalPrice.toLocaleString()}</div>
-            <p className="text-gray-700">Prezzo totale IVA inclusa</p>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Submit Button */}
       <div className="text-center">
         <Button
@@ -365,6 +311,7 @@ export function Step7Package({ configuration, updateConfiguration }: Step7Props)
         >
           {isSubmitting ? "Invio in corso..." : "Invia Configurazione"}
         </Button>
+        <p className="text-gray-600 text-sm mt-2">Riceverai un preventivo personalizzato via email</p>
       </div>
     </div>
   )

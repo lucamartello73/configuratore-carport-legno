@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { createClient } from "@/lib/supabase/client"
 import type { ConfigurationData } from "@/app/configuratore/page"
 
@@ -71,9 +70,6 @@ export function Step4Coverage({ configuration, updateConfiguration }: Step4Props
               />
               <h3 className="text-xl font-semibold text-gray-900 mb-2">{coverage.name}</h3>
               <p className="text-gray-700 mb-3">{coverage.description}</p>
-              <Badge className={coverage.price_modifier > 0 ? "bg-orange-500 text-white" : "bg-green-500 text-white"}>
-                {coverage.price_modifier > 0 ? `+€${coverage.price_modifier}` : "Incluso"}
-              </Badge>
             </CardContent>
           </Card>
         ))}

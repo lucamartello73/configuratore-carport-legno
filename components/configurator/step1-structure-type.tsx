@@ -16,7 +16,7 @@ const structureTypes = [
     name: "Addossato",
     description: "Carport appoggiato alla parete esistente, ideale per ottimizzare lo spazio",
     image: "/carport-addossato-parete.jpg",
-    features: ["Meno costoso", "Facile installazione", "Ottimizza lo spazio"],
+    features: ["Facile installazione", "Ottimizza lo spazio", "Soluzione compatta"],
   },
   {
     id: "autoportante",
