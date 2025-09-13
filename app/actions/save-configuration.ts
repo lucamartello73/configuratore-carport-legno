@@ -26,9 +26,44 @@ export async function saveConfiguration(configData: ConfigurationData) {
   try {
     const supabase = await createClient()
 
+    let structure_color_id = null
+    if (configData.structure_color) {
+      const { data: colorData, error: colorError } = await supabase
+        .from("carport_colors")
+        .select("id")
+        .ilike("name", `%${configData.structure_color}%`)
+        .maybeSingle()
+
+      if (colorError) {
+        console.error("Color lookup error:", colorError)
+      } else if (colorData) {
+        structure_color_id = colorData.id
+      } else {
+        console.log("[v0] Color not found, creating custom color:", configData.structure_color)
+        const { data: newColorData, error: insertError } = await supabase
+          .from("carport_colors")
+          .insert({
+            name: configData.structure_color,
+            hex_value: "#000000", // Default hex for custom colors
+            category: "custom",
+            price_modifier: 0,
+          })
+          .select("id")
+          .single()
+
+        if (!insertError && newColorData) {
+          structure_color_id = newColorData.id
+          console.log("[v0] Created custom color with ID:", structure_color_id)
+        } else {
+          console.error("Error creating custom color:", insertError)
+        }
+      }
+    }
+
+    const { structure_color, ...restConfigData } = configData
     const dbData = {
-      ...configData,
-      structure_color_id: null, // Set UUID field to null
+      ...restConfigData,
+      structure_color_id,
     }
 
     const { data, error } = await supabase.from("carport_configurations").insert(dbData).select().single()
