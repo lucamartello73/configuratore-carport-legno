@@ -35,6 +35,10 @@ export function Step6Surface({ configuration, updateConfiguration }: Step6Props)
       if (error) {
         console.error("Error fetching surfaces:", error)
       } else {
+        console.log(
+          "[v0] Loaded surfaces with images:",
+          data?.map((s) => ({ name: s.name, image: s.image })),
+        )
         setSurfaces(data || [])
       }
       setLoading(false)
@@ -62,6 +66,9 @@ export function Step6Surface({ configuration, updateConfiguration }: Step6Props)
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {surfaces.map((surface) => {
+          const imageUrl = getImageUrl(surface.image)
+          console.log("[v0] Surface:", surface.name, "Image path:", surface.image, "Resolved URL:", imageUrl)
+
           return (
             <Card
               key={surface.id}
@@ -72,12 +79,14 @@ export function Step6Surface({ configuration, updateConfiguration }: Step6Props)
             >
               <CardContent className="p-6">
                 <img
-                  src={getImageUrl(surface.image) || "/placeholder.svg"}
+                  src={imageUrl || "/placeholder.svg"}
                   alt={surface.name}
                   className="w-full h-48 object-cover rounded-lg mb-4"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
-                    target.src = getFallbackImageUrl("surface")
+                    const fallbackUrl = getFallbackImageUrl("surface")
+                    console.log("[v0] Image failed to load for surface:", surface.name, "Using fallback:", fallbackUrl)
+                    target.src = fallbackUrl
                   }}
                 />
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">{surface.name}</h3>

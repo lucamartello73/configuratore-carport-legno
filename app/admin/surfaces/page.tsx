@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { AdminLayout } from "@/components/admin/admin-layout"
 import { createClient } from "@/lib/supabase/client"
-import { Plus, Edit, Trash2 } from "lucide-react"
+import { Plus, Edit, Trash2, ImageIcon } from "lucide-react"
 import { ImageUpload } from "@/components/admin/image-upload"
 
 interface Surface {
@@ -178,6 +178,7 @@ export default function SurfacesPage() {
                   onImageRemoved={() => setEditingSurface({ ...editingSurface, image: "" })}
                   folder="surfaces"
                   label="Immagine Superficie"
+                  showPredefinedIcons={true}
                 />
               </div>
               <div className="flex gap-2">
@@ -210,12 +211,16 @@ export default function SurfacesPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {surfaces.map((surface) => (
                 <div key={surface.id} className="border rounded-lg p-4 bg-green-50">
-                  {surface.image && (
+                  {surface.image ? (
                     <img
                       src={surface.image || "/placeholder.svg"}
                       alt={surface.name}
                       className="w-full h-32 object-cover rounded-lg mb-4"
                     />
+                  ) : (
+                    <div className="w-full h-32 bg-gray-100 rounded-lg mb-4 flex items-center justify-center">
+                      <ImageIcon className="w-12 h-12 text-gray-400" />
+                    </div>
                   )}
                   <h3 className="font-semibold text-green-800 mb-2">{surface.name}</h3>
                   <p className="text-green-600 text-sm mb-3">{surface.description}</p>

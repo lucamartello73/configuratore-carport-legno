@@ -16,30 +16,34 @@ export function getImageUrl(imagePath: string | null | undefined): string {
     return imagePath
   }
 
+  if (imagePath.startsWith("/api/surface-icon/")) {
+    return imagePath
+  }
+
   // If it's a local path starting with /, check if it exists in public folder
   // For now, we'll use placeholder images for local paths since they don't exist
   if (imagePath.startsWith("/")) {
     // Map common local paths to appropriate placeholders
     if (imagePath.includes("addossato")) {
-      return "/placeholder.svg?height=200&width=300"
+      return "/carport-addossato-structure.jpg"
     } else if (imagePath.includes("autoportante")) {
-      return "/placeholder.svg?height=200&width=300"
+      return "/carport-autoportante-structure.jpg"
     } else if (imagePath.includes("doppio")) {
-      return "/placeholder.svg?height=200&width=300"
+      return "/carport-doppio-structure.jpg"
     } else if (imagePath.includes("model")) {
-      return "/placeholder.svg?height=200&width=300"
+      return "/carport-model.jpg"
     } else if (imagePath.includes("surface")) {
-      return "/placeholder.svg?height=200&width=300"
+      return "/carport-surface-material.jpg"
     } else if (imagePath.includes("coverage")) {
-      return "/placeholder.svg?height=200&width=300"
+      return "/carport-coverage-roof.jpg"
     }
 
     // Generic carport placeholder for other local paths
-    return "/placeholder.svg?height=200&width=300"
+    return "/carport.jpg"
   }
 
   // If it's a relative path, treat as local
-  return "/placeholder.svg?height=200&width=300"
+  return "/carport.jpg"
 }
 
 /**

@@ -172,9 +172,6 @@ export function Step5Colors({ configuration, updateConfiguration }: Step5Props) 
                   >
                     <div className="w-full h-16 rounded-lg mb-2 border" style={{ backgroundColor: color.hex_value }} />
                     <p className="text-sm font-medium text-gray-900 text-center mb-1">{color.name}</p>
-                    {color.price_modifier > 0 && (
-                      <p className="text-xs text-green-600 text-center">+€{color.price_modifier}</p>
-                    )}
                   </div>
                 ))}
             </div>

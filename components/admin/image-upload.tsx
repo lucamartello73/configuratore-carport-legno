@@ -7,7 +7,21 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createClient } from "@/lib/supabase/client"
 import Image from "next/image"
-import { X } from "lucide-react"
+import {
+  X,
+  Grid3X3,
+  Waves,
+  Zap,
+  TreePine,
+  Sparkles,
+  Mountain,
+  Square,
+  Hexagon,
+  Triangle,
+  Circle,
+  Layers,
+  Hash,
+} from "lucide-react"
 
 interface ImageUploadProps {
   currentImage?: string
@@ -16,7 +30,23 @@ interface ImageUploadProps {
   bucket?: string
   folder?: string
   label?: string
+  showPredefinedIcons?: boolean
 }
+
+const PREDEFINED_SURFACE_ICONS = [
+  { id: "concrete", icon: Grid3X3, name: "Cemento", color: "#6B7280" },
+  { id: "wood", icon: TreePine, name: "Legno", color: "#92400E" },
+  { id: "stone", icon: Mountain, name: "Pietra", color: "#78716C" },
+  { id: "ceramic", icon: Sparkles, name: "Ceramica", color: "#DC2626" },
+  { id: "metal", icon: Zap, name: "Metallo", color: "#374151" },
+  { id: "composite", icon: Waves, name: "Composito", color: "#059669" },
+  { id: "tiles", icon: Square, name: "Piastrelle", color: "#3B82F6" },
+  { id: "parquet", icon: Layers, name: "Parquet", color: "#A16207" },
+  { id: "laminate", icon: Hash, name: "Laminato", color: "#B45309" },
+  { id: "vinyl", icon: Hexagon, name: "Vinile", color: "#7C3AED" },
+  { id: "marble", icon: Triangle, name: "Marmo", color: "#E5E7EB" },
+  { id: "granite", icon: Circle, name: "Granito", color: "#1F2937" },
+]
 
 export function ImageUpload({
   currentImage,
@@ -25,10 +55,23 @@ export function ImageUpload({
   bucket = "images",
   folder = "carport",
   label = "Immagine",
+  showPredefinedIcons = false,
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState(currentImage || "")
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [selectedIcon, setSelectedIcon] = useState<string | null>(null)
+
+  console.log("[v0] ImageUpload rendered with showPredefinedIcons:", showPredefinedIcons)
+
+  const handleIconSelect = (iconId: string) => {
+    console.log("[v0] Icon selected:", iconId)
+    const iconUrl = `/api/surface-icon/${iconId}`
+    setPreviewUrl(iconUrl)
+    setSelectedIcon(iconId)
+    onImageUploaded(iconUrl)
+    setUploadError(null)
+  }
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -36,6 +79,7 @@ export function ImageUpload({
 
     setUploading(true)
     setUploadError(null)
+    setSelectedIcon(null)
 
     try {
       const compressedFile = await compressImage(file)
@@ -133,6 +177,7 @@ export function ImageUpload({
 
   const handleRemoveImage = () => {
     setPreviewUrl("")
+    setSelectedIcon(null)
     onImageUploaded(null)
     onImageRemoved()
     setUploadError(null)
@@ -142,6 +187,35 @@ export function ImageUpload({
     <div className="space-y-4">
       <div>
         <Label htmlFor="image-upload">{label}</Label>
+
+        {showPredefinedIcons && (
+          <div className="mb-4">
+            <Label className="text-sm text-gray-600 mb-2 block">Icone Predefinite</Label>
+            {console.log("[v0] Rendering predefined icons section")}
+            <div className="grid grid-cols-6 gap-2">
+              {PREDEFINED_SURFACE_ICONS.map((iconData) => {
+                const IconComponent = iconData.icon
+                console.log("[v0] Rendering icon:", iconData.id, iconData.name)
+                return (
+                  <button
+                    key={iconData.id}
+                    type="button"
+                    onClick={() => handleIconSelect(iconData.id)}
+                    className={`p-3 rounded-lg border-2 transition-all hover:scale-105 ${
+                      selectedIcon === iconData.id
+                        ? "border-orange-500 bg-orange-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                    title={iconData.name}
+                  >
+                    <IconComponent className="w-6 h-6 mx-auto" style={{ color: iconData.color }} />
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-2 items-end">
           <Input
             id="image-url"
@@ -149,6 +223,7 @@ export function ImageUpload({
             value={previewUrl}
             onChange={(e) => {
               setPreviewUrl(e.target.value)
+              setSelectedIcon(null)
               onImageUploaded(e.target.value)
               setUploadError(null)
             }}
@@ -200,19 +275,32 @@ export function ImageUpload({
 
       {previewUrl && (
         <div className="mt-4">
-          <Image
-            src={previewUrl || "/placeholder.svg"}
-            alt="Preview"
-            width={128}
-            height={128}
-            className="w-32 h-32 object-cover rounded-lg border"
-            placeholder="blur"
-            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
-            onError={(e) => {
-              const target = e.target as HTMLImageElement
-              target.src = "/placeholder.svg?height=128&width=128"
-            }}
-          />
+          {selectedIcon ? (
+            <div className="w-32 h-32 bg-gray-100 rounded-lg border flex items-center justify-center">
+              {(() => {
+                const iconData = PREDEFINED_SURFACE_ICONS.find((i) => i.id === selectedIcon)
+                if (iconData) {
+                  const IconComponent = iconData.icon
+                  return <IconComponent className="w-16 h-16" style={{ color: iconData.color }} />
+                }
+                return null
+              })()}
+            </div>
+          ) : (
+            <Image
+              src={previewUrl || "/placeholder.svg"}
+              alt="Preview"
+              width={128}
+              height={128}
+              className="w-32 h-32 object-cover rounded-lg border"
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+              onError={(e) => {
+                const target = e.target as HTMLImageElement
+                target.src = "/placeholder.svg?height=128&width=128"
+              }}
+            />
+          )}
         </div>
       )}
     </div>
