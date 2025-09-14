@@ -81,7 +81,7 @@ export function Step6Surface({ configuration, updateConfiguration }: Step6Props)
                 <img
                   src={imageUrl || "/placeholder.svg"}
                   alt={surface.name}
-                  className="w-full h-48 object-cover rounded-lg mb-4"
+                  className="w-full h-14 object-cover rounded-lg mb-4"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
                     const fallbackUrl = getFallbackImageUrl("surface")

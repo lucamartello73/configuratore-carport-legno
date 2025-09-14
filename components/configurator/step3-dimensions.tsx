@@ -144,17 +144,96 @@ export function Step3Dimensions({ configuration, updateConfiguration }: Step3Pro
           <Card className="p-6 bg-green-50">
             <h3 className="text-gray-900 font-semibold mb-4 text-center">Riepilogo Dimensioni</h3>
             <div className="text-center space-y-4">
-              <div className="bg-white p-4 rounded-lg shadow-sm">
-                <div className="text-sm text-gray-600 mb-2">
-                  {carSpots} Posto{carSpots > 1 ? "i" : ""} Auto
+              {/* Visual representation */}
+              <div className="mb-4 flex justify-center">
+                <div className="relative">
+                  {/* Rectangle representing the carport */}
+                  <div
+                    className="border-2 border-green-600 bg-green-100 relative transition-all duration-300"
+                    style={{
+                      width: Math.max(78, Math.min(260, (width / depth) * 156)), // Real proportions, 30% larger
+                      height: 156, // Base height 30% larger (was 120)
+                    }}
+                  >
+                    <div className="absolute -top-16 left-0 right-0 flex flex-col items-center gap-2">
+                      {/* Parking direction arrow pointing to width side */}
+                      <div className="flex items-center gap-2 bg-blue-100 px-3 py-1 rounded-full border border-blue-300">
+                        <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path
+                            fillRule="evenodd"
+                            d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L16.586 11H5a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <span className="text-xs font-medium text-blue-700">
+                          {carSpots} auto entrano da questo lato
+                        </span>
+                      </div>
+
+                      {/* Car spot visual indicators */}
+                      <div className="flex items-center gap-1">
+                        {/* Left outward arrow */}
+                        <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path
+                            fillRule="evenodd"
+                            d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L4.414 10l3.293 3.293a1 1 0 010 1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        {/* Car spot indicators with better spacing */}
+                        {Array.from({ length: Math.min(carSpots, 5) }, (_, i) => (
+                          <div key={i} className="w-2 h-8 bg-green-600 mx-1 rounded-sm"></div>
+                        ))}
+                        {carSpots > 5 && <span className="text-sm text-green-600 font-bold mx-1">+</span>}
+                        {/* Right outward arrow */}
+                        <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path
+                            fillRule="evenodd"
+                            d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L16.586 11H5a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Width dimension line */}
+                    <div className="absolute -top-6 left-0 right-0 h-px bg-green-600"></div>
+                    <div className="absolute -top-6 left-0 w-px h-3 bg-green-600"></div>
+                    <div className="absolute -top-6 right-0 w-px h-3 bg-green-600"></div>
+
+                    {/* Depth dimension line */}
+                    <div className="absolute -left-8 top-0 bottom-0 w-px bg-green-600"></div>
+                    <div className="absolute -left-8 top-0 h-px w-3 bg-green-600"></div>
+                    <div className="absolute -left-8 bottom-0 h-px w-3 bg-green-600"></div>
+
+                    {/* Depth label */}
+                    <div className="absolute -left-16 top-1/2 transform -translate-y-1/2 -rotate-90 text-sm text-green-600 font-medium whitespace-nowrap">
+                      {depth}cm
+                    </div>
+                  </div>
+
+                  {/* Width label */}
+                  <div className="text-sm text-green-600 font-medium mt-3">{width}cm</div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">
-                  {width} × {depth} × {height} cm
-                </div>
-                <div className="text-gray-700 mt-2">Superficie: {((width * depth) / 10000).toFixed(1)} m²</div>
               </div>
-              <div className="text-xs text-gray-600 bg-white p-3 rounded">
-                <strong>Nota:</strong> Le dimensioni possono essere personalizzate in base alle tue esigenze specifiche
+
+              <div className="text-sm text-gray-700 bg-amber-50 p-4 rounded-lg border-2 border-amber-300 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-amber-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <div className="text-left">
+                    <div className="font-bold text-amber-800 mb-1">⚠️ IMPORTANTE</div>
+                    <div className="text-amber-700 leading-relaxed">
+                      Le dimensioni suggerite selezionando i tasti posti auto sono <strong>solo indicative</strong>.
+                      Puoi inserire a tuo piacimento altre dimensioni personalizzate utilizzando i campi di input.
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </Card>

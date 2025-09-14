@@ -340,26 +340,29 @@ export function Step7Package({ configuration, updateConfiguration }: Step7Props)
       {/* Privacy Acceptance Section */}
       <Card>
         <CardContent className="p-6">
-          <div className="flex items-start space-x-3">
+          <div
+            className="flex items-start space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+            onClick={() => setPrivacyAccepted(!privacyAccepted)}
+          >
             <Checkbox
               id="privacy"
               checked={privacyAccepted}
               onCheckedChange={(checked) => setPrivacyAccepted(checked as boolean)}
-              className="mt-1"
+              className="mt-1 pointer-events-none"
             />
-            <div className="space-y-2">
+            <div className="space-y-2 flex-1">
               <Label
                 htmlFor="privacy"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
               >
                 Accettazione Privacy *
               </Label>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 cursor-pointer">
                 Accetto l'informativa sulla privacy e autorizzo il trattamento dei miei dati personali per l'invio del
                 preventivo e per essere contattato in merito alla configurazione del carport. I dati saranno trattati in
                 conformità al GDPR (Regolamento UE 2016/679).
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 cursor-pointer">
                 Puoi consultare la nostra informativa completa sulla privacy sul nostro sito web.
               </p>
             </div>
