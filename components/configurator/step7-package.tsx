@@ -186,6 +186,9 @@ export function Step7Package({ configuration, updateConfiguration }: Step7Props)
       }
 
       setIsSubmitted(true)
+      setTimeout(() => {
+        window.location.href = "https://www.martello1930.net"
+      }, 2000) // Wait 2 seconds to show success message before redirecting
     } catch (error) {
       console.error("Error:", error)
       alert("Errore nel salvare la configurazione")
