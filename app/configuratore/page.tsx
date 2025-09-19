@@ -34,15 +34,14 @@ export default function ConfiguratorePage() {
   const [configuration, setConfiguration] = useState<Partial<ConfigurationData>>({})
 
   useEffect(() => {
-    // Inizializza Google Analytics
-    initializeGoogleAnalytics("G-XXXXXXXXXX")
+    initializeGoogleAnalytics("G-8BW6WP9PR1")
 
     // Traccia il primo step
-    trackConfiguratorStep(`step_${currentStep}_${steps[currentStep - 1].title.toLowerCase().replace(" ", "_")}`)
+    trackConfiguratorStep(`step_${currentStep}_${steps[currentStep - 1].title.toLowerCase().replace(/ /g, "_")}`)
 
     // Configura tracking abbandono
     const cleanup = setupAbandonTracking(
-      () => `step_${currentStep}_${steps[currentStep - 1].title.toLowerCase().replace(" ", "_")}`,
+      () => `step_${currentStep}_${steps[currentStep - 1].title.toLowerCase().replace(/ /g, "_")}`,
     )
 
     return cleanup
@@ -51,7 +50,7 @@ export default function ConfiguratorePage() {
   useEffect(() => {
     if (currentStep > 1) {
       // Non tracciare il primo step due volte
-      const stepName = `step_${currentStep}_${steps[currentStep - 1].title.toLowerCase().replace(" ", "_")}`
+      const stepName = `step_${currentStep}_${steps[currentStep - 1].title.toLowerCase().replace(/ /g, "_")}`
       trackConfiguratorStep(stepName, {
         previous_step: currentStep - 1,
         configuration_progress: Math.round((currentStep / 7) * 100),

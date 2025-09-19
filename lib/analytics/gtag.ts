@@ -24,11 +24,13 @@ declare global {
 /**
  * Inizializza Google Analytics se non già presente
  */
-export function initializeGoogleAnalytics(measurementId = "G-XXXXXXXXXX") {
+export function initializeGoogleAnalytics(measurementId = "G-8BW6WP9PR1") {
   if (typeof window === "undefined") return
 
-  // Verifica se gtag è già caricato
-  if (window.gtag) return
+  if (window.gtag) {
+    console.log("[v0] Google Analytics already initialized")
+    return
+  }
 
   // Crea il dataLayer se non esiste
   window.dataLayer = window.dataLayer || []
@@ -42,11 +44,7 @@ export function initializeGoogleAnalytics(measurementId = "G-XXXXXXXXXX") {
   window.gtag("js", new Date())
   window.gtag("config", measurementId)
 
-  // Carica lo script di Google Analytics
-  const script = document.createElement("script")
-  script.async = true
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`
-  document.head.appendChild(script)
+  console.log("[v0] Google Analytics initialized with ID:", measurementId)
 }
 
 /**
@@ -84,7 +82,10 @@ function getTrafficParams(): { traffic_source?: string; traffic_medium?: string 
  * Invia evento di navigazione step del configuratore
  */
 export function trackConfiguratorStep(stepName: string, additionalParams: Record<string, any> = {}) {
-  if (typeof window === "undefined" || !window.gtag) return
+  if (typeof window === "undefined" || !window.gtag) {
+    console.log("[v0] Google Analytics not available, skipping step tracking")
+    return
+  }
 
   const trafficParams = getTrafficParams()
 
@@ -104,7 +105,10 @@ export function trackConfiguratorStep(stepName: string, additionalParams: Record
  * Invia evento di invio configurazione completata
  */
 export function trackConfiguratorSubmit(additionalParams: Record<string, any> = {}) {
-  if (typeof window === "undefined" || !window.gtag) return
+  if (typeof window === "undefined" || !window.gtag) {
+    console.log("[v0] Google Analytics not available, skipping submit tracking")
+    return
+  }
 
   const trafficParams = getTrafficParams()
 
@@ -124,7 +128,10 @@ export function trackConfiguratorSubmit(additionalParams: Record<string, any> = 
  * Invia evento di abbandono configuratore
  */
 export function trackConfiguratorAbandon(currentStep: string, additionalParams: Record<string, any> = {}) {
-  if (typeof window === "undefined" || !window.gtag) return
+  if (typeof window === "undefined" || !window.gtag) {
+    console.log("[v0] Google Analytics not available, skipping abandon tracking")
+    return
+  }
 
   const trafficParams = getTrafficParams()
 
