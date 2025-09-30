@@ -16,6 +16,7 @@ interface Configuration {
   customer_city: string
   customer_cap: string
   customer_province: string
+  structure_type: string // Added structure_type field to use the text value directly
   width: number
   depth: number
   height: number
@@ -24,11 +25,11 @@ interface Configuration {
   status: string
   created_at: string
   // Related data from JOINs
-  carport_models: { name: string; carport_structure_types: { name: string } }
-  structure_color: { name: string }
-  coverage_color: { name: string }
-  carport_coverage_types: { name: string }
-  carport_surfaces: { name: string }
+  carport_models: { name: string; carport_structure_types: { name: string } } | null
+  structure_color: { name: string } | null
+  coverage_color: { name: string } | null
+  carport_coverage_types: { name: string } | null
+  carport_surfaces: { name: string } | null
 }
 
 interface Stats {
@@ -78,7 +79,7 @@ export default function AdminDashboardPage() {
           configurations?.map((config) => ({
             ...config,
             model_name: config.carport_models?.name || "N/A",
-            structure_type_name: config.carport_models?.carport_structure_types?.name || "N/A",
+            structure_type_name: config.structure_type || "N/A",
             structure_color_name: config.structure_color?.name || "N/A",
             coverage_color_name: config.coverage_color?.name || "N/A",
             coverage_name: config.carport_coverage_types?.name || "N/A",

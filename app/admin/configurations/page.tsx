@@ -31,11 +31,13 @@ interface Configuration {
   customer_city: string
   customer_cap: string
   customer_province: string
+  structure_type: string // Added structure_type field
+  model_id: string // Added model_id field
   width: number
   depth: number
   height: number
   package_type: string
-  contact_preference: string // Added contact_preference field
+  contact_preference: string
   total_price: number
   status: string
   created_at: string
@@ -90,7 +92,7 @@ export default function ConfigurationsPage() {
           configurationsData?.map((config) => ({
             ...config,
             model_name: modelsMap.get(config.model_id) || "N/A",
-            structure_type_name: structureTypesMap.get(config.structure_type) || "N/A",
+            structure_type_name: config.structure_type || "N/A",
             structure_color_name: colorsMap.get(config.structure_color_id) || "N/A",
             coverage_name: coveragesMap.get(config.coverage_id) || "N/A",
             surface_name: surfacesMap.get(config.surface_id) || "N/A",
