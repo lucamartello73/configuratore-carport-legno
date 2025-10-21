@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 // Import step components
 import { Step1StructureType } from "@/components/configurator/step1-structure-type"
@@ -32,14 +33,14 @@ const steps = [
 export default function ConfiguratorePage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [configuration, setConfiguration] = useState<Partial<ConfigurationData>>({})
+  const [validationError, setValidationError] = useState<string>("")
+  const [showValidationError, setShowValidationError] = useState(false)
 
   useEffect(() => {
     initializeGoogleAnalytics("G-8BW6WP9PR1")
 
-    // Traccia il primo step
     trackConfiguratorStep(`step_${currentStep}_${steps[currentStep - 1].title.toLowerCase().replace(/ /g, "_")}`)
 
-    // Configura tracking abbandono
     const cleanup = setupAbandonTracking(
       () => `step_${currentStep}_${steps[currentStep - 1].title.toLowerCase().replace(/ /g, "_")}`,
     )
@@ -49,7 +50,6 @@ export default function ConfiguratorePage() {
 
   useEffect(() => {
     if (currentStep > 1) {
-      // Non tracciare il primo step due volte
       const stepName = `step_${currentStep}_${steps[currentStep - 1].title.toLowerCase().replace(/ /g, "_")}`
       trackConfiguratorStep(stepName, {
         previous_step: currentStep - 1,
@@ -58,19 +58,72 @@ export default function ConfiguratorePage() {
     }
   }, [currentStep])
 
+  const validateCurrentStep = (): { valid: boolean; error: string } => {
+    switch (currentStep) {
+      case 1: // Model selection
+        if (!configuration.modelId) {
+          return { valid: false, error: "⚠️ Seleziona un modello per proseguire" }
+        }
+        break
+      case 2: // Structure type
+        if (!configuration.structureTypeId && !configuration.structureType) {
+          return { valid: false, error: "⚠️ Seleziona un tipo di struttura per proseguire" }
+        }
+        break
+      case 3: // Dimensions
+        if (!configuration.width || !configuration.depth || !configuration.height) {
+          return { valid: false, error: "⚠️ Inserisci tutte le dimensioni (larghezza, profondità, altezza)" }
+        }
+        if (configuration.width < 200 || configuration.depth < 300 || configuration.height < 180) {
+          return { valid: false, error: "⚠️ Le dimensioni inserite sono troppo piccole. Verifica i valori minimi." }
+        }
+        break
+      case 4: // Coverage
+        if (!configuration.coverageId) {
+          return { valid: false, error: "⚠️ Seleziona un tipo di copertura per proseguire" }
+        }
+        break
+      case 5: // Colors
+        if (!configuration.structureColor) {
+          return { valid: false, error: "⚠️ Seleziona un colore per la struttura" }
+        }
+        break
+      case 6: // Surface (optional)
+        // Surface is optional, always valid
+        break
+    }
+    return { valid: true, error: "" }
+  }
+
   const updateConfiguration = useCallback((data: Partial<ConfigurationData>) => {
     setConfiguration((prev) => ({ ...prev, ...data }))
+    setShowValidationError(false)
+    setValidationError("")
   }, [])
 
   const nextStep = () => {
+    const validation = validateCurrentStep()
+    if (!validation.valid) {
+      setValidationError(validation.error)
+      setShowValidationError(true)
+      window.scrollTo({ top: 0, behavior: "smooth" })
+      return
+    }
+
     if (currentStep < 7) {
       setCurrentStep(currentStep + 1)
+      setShowValidationError(false)
+      setValidationError("")
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
 
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1)
+      setShowValidationError(false)
+      setValidationError("")
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
 
@@ -89,7 +142,17 @@ export default function ConfiguratorePage() {
       case 6:
         return <Step6Surface configuration={configuration} updateConfiguration={updateConfiguration} />
       case 7:
-        return <Step7Package configuration={configuration} updateConfiguration={updateConfiguration} />
+        return (
+          <Step7Package
+            configuration={configuration}
+            updateConfiguration={updateConfiguration}
+            onValidationError={(error) => {
+              setValidationError(error)
+              setShowValidationError(true)
+              window.scrollTo({ top: 0, behavior: "smooth" })
+            }}
+          />
+        )
       default:
         return null
     }
@@ -134,15 +197,32 @@ export default function ConfiguratorePage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div className="w-24"></div> {/* Spacer for centering */}
+          <div className="w-24"></div>
           <div className="text-center">
             <h1 className="text-3xl font-bold text-green-800 mb-2">Configuratore Carport</h1>
             <p className="text-green-700">
               Passaggio {currentStep} di 7: {steps[currentStep - 1].title}
             </p>
           </div>
-          <div className="w-24"></div> {/* Spacer for centering */}
+          <div className="w-24"></div>
         </div>
+
+        {showValidationError && validationError && (
+          <div className="max-w-4xl mx-auto mb-6 animate-shake">
+            <Alert variant="destructive" className="bg-red-50 border-red-300 border-2">
+              <AlertDescription className="text-red-800 font-medium flex items-center gap-2">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {validationError}
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
 
         {/* Progress Bar */}
         <div className="max-w-4xl mx-auto mb-8">
@@ -192,7 +272,7 @@ export default function ConfiguratorePage() {
         </div>
 
         {/* Navigation */}
-        <div className="flex justify-between max-w-6xl mx-auto mt-8">
+        <div className="flex justify-between max-w-6xl mx-auto mt-8 sticky bottom-4 bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-lg">
           <Button
             variant="outline"
             onClick={prevStep}

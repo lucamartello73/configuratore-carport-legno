@@ -80,6 +80,7 @@ const MessageCircle = ({ className }: { className?: string }) => (
 interface Step7Props {
   configuration: Partial<ConfigurationData>
   updateConfiguration: (data: Partial<ConfigurationData>) => void
+  onValidationError?: (error: string) => void // Added validation error callback
 }
 
 const packageTypes = [
@@ -111,7 +112,7 @@ const packageTypes = [
   },
 ]
 
-export function Step7Package({ configuration, updateConfiguration }: Step7Props) {
+export function Step7Package({ configuration, updateConfiguration, onValidationError }: Step7Props) {
   const [selectedPackage, setSelectedPackage] = useState(configuration.packageType || "")
   const [contactPreference, setContactPreference] = useState(configuration.contactPreference || "email")
   const [customerData, setCustomerData] = useState({
@@ -128,13 +129,24 @@ export function Step7Package({ configuration, updateConfiguration }: Step7Props)
   const [isSubmitted, setIsSubmitted] = useState(false)
 
   const handleSubmit = async () => {
-    if (!selectedPackage || !customerData.name || !customerData.email || !customerData.phone) {
-      alert("Compila tutti i campi obbligatori")
+    if (!selectedPackage) {
+      onValidationError?.("⚠️ Seleziona un tipo di servizio (Chiavi in Mano o Fai da Te)")
+      return
+    }
+
+    if (!customerData.name || !customerData.email || !customerData.phone) {
+      onValidationError?.("⚠️ Compila tutti i campi obbligatori: Nome, Email e Telefono")
+      return
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(customerData.email)) {
+      onValidationError?.("⚠️ Inserisci un indirizzo email valido")
       return
     }
 
     if (!privacyAccepted) {
-      alert("Devi accettare l'informativa sulla privacy per continuare")
+      onValidationError?.("⚠️ Devi accettare l'informativa sulla privacy per continuare")
       return
     }
 
@@ -143,7 +155,7 @@ export function Step7Package({ configuration, updateConfiguration }: Step7Props)
       coverageId: configuration.coverageId,
       structureColor: configuration.structureColor,
       structureType: configuration.structureType,
-      structureTypeId: configuration.structureTypeId, // Added structureTypeId to debug log
+      structureTypeId: configuration.structureTypeId,
       width: configuration.width,
       depth: configuration.depth,
       height: configuration.height,
@@ -161,7 +173,9 @@ export function Step7Package({ configuration, updateConfiguration }: Step7Props)
         structureColor: !configuration.structureColor ? "MISSING" : "OK",
         structureType: !configuration.structureType && !configuration.structureTypeId ? "MISSING" : "OK",
       })
-      alert("Configurazione incompleta. Assicurati di aver completato tutti i passaggi.")
+      onValidationError?.(
+        "⚠️ Configurazione incompleta. Torna indietro e completa tutti i passaggi obbligatori (Modello, Tipo Struttura, Dimensioni, Copertura, Colori)",
+      )
       return
     }
 
@@ -195,7 +209,7 @@ export function Step7Package({ configuration, updateConfiguration }: Step7Props)
 
       if (!result.success) {
         console.error("Error saving configuration:", result.error)
-        alert(`Errore nel salvare la configurazione: ${result.error}`)
+        onValidationError?.("❌ Errore nel salvare la configurazione. Riprova o contatta l'assistenza.")
         return
       }
 
@@ -237,7 +251,7 @@ export function Step7Package({ configuration, updateConfiguration }: Step7Props)
       }, 2000) // Wait 2 seconds to show success message before redirecting
     } catch (error) {
       console.error("Error:", error)
-      alert("Errore nel salvare la configurazione")
+      onValidationError?.("❌ Errore nel salvare la configurazione. Riprova o contatta l'assistenza.")
     } finally {
       setIsSubmitting(false)
     }
