@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { createClient } from "@/lib/supabase/client"
-import { getImageUrl, getFallbackImageUrl } from "@/lib/utils/image-utils"
-import { getTableName } from "@/lib/supabase/tables"
+import { ImageOff } from "lucide-react"
+import { useConfiguratorData, getImageUrlOrPlaceholder, getDescriptionOrFallback } from "@/lib/supabase/fetchConfiguratorData"
 import type { ConfigurationData } from "@/types/configuration"
 
 interface Step1Props {
@@ -17,46 +16,21 @@ interface StructureType {
   id: string
   name: string
   description: string
-  image: string
+  image_url: string
   features: string[]
-  is_active: boolean
+  attivo: boolean
   base_price?: number
 }
 
 export function Step1StructureType({ configuration, updateConfiguration }: Step1Props) {
-  const [structureTypes, setStructureTypes] = useState<StructureType[]>([])
   const [selectedType, setSelectedType] = useState(configuration.structureTypeId || "")
-  const [isLoading, setIsLoading] = useState(true)
   const [isUpdating, setIsUpdating] = useState(false)
 
-  useEffect(() => {
-    const loadStructureTypes = async () => {
-      try {
-        const supabase = createClient()
-        const tableName = getTableName('legno', 'structure_types')
-
-        const { data, error } = await supabase
-          .from(tableName)
-          .select("*")
-          .eq("is_active", true)
-          .order("name")
-
-        if (error) {
-          console.error("Error loading structure types:", error)
-          return
-        }
-
-        console.log("[Legno] Loaded structure types from database:", data)
-        setStructureTypes(data || [])
-      } catch (error) {
-        console.error("Error loading structure types:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadStructureTypes()
-  }, [])
+  // Fetch dinamico da Supabase con filtro 'legno'
+  const { data: structureTypes, isLoading, error } = useConfiguratorData<StructureType>({
+    material: 'legno',
+    table: 'structure_types',
+  })
 
   useEffect(() => {
     if (selectedType) {
@@ -80,6 +54,14 @@ export function Step1StructureType({ configuration, updateConfiguration }: Step1
     )
   }
 
+  if (error) {
+    return (
+      <div className="text-center py-12 text-red-600">
+        <p>Errore nel caricamento dei tipi di struttura: {error}</p>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-8">
       <div className="text-center">
@@ -94,68 +76,86 @@ export function Step1StructureType({ configuration, updateConfiguration }: Step1
       )}
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {structureTypes.map((type) => (
-          <Card
-            key={type.id}
-            className={`cursor-pointer transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 ${
-              selectedType === type.id
-                ? "ring-2 ring-[#008f4c] bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg"
-                : "hover:bg-gradient-to-br hover:from-green-50 hover:to-emerald-50"
-            }`}
-            onClick={() => setSelectedType(type.id)}
-          >
-            <CardContent className="p-6">
-              <div className="relative overflow-hidden rounded-lg mb-4">
-                <img
-                  src={getImageUrl(type.image) || "/placeholder.svg"}
-                  alt={type.name}
-                  className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement
-                    target.src = getFallbackImageUrl("pergola")
-                  }}
-                />
-                {selectedType === type.id && (
-                  <div className="absolute top-2 right-2 bg-[#008f4c] text-white rounded-full p-2">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                )}
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">{type.name}</h3>
-              <p className="text-gray-700 mb-4 leading-relaxed">{type.description}</p>
-
-              {type.features && type.features.length > 0 && (
-                <div className="space-y-2">
-                  {type.features.map((feature, index) => (
-                    <div key={index} className="flex items-center text-sm text-gray-800">
-                      <svg className="w-4 h-4 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+        {structureTypes.map((type) => {
+          const imageUrl = getImageUrlOrPlaceholder(type.image_url)
+          const description = getDescriptionOrFallback(type.description)
+          
+          return (
+            <Card
+              key={type.id}
+              className={`cursor-pointer transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 ${
+                selectedType === type.id
+                  ? "ring-2 ring-[#008f4c] bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg"
+                  : "hover:bg-gradient-to-br hover:from-green-50 hover:to-emerald-50"
+              }`}
+              onClick={() => setSelectedType(type.id)}
+            >
+              <CardContent className="p-6">
+                <div className="relative overflow-hidden rounded-lg mb-4">
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt={type.name}
+                      className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement
+                        target.style.display = 'none'
+                        const parent = target.parentElement
+                        if (parent) {
+                          const placeholder = document.createElement('div')
+                          placeholder.className = 'flex items-center justify-center w-full h-48 bg-gray-100'
+                          placeholder.innerHTML = '<svg class="w-12 h-12 text-gray-400"><use href="#icon-image-off"/></svg>'
+                          parent.appendChild(placeholder)
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center w-full h-48 bg-gray-100">
+                      <ImageOff className="w-12 h-12 text-gray-400" />
+                    </div>
+                  )}
+                  {selectedType === type.id && (
+                    <div className="absolute top-2 right-2 bg-[#008f4c] text-white rounded-full p-2">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path
                           fillRule="evenodd"
                           d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                           clipRule="evenodd"
                         />
                       </svg>
-                      {feature}
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{type.name}</h3>
+                <p className="text-gray-700 mb-4 leading-relaxed">{description}</p>
 
-              {type.base_price && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-600">Prezzo base da:</p>
-                  <p className="text-xl font-bold text-green-700">€{type.base_price.toFixed(2)}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+                {type.features && type.features.length > 0 && (
+                  <div className="space-y-2">
+                    {type.features.map((feature, index) => (
+                      <div key={index} className="flex items-center text-sm text-gray-800">
+                        <svg className="w-4 h-4 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        {feature}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {type.base_price && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <p className="text-sm text-gray-600">Prezzo base da:</p>
+                    <p className="text-xl font-bold text-green-700">€{type.base_price.toFixed(2)}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
 
       {structureTypes.length === 0 && !isLoading && (
