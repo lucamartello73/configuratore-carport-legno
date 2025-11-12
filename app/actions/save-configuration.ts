@@ -110,6 +110,7 @@ export async function saveConfiguration(configData: ConfigurationData) {
     const supabase = await createClient()
     const configurationsTable = getTableName(configuratorType, 'configurations')
 
+    // Campi comuni base (senza CAP - gestito per tipo configuratore)
     let dbData: any = {
       width: configData.width,
       depth: configData.depth,
@@ -123,10 +124,17 @@ export async function saveConfiguration(configData: ConfigurationData) {
       customer_phone: configData.customer_phone,
       customer_address: configData.customer_address,
       customer_city: configData.customer_city,
-      customer_postal_code: configData.customer_cap,
+      customer_province: configData.customer_province,
       contact_preference: configData.contact_preference,
       total_price: configData.total_price,
       status: configData.status,
+    }
+
+    // Campo CAP: nome diverso tra acciaio e legno
+    if (configuratorType === 'acciaio') {
+      dbData.customer_cap = configData.customer_cap
+    } else if (configuratorType === 'legno') {
+      dbData.customer_postal_code = configData.customer_cap
     }
 
     // Gestione CONFIGURATORE ACCIAIO
