@@ -1,4 +1,5 @@
 export interface ConfigurationData {
+  configuratorType?: 'acciaio' | 'legno' // Tipo di configuratore
   structureType: string
   structureTypeId: string
   material: string

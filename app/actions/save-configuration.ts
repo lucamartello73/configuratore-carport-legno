@@ -1,8 +1,10 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { getTableName, type ConfiguratorType } from "@/lib/supabase/tables"
 
 export interface ConfigurationData {
+  configurator_type?: 'acciaio' | 'legno' // Tipo di configuratore
   structure_type: string
   model_id: string
   width: number
@@ -40,8 +42,12 @@ export async function saveConfiguration(configData: ConfigurationData) {
         console.log("[v0] Using structure color ID directly:", structure_color_id)
       } else {
         // It's a custom color or name, try to find by name
+        // Determina il tipo di configuratore (default: acciaio)
+        const configuratorType: ConfiguratorType = (configData as any).configurator_type || 'acciaio'
+        const colorsTable = getTableName(configuratorType, 'colors')
+        
         const { data: colorData, error: colorError } = await supabase
-          .from("carport_colors")
+          .from(colorsTable)
           .select("id")
           .ilike("name", `%${configData.structure_color}%`)
           .maybeSingle()
@@ -63,8 +69,12 @@ export async function saveConfiguration(configData: ConfigurationData) {
       surface_id: surface_id || null,
     }
 
-    console.log("[v0] Attempting to insert configuration data:", dbData)
-    const { data, error } = await supabase.from("carport_configurations").insert(dbData).select().single()
+    // Determina il tipo di configuratore (default: acciaio)
+    const configuratorType: ConfiguratorType = (configData as any).configurator_type || 'acciaio'
+    const configurationsTable = getTableName(configuratorType, 'configurations')
+    
+    console.log(`[v0] Attempting to insert configuration data into ${configurationsTable}:`, dbData)
+    const { data, error } = await supabase.from(configurationsTable).insert(dbData).select().single()
 
     if (error) {
       console.error("[v0] Database insert error:", error)
