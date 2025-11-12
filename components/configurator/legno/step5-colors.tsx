@@ -71,7 +71,7 @@ export function Step5Colors({ configuration, updateConfiguration }: Step5Props) 
         setIsUpdating(false)
       }, 300)
     }
-  }, [selectedColor, colors, updateConfiguration])
+  }, [selectedColor, colors])
 
   if (isLoading) {
     return (

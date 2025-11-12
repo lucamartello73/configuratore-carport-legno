@@ -77,7 +77,7 @@ export function Step2Model({ configuration, updateConfiguration }: Step2Props) {
         setIsUpdating(false)
       }, 300)
     }
-  }, [selectedModel, models, updateConfiguration])
+  }, [selectedModel, models])
 
   if (isLoading) {
     return (

@@ -53,7 +53,7 @@ export function Step4Coverage({ configuration, updateConfiguration }: Step4Props
     if (selectedCoverage) {
       updateConfiguration({ coverageId: selectedCoverage })
     }
-  }, [selectedCoverage, updateConfiguration])
+  }, [selectedCoverage])
 
   if (loading) {
     return (

@@ -70,7 +70,7 @@ export function Step1StructureType({ configuration, updateConfiguration }: Step1
         setIsUpdating(false)
       }, 300)
     }
-  }, [selectedType, structureTypes, updateConfiguration])
+  }, [selectedType, structureTypes])
 
   if (isLoading) {
     return (

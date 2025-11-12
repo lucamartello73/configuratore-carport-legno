@@ -38,7 +38,7 @@ export function Step3Dimensions({ configuration, updateConfiguration }: Step3Pro
 
   useEffect(() => {
     updateConfiguration({ carSpots, width, depth, height })
-  }, [carSpots, width, depth, height, updateConfiguration])
+  }, [carSpots, width, depth, height])
 
   return (
     <div className="space-y-8">

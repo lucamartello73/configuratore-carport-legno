@@ -56,7 +56,7 @@ export function Step6Accessories({ configuration, updateConfiguration }: Step6Pr
     updateConfiguration({
       accessories: selectedAccessories,
     })
-  }, [selectedAccessories, updateConfiguration])
+  }, [selectedAccessories])
 
   const toggleAccessory = (accessoryId: string) => {
     setSelectedAccessories((prev) =>
