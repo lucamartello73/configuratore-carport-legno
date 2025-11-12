@@ -2,7 +2,15 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 export function middleware(request: NextRequest) {
-  // For now, allow all requests to pass through
+  const { pathname } = request.nextUrl
+
+  // Escludi API routes da middleware (evita redirect 307)
+  const isApiRoute = pathname.startsWith('/api/')
+  if (isApiRoute) {
+    return NextResponse.next()
+  }
+
+  // For now, allow all other requests to pass through
   // TODO: Add proper authentication check later
   return NextResponse.next()
 }
