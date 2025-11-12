@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Building2, TreePine } from "lucide-react"
+import { FooterMartello1930 } from "@/components/footer-martello1930"
 
 export default function HomePage() {
   return (
@@ -159,6 +160,7 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+      <FooterMartello1930 />
     </div>
   )
 }

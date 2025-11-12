@@ -6,14 +6,14 @@
  * 
  * Database Structure:
  * - Tabelle Acciaio: prefisso "carport_*"
- * - Tabelle Legno: prefisso "configuratorelegno_*"
+ * - Tabelle Legno: prefisso "carport_legno_*"
  */
 
 export type ConfiguratorType = 'acciaio' | 'legno'
 
 export interface TableMapping {
   configurations: string
-  models: string
+  models?: string
   colors: string
   coverage_types: string
   structure_types?: string
@@ -21,6 +21,7 @@ export interface TableMapping {
   pricing_rules?: string
   pergola_types?: string
   accessories?: string
+  packages?: string
 }
 
 /**
@@ -37,12 +38,14 @@ export const TABLES: Record<ConfiguratorType, TableMapping> = {
     pricing_rules: 'carport_pricing_rules',
   },
   legno: {
-    configurations: 'configuratorelegno_configurations',
-    models: 'configuratorelegno_pergola_types', // In legno, i "modelli" sono i tipi di pergola
-    colors: 'configuratorelegno_colors',
-    coverage_types: 'configuratorelegno_coverage_types',
-    pergola_types: 'configuratorelegno_pergola_types',
-    accessories: 'configuratorelegno_accessories',
+    configurations: 'carport_legno_configurations',
+    colors: 'carport_legno_colors',
+    coverage_types: 'carport_legno_coverage_types',
+    structure_types: 'carport_legno_structure_types',
+    pergola_types: 'carport_legno_structure_types', // Alias per compatibilità
+    accessories: 'carport_legno_accessories',
+    packages: 'carport_legno_packages',
+    surfaces: 'carport_legno_surfaces',
   },
 }
 
@@ -56,7 +59,7 @@ export const TABLES: Record<ConfiguratorType, TableMapping> = {
  * @example
  * ```typescript
  * const tableName = getTableName('acciaio', 'models') // Returns: 'carport_models'
- * const tableName = getTableName('legno', 'colors')   // Returns: 'configuratorelegno_colors'
+ * const tableName = getTableName('legno', 'colors')   // Returns: 'carport_legno_colors'
  * ```
  */
 export function getTableName(
@@ -103,7 +106,7 @@ export function getAllTables(configuratorType: ConfiguratorType): TableMapping {
  * @example
  * ```typescript
  * hasTable('acciaio', 'surfaces')    // true
- * hasTable('legno', 'surfaces')      // false
+ * hasTable('legno', 'surfaces')      // true
  * hasTable('legno', 'accessories')   // true
  * ```
  */
@@ -123,9 +126,9 @@ export function hasTable(
  * @example
  * ```typescript
  * getTablePrefix('acciaio') // 'carport_'
- * getTablePrefix('legno')   // 'configuratorelegno_'
+ * getTablePrefix('legno')   // 'carport_legno_'
  * ```
  */
 export function getTablePrefix(configuratorType: ConfiguratorType): string {
-  return configuratorType === 'acciaio' ? 'carport_' : 'configuratorelegno_'
+  return configuratorType === 'acciaio' ? 'carport_' : 'carport_legno_'
 }

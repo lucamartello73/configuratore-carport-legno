@@ -16,6 +16,7 @@ import { Step6Surface } from "@/components/configurator/acciaio/step6-surface"
 import { Step7Package } from "@/components/configurator/acciaio/step7-package"
 
 import type { ConfigurationData } from "@/types/configuration"
+import { FooterMartello1930 } from "@/components/footer-martello1930"
 
 import { initializeGoogleAnalytics, trackConfiguratorStep, setupAbandonTracking } from "@/lib/analytics/gtag"
 
@@ -332,6 +333,7 @@ export default function ConfiguratorAcciaioPage() {
           )}
         </div>
       </div>
+      <FooterMartello1930 />
     </div>
   )
 }

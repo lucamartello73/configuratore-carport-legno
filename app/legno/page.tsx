@@ -15,6 +15,7 @@ import { Step5Accessories } from "@/components/configurator/legno/step5-accessor
 import { Step6Package } from "@/components/configurator/legno/step6-package"
 
 import type { ConfigurationData } from "@/types/configuration"
+import { FooterMartello1930 } from "@/components/footer-martello1930"
 
 import { initializeGoogleAnalytics, trackConfiguratorStep, setupAbandonTracking } from "@/lib/analytics/gtag"
 
@@ -323,6 +324,7 @@ export default function ConfiguratoreLegnoPage() {
           )}
         </div>
       </div>
+      <FooterMartello1930 />
     </div>
   )
 }
