@@ -150,31 +150,33 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
       return
     }
 
-    console.log("[v0] Configuration validation check:", {
-      modelId: configuration.modelId,
-      coverageId: configuration.coverageId,
-      structureColor: configuration.structureColor,
-      structureType: configuration.structureType,
+    console.log("[Legno] Configuration validation check:", {
       structureTypeId: configuration.structureTypeId,
+      modelId: configuration.modelId,
       width: configuration.width,
       depth: configuration.depth,
       height: configuration.height,
+      coverageId: configuration.coverageId,
+      colorId: configuration.colorId,
+      surfaceId: configuration.surfaceId,
     })
 
     if (
+      !configuration.structureTypeId ||
       !configuration.modelId ||
       !configuration.coverageId ||
-      !configuration.structureColor ||
-      (!configuration.structureType && !configuration.structureTypeId)
+      !configuration.colorId ||
+      !configuration.surfaceId
     ) {
-      console.log("[v0] Missing required fields:", {
+      console.log("[Legno] Missing required fields:", {
+        structureTypeId: !configuration.structureTypeId ? "MISSING" : "OK",
         modelId: !configuration.modelId ? "MISSING" : "OK",
         coverageId: !configuration.coverageId ? "MISSING" : "OK",
-        structureColor: !configuration.structureColor ? "MISSING" : "OK",
-        structureType: !configuration.structureType && !configuration.structureTypeId ? "MISSING" : "OK",
+        colorId: !configuration.colorId ? "MISSING" : "OK",
+        surfaceId: !configuration.surfaceId ? "MISSING" : "OK",
       })
       onValidationError?.(
-        "⚠️ Configurazione incompleta. Torna indietro e completa tutti i passaggi obbligatori (Modello, Tipo Struttura, Dimensioni, Copertura, Colori)",
+        "⚠️ Configurazione incompleta. Torna indietro e completa tutti i passaggi obbligatori (Tipo Struttura, Modello, Dimensioni, Copertura, Colori, Superficie)",
       )
       return
     }
@@ -183,14 +185,14 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
 
     try {
       const configurationData = {
-        structure_type: configuration.structureType || configuration.structureTypeId || "",
+        configurator_type: 'legno',
+        structure_type_id: configuration.structureTypeId,
         model_id: configuration.modelId,
         width: configuration.width || 0,
         depth: configuration.depth || 0,
         height: configuration.height || 0,
         coverage_id: configuration.coverageId,
-        structure_color: configuration.structureColor,
-        coverage_color: configuration.coverageColor,
+        color_id: configuration.colorId,
         surface_id: configuration.surfaceId,
         customer_name: customerData.name,
         customer_email: customerData.email,
