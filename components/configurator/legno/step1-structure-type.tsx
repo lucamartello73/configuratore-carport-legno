@@ -94,7 +94,7 @@ export function Step1StructureType({ configuration, updateConfiguration }: Step1
       )}
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {pergolaTypes.map((type) => (
+        {structureTypes.map((type) => (
           <Card
             key={type.id}
             className={`cursor-pointer transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 ${
@@ -158,7 +158,7 @@ export function Step1StructureType({ configuration, updateConfiguration }: Step1
         ))}
       </div>
 
-      {pergolaTypes.length === 0 && !isLoading && (
+      {structureTypes.length === 0 && !isLoading && (
         <div className="text-center py-12 text-gray-500">
           <p>Nessun tipo di pergola disponibile al momento.</p>
         </div>
