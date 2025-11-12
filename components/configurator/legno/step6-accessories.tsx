@@ -9,7 +9,7 @@ import { getImageUrl, getFallbackImageUrl } from "@/lib/utils/image-utils"
 import { getTableName } from "@/lib/supabase/tables"
 import type { ConfigurationData } from "@/types/configuration"
 
-interface Step5Props {
+interface Step6Props {
   configuration: Partial<ConfigurationData>
   updateConfiguration: (data: Partial<ConfigurationData>) => void
 }
@@ -23,7 +23,7 @@ interface Accessory {
   category?: string
 }
 
-export function Step5Accessories({ configuration, updateConfiguration }: Step5Props) {
+export function Step6Accessories({ configuration, updateConfiguration }: Step6Props) {
   const [accessories, setAccessories] = useState<Accessory[]>([])
   const [selectedAccessories, setSelectedAccessories] = useState<string[]>([])
   const [loading, setLoading] = useState(true)

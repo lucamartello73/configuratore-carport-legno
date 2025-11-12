@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import type { ConfigurationData } from "@/types/configuration"
 
-interface Step2Props {
+interface Step3Props {
   configuration: Partial<ConfigurationData>
   updateConfiguration: (data: Partial<ConfigurationData>) => void
 }
@@ -20,7 +20,7 @@ const carSpotsData = [
   { spots: 5, width: 1150, depth: 400, height: 200, label: "5+ Posti Auto" },
 ]
 
-export function Step2Dimensions({ configuration, updateConfiguration }: Step2Props) {
+export function Step3Dimensions({ configuration, updateConfiguration }: Step3Props) {
   const [carSpots, setCarSpots] = useState(configuration.carSpots || 1)
   const [width, setWidth] = useState(configuration.width || 230)
   const [depth, setDepth] = useState(configuration.depth || 400)

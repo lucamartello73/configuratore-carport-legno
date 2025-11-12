@@ -7,7 +7,7 @@ import { getImageUrl, getFallbackImageUrl } from "@/lib/utils/image-utils"
 import { getTableName } from "@/lib/supabase/tables"
 import type { ConfigurationData } from "@/types/configuration"
 
-interface Step3Props {
+interface Step4Props {
   configuration: Partial<ConfigurationData>
   updateConfiguration: (data: Partial<ConfigurationData>) => void
 }
@@ -20,7 +20,7 @@ interface CoverageType {
   image: string
 }
 
-export function Step3Coverage({ configuration, updateConfiguration }: Step3Props) {
+export function Step4Coverage({ configuration, updateConfiguration }: Step4Props) {
   const [coverageTypes, setCoverageTypes] = useState<CoverageType[]>([])
   const [selectedCoverage, setSelectedCoverage] = useState(configuration.coverageId || "")
   const [loading, setLoading] = useState(true)
