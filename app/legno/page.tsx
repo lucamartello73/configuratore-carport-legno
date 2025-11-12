@@ -8,11 +8,12 @@ import Link from "next/link"
 
 // Import step components per configuratore Legno
 import { Step1StructureType } from "@/components/configurator/legno/step1-structure-type"
-import { Step2Dimensions } from "@/components/configurator/legno/step2-dimensions"
-import { Step3Coverage } from "@/components/configurator/legno/step3-coverage"
-import { Step4Colors } from "@/components/configurator/legno/step4-colors"
-import { Step5Accessories } from "@/components/configurator/legno/step5-accessories"
-import { Step6Package } from "@/components/configurator/legno/step6-package"
+import { Step2Model } from "@/components/configurator/legno/step2-model"
+import { Step3Dimensions } from "@/components/configurator/legno/step3-dimensions"
+import { Step4Coverage } from "@/components/configurator/legno/step4-coverage"
+import { Step5Colors } from "@/components/configurator/legno/step5-colors"
+import { Step6Accessories } from "@/components/configurator/legno/step6-accessories"
+import { Step7Package } from "@/components/configurator/legno/step7-package"
 
 import type { ConfigurationData } from "@/types/configuration"
 import { FooterMartello1930 } from "@/components/footer-martello1930"
@@ -23,11 +24,12 @@ export type { ConfigurationData }
 
 const steps = [
   { id: 1, title: "Tipo Struttura", description: "Scegli il tipo di struttura", icon: "🌳" },
-  { id: 2, title: "Dimensioni", description: "Imposta le dimensioni", icon: "📏" },
-  { id: 3, title: "Copertura", description: "Scegli la copertura", icon: "🏡" },
-  { id: 4, title: "Colori", description: "Seleziona le tinte legno", icon: "🎨" },
-  { id: 5, title: "Accessori", description: "Aggiungi accessori", icon: "✨" },
-  { id: 6, title: "Pacchetto", description: "Finalizza e invia", icon: "📦" },
+  { id: 2, title: "Modello", description: "Seleziona il modello", icon: "🏗️" },
+  { id: 3, title: "Dimensioni", description: "Imposta le dimensioni", icon: "📏" },
+  { id: 4, title: "Copertura", description: "Scegli la copertura", icon: "🏡" },
+  { id: 5, title: "Colori", description: "Seleziona le tinte legno", icon: "🎨" },
+  { id: 6, title: "Accessori", description: "Aggiungi accessori", icon: "✨" },
+  { id: 7, title: "Riepilogo", description: "Finalizza e invia", icon: "📦" },
 ]
 
 export default function ConfiguratoreLegnoPage() {
@@ -55,7 +57,7 @@ export default function ConfiguratoreLegnoPage() {
       const stepName = `legno_step_${currentStep}_${steps[currentStep - 1].title.toLowerCase().replace(/ /g, "_")}`
       trackConfiguratorStep(stepName, {
         previous_step: currentStep - 1,
-        configuration_progress: Math.round((currentStep / 6) * 100),
+        configuration_progress: Math.round((currentStep / 7) * 100),
         configurator_type: 'legno',
       })
     }
@@ -68,25 +70,30 @@ export default function ConfiguratoreLegnoPage() {
           return { valid: false, error: "⚠️ Seleziona un tipo di struttura per proseguire" }
         }
         break
-      case 2: // Dimensions
+      case 2: // Model
+        if (!configuration.modelId) {
+          return { valid: false, error: "⚠️ Seleziona un modello per proseguire" }
+        }
+        break
+      case 3: // Dimensions
         if (!configuration.width || !configuration.depth || !configuration.height) {
           return { valid: false, error: "⚠️ Inserisci tutte le dimensioni (larghezza, profondità, altezza)" }
         }
-        if (configuration.width < 200 || configuration.depth < 300 || configuration.height < 180) {
-          return { valid: false, error: "⚠️ Le dimensioni inserite sono troppo piccole. Verifica i valori minimi." }
+        if (configuration.width < 230 || configuration.depth < 300 || configuration.height < 180) {
+          return { valid: false, error: "⚠️ Le dimensioni inserite sono troppo piccole. Minimi: Larghezza 2.30m, Profondità 3.00m" }
         }
         break
-      case 3: // Coverage
+      case 4: // Coverage
         if (!configuration.coverageId) {
           return { valid: false, error: "⚠️ Seleziona un tipo di copertura per proseguire" }
         }
         break
-      case 4: // Colors
-        if (!configuration.structureColor) {
+      case 5: // Colors
+        if (!configuration.colorId) {
           return { valid: false, error: "⚠️ Seleziona una tinta per il legno" }
         }
         break
-      case 5: // Accessories (optional)
+      case 6: // Accessories (optional)
         // Accessories are optional, always valid
         break
     }
@@ -108,7 +115,7 @@ export default function ConfiguratoreLegnoPage() {
       return
     }
 
-    if (currentStep < 6) {
+    if (currentStep < 7) {
       setCurrentStep(currentStep + 1)
       setShowValidationError(false)
       setValidationError("")
@@ -130,16 +137,18 @@ export default function ConfiguratoreLegnoPage() {
       case 1:
         return <Step1StructureType configuration={configuration} updateConfiguration={updateConfiguration} />
       case 2:
-        return <Step2Dimensions configuration={configuration} updateConfiguration={updateConfiguration} />
+        return <Step2Model configuration={configuration} updateConfiguration={updateConfiguration} />
       case 3:
-        return <Step3Coverage configuration={configuration} updateConfiguration={updateConfiguration} />
+        return <Step3Dimensions configuration={configuration} updateConfiguration={updateConfiguration} />
       case 4:
-        return <Step4Colors configuration={configuration} updateConfiguration={updateConfiguration} />
+        return <Step4Coverage configuration={configuration} updateConfiguration={updateConfiguration} />
       case 5:
-        return <Step5Accessories configuration={configuration} updateConfiguration={updateConfiguration} />
+        return <Step5Colors configuration={configuration} updateConfiguration={updateConfiguration} />
       case 6:
+        return <Step6Accessories configuration={configuration} updateConfiguration={updateConfiguration} />
+      case 7:
         return (
-          <Step6Package
+          <Step7Package
             configuration={configuration}
             updateConfiguration={updateConfiguration}
             onValidationError={(error) => {
@@ -154,7 +163,7 @@ export default function ConfiguratoreLegnoPage() {
     }
   }
 
-  const progress = (currentStep / 6) * 100
+  const progress = (currentStep / 7) * 100
 
   const headerStyle = {
     background: "linear-gradient(to right, #008f4c, #00703c)",
@@ -204,7 +213,7 @@ export default function ConfiguratoreLegnoPage() {
           <div className="text-center flex-1">
             <h1 className="text-3xl font-bold text-[#008f4c] mb-2">Configuratore Coperture Auto in Legno</h1>
             <p className="text-gray-700">
-              Passaggio {currentStep} di 6: {steps[currentStep - 1].title}
+              Passaggio {currentStep} di 7: {steps[currentStep - 1].title}
             </p>
           </div>
           <div className="w-32"></div>

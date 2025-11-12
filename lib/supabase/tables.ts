@@ -39,6 +39,7 @@ export const TABLES: Record<ConfiguratorType, TableMapping> = {
   },
   legno: {
     configurations: 'carport_legno_configurations',
+    models: 'carport_legno_models',
     colors: 'carport_legno_colors',
     coverage_types: 'carport_legno_coverage_types',
     structure_types: 'carport_legno_structure_types',
