@@ -3,6 +3,7 @@
  * Gestisce automaticamente filtri per materiale e stato attivo
  */
 
+import * as React from 'react'
 import { createClient } from "@/lib/supabase/client"
 import { getTableName, type ConfiguratorType } from "@/lib/supabase/tables"
 
@@ -40,7 +41,7 @@ export interface ConfiguratorDataOptions {
  */
 export async function fetchConfiguratorData<T = any>(
   options: ConfiguratorDataOptions
-): Promise<{ data: T[] | null; error: any }> {
+): Promise<{ data: T[]; error: any }> {
   const { material, table, filters = {}, orderBy, ascending = true } = options
 
   try {
@@ -54,12 +55,19 @@ export async function fetchConfiguratorData<T = any>(
     // Query base: seleziona tutto da tabella
     let query = supabase.from(physicalTableName).select("*")
 
-    // Filtro stato attivo (se colonna esiste)
-    // Alcune tabelle usano 'is_active', altre 'attivo'
+    // Filtro stato attivo - prova entrambe le convenzioni
+    // Usa OR per compatibilità con diverse strutture tabelle
+    const activeFilters = []
     if (await hasColumn(physicalTableName, 'is_active')) {
-      query = query.eq('is_active', true)
-    } else if (await hasColumn(physicalTableName, 'attivo')) {
-      query = query.eq('attivo', true)
+      activeFilters.push('is_active.eq.true')
+    }
+    if (await hasColumn(physicalTableName, 'attivo')) {
+      activeFilters.push('attivo.eq.true')
+    }
+    
+    // Applica filtro attivo solo se almeno una colonna esiste
+    if (activeFilters.length > 0) {
+      query = query.or(activeFilters.join(','))
     }
 
     // Filtri aggiuntivi personalizzati
@@ -79,15 +87,15 @@ export async function fetchConfiguratorData<T = any>(
 
     if (error) {
       console.error(`[fetchConfiguratorData] Error fetching from ${physicalTableName}:`, error)
-      return { data: null, error }
+      return { data: [], error }
     }
 
     console.log(`[fetchConfiguratorData] Loaded ${data?.length || 0} records from ${physicalTableName}`)
-    return { data: data as T[], error: null }
+    return { data: (data as T[]) || [], error: null }
     
   } catch (error) {
     console.error("[fetchConfiguratorData] Unexpected error:", error)
-    return { data: null, error }
+    return { data: [], error }
   }
 }
 
@@ -102,32 +110,38 @@ async function hasColumn(tableName: string, columnName: string): Promise<boolean
     return columnCache.get(tableName)!.has(columnName)
   }
 
-  // Query schema Supabase (da fare solo una volta per tabella)
+  // Query schema Supabase per ottenere struttura tabella
   try {
     const supabase = createClient()
+    // Fetch 1 record per vedere struttura colonne
     const { data, error } = await supabase
       .from(tableName)
       .select('*')
-      .limit(0) // Solo metadata, nessun dato
+      .limit(1)
     
-    if (!error && data !== null) {
-      // Estrai nomi colonne (Supabase restituisce oggetto vuoto ma con chiavi)
-      const columns = new Set(Object.keys(data[0] || {}))
+    if (!error && data && data.length > 0) {
+      // Estrai nomi colonne dal primo record
+      const columns = new Set(Object.keys(data[0]))
       columnCache.set(tableName, columns)
       return columns.has(columnName)
+    } else if (!error && data && data.length === 0) {
+      // Tabella vuota: assume colonne standard esistano
+      const defaultColumns = new Set(['id', 'name', 'is_active', 'attivo', 'ordine', 'display_order'])
+      columnCache.set(tableName, defaultColumns)
+      return defaultColumns.has(columnName)
     }
   } catch (e) {
-    console.warn(`[hasColumn] Could not check column ${columnName} in ${tableName}`)
+    console.warn(`[hasColumn] Could not check column ${columnName} in ${tableName}`, e)
   }
   
-  // Default: assume colonna non esiste
-  return false
+  // Default: assume colonna esiste per evitare blocchi
+  return true
 }
 
 /**
  * Ottiene URL immagine valido o placeholder
  */
-export function getImageUrlOrPlaceholder(imageUrl?: string | null, type: string = 'general'): string {
+export function getImageUrlOrPlaceholder(imageUrl?: string | null, type: string = 'general'): string | null {
   if (imageUrl && imageUrl.trim() !== '') {
     // Se è URL completo, usa direttamente
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
@@ -140,17 +154,8 @@ export function getImageUrlOrPlaceholder(imageUrl?: string | null, type: string 
     return imageUrl
   }
   
-  // Placeholder basato su tipo
-  const placeholders: Record<string, string> = {
-    structure: '/placeholder-structure.svg',
-    model: '/placeholder-model.svg',
-    coverage: '/placeholder-coverage.svg',
-    color: '/placeholder-color.svg',
-    surface: '/placeholder-surface.svg',
-    general: '/placeholder.svg'
-  }
-  
-  return placeholders[type] || placeholders.general
+  // Ritorna null per gestire placeholder in UI con ImageOff icon
+  return null
 }
 
 /**
@@ -167,21 +172,21 @@ export function getDescriptionOrFallback(description?: string | null): string {
  * Hook React per fetch dati configuratore (con loading state)
  */
 export function useConfiguratorData<T = any>(options: ConfiguratorDataOptions) {
-  const [data, setData] = React.useState<T[] | null>(null)
-  const [loading, setLoading] = React.useState(true)
+  const [data, setData] = React.useState<T[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<any>(null)
 
   React.useEffect(() => {
     let isMounted = true
 
     async function load() {
-      setLoading(true)
+      setIsLoading(true)
       const result = await fetchConfiguratorData<T>(options)
       
       if (isMounted) {
-        setData(result.data)
+        setData(result.data || [])
         setError(result.error)
-        setLoading(false)
+        setIsLoading(false)
       }
     }
 
@@ -192,8 +197,5 @@ export function useConfiguratorData<T = any>(options: ConfiguratorDataOptions) {
     }
   }, [options.material, options.table, JSON.stringify(options.filters)])
 
-  return { data, loading, error }
+  return { data, isLoading, error }
 }
-
-// Import React per hook (solo se usato)
-import * as React from 'react'
