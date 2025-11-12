@@ -1,55 +1,23 @@
-import nodemailer from 'nodemailer'
+import * as nodemailer from "nodemailer"
 
 /**
- * Crea un transport Nodemailer configurato per Gmail SMTP
- * 
- * Requisiti:
- * - GMAIL_USER: indirizzo email Gmail (es: info@martello1930.net)
- * - GMAIL_APP_PASSWORD: App Password generata da Google Account
- * 
- * NOTA: NON usare la password normale dell'account Gmail!
- * Genera una App Password da: https://myaccount.google.com/security
+ * Crea transport Gmail configurato per SMTP
+ * Usa variabili ambiente: GMAIL_USER e GMAIL_APP_PASSWORD
  */
-export function createGmailTransport() {
-  const gmailUser = process.env.GMAIL_USER
-  const gmailPassword = process.env.GMAIL_APP_PASSWORD
-
-  if (!gmailUser || !gmailPassword) {
-    console.error('❌ Configurazione email mancante!')
-    console.error('Variabili ambiente richieste:')
-    console.error('- GMAIL_USER:', gmailUser ? '✅' : '❌ MANCANTE')
-    console.error('- GMAIL_APP_PASSWORD:', gmailPassword ? '✅' : '❌ MANCANTE')
-    throw new Error('Gmail credentials not configured. Set GMAIL_USER and GMAIL_APP_PASSWORD environment variables.')
+export const createGmailTransport = () => {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    throw new Error(
+      "Configurazione Gmail mancante. Verifica variabili ambiente GMAIL_USER e GMAIL_APP_PASSWORD"
+    )
   }
 
-  const transport = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
+  return nodemailer.createTransport({
+    host: "smtp.gmail.com",
     port: 587,
-    secure: false, // true per porta 465, false per altre porte
+    secure: false, // TLS su porta 587
     auth: {
-      user: gmailUser,
-      pass: gmailPassword,
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
     },
-    tls: {
-      rejectUnauthorized: true
-    }
   })
-
-  return transport
-}
-
-/**
- * Verifica la connessione Gmail SMTP
- * Utile per testare la configurazione
- */
-export async function verifyGmailConnection(): Promise<boolean> {
-  try {
-    const transport = createGmailTransport()
-    await transport.verify()
-    console.log('✅ Gmail SMTP connection verified')
-    return true
-  } catch (error) {
-    console.error('❌ Gmail SMTP connection failed:', error)
-    return false
-  }
 }

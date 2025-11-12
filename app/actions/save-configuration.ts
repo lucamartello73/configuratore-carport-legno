@@ -44,6 +44,64 @@ interface LegnoConfigurationData extends BaseConfigurationData {
 
 export type ConfigurationData = AcciaioConfigurationData | LegnoConfigurationData
 
+/**
+ * Prepara dati denormalizzati per email (nomi leggibili invece di UUID)
+ */
+async function prepareEmailData(
+  supabase: any,
+  configuratorType: ConfiguratorType,
+  configurationId: string,
+  originalData: ConfigurationData
+) {
+  const emailData: any = {
+    customerName: originalData.customer_name,
+    customerEmail: originalData.customer_email,
+    customerPhone: originalData.customer_phone,
+    customerAddress: originalData.customer_address,
+    customerCity: originalData.customer_city,
+    customerCap: originalData.customer_cap,
+    customerProvince: originalData.customer_province,
+    contactPreference: originalData.contact_preference,
+    dimensions: {
+      width: originalData.width,
+      depth: originalData.depth,
+      height: originalData.height,
+    },
+    packageType: originalData.package_type,
+    totalPrice: originalData.total_price,
+  }
+
+  if (configuratorType === 'legno') {
+    const legnoData = originalData as LegnoConfigurationData
+    
+    // Recupera nomi leggibili dalle tabelle
+    const [structureTypeResult, modelResult, coverageResult, colorResult, surfaceResult] = await Promise.all([
+      supabase.from(getTableName('legno', 'structure_types')).select('name').eq('id', legnoData.structure_type_id).maybeSingle(),
+      supabase.from(getTableName('legno', 'models')).select('name').eq('id', legnoData.model_id).maybeSingle(),
+      supabase.from(getTableName('legno', 'coverage_types')).select('name').eq('id', legnoData.coverage_id).maybeSingle(),
+      supabase.from(getTableName('legno', 'colors')).select('name').eq('id', legnoData.color_id).maybeSingle(),
+      supabase.from(getTableName('legno', 'surfaces')).select('name').eq('id', legnoData.surface_id).maybeSingle(),
+    ])
+    
+    emailData.structureType = structureTypeResult.data?.name || 'N/A'
+    emailData.modelName = modelResult.data?.name || 'N/A'
+    emailData.coverageType = coverageResult.data?.name || 'N/A'
+    emailData.colorName = colorResult.data?.name || 'N/A'
+    emailData.surfaceName = surfaceResult.data?.name || 'N/A'
+  } else if (configuratorType === 'acciaio') {
+    const acciaioData = originalData as AcciaioConfigurationData
+    
+    // TODO: Implementare per acciaio quando necessario
+    emailData.structureType = acciaioData.structure_type
+    emailData.modelName = 'N/A'
+    emailData.coverageType = 'N/A'
+    emailData.colorName = acciaioData.structure_color
+    emailData.surfaceName = 'N/A'
+  }
+  
+  return emailData
+}
+
 export async function saveConfiguration(configData: ConfigurationData) {
   try {
     const configuratorType = configData.configurator_type
@@ -143,8 +201,31 @@ export async function saveConfiguration(configData: ConfigurationData) {
 
     console.log(`[${configuratorType}] Configuration saved successfully with ID:`, data.id)
     
-    // TODO: Inviare email notifica admin
-    // TODO: Inviare email conferma cliente
+    // Invio email notifiche (cliente + admin)
+    try {
+      console.log(`[${configuratorType}] Tentativo invio email...`)
+      
+      // Recupera dati denormalizzati per email
+      const emailData = await prepareEmailData(supabase, configuratorType, data.id, configData)
+      
+      // Chiama API email (non blocca il salvataggio se fallisce)
+      const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/send-configuration-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emailData),
+      })
+      
+      if (!emailResponse.ok) {
+        const errorData = await emailResponse.json()
+        console.error(`[${configuratorType}] ⚠️ Errore invio email:`, errorData)
+        // Non fallire il salvataggio anche se email fallisce
+      } else {
+        console.log(`[${configuratorType}] ✅ Email inviate con successo`)
+      }
+    } catch (emailError) {
+      console.error(`[${configuratorType}] ⚠️ Errore invio email (non critico):`, emailError)
+      // Email failure non impedisce il salvataggio
+    }
     
     return { success: true, data }
     
