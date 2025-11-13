@@ -10,13 +10,13 @@ import { ConfiguratorNavigation } from "@/components/configurator/shared/Configu
 import { FooterMartello1930 } from "@/components/footer-martello1930"
 
 // Import step components per configuratore Legno
-import { Step1StructureType } from "@/components/configurator/legno/step1-structure-type"
-import { Step2Model } from "@/components/configurator/legno/step2-model"
-import { Step3Dimensions } from "@/components/configurator/legno/step3-dimensions"
-import { Step4Coverage } from "@/components/configurator/legno/step4-coverage"
-import { Step5Colors } from "@/components/configurator/legno/step5-colors"
-import { Step6Surface } from "@/components/configurator/legno/step6-surface"
-import { Step7Package } from "@/components/configurator/legno/step7-package"
+import { Step1StructureType } from "@/components/configurator/steps/step1-structure-type"
+import { Step2Model } from "@/components/configurator/steps/step2-model"
+import { Step3Dimensions } from "@/components/configurator/steps/step3-dimensions"
+import { Step4Coverage } from "@/components/configurator/steps/step4-coverage"
+import { Step5Colors } from "@/components/configurator/steps/step5-colors"
+import { Step6Surface } from "@/components/configurator/steps/step6-surface"
+import { Step7Package } from "@/components/configurator/steps/step7-package"
 
 import type { ConfigurationData } from "@/types/configuration"
 import { initializeGoogleAnalytics, trackConfiguratorStep, setupAbandonTracking } from "@/lib/analytics/gtag"

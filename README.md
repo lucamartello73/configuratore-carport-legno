@@ -1,32 +1,101 @@
-# CARPORT
+# 🌳 Configuratore Carport Legno - Martello1930
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+Configuratore standalone per carport, pergole e strutture in legno.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/lucamartello73-4767s-projects/v0-carport)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/Yb3NwsaoZOp)
+## 🎯 Caratteristiche
 
-## Overview
+- **Design System Martello1930** integrato
+- **7 Step di Configurazione** completi
+- **Supabase Backend** condiviso
+- **Mobile-First** responsive
+- **Google Analytics** tracking
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+## 🚀 Deployment
 
-## Deployment
+- **URL Produzione**: https://carport-legno.martello1930.net
+- **Percorso Configuratore**: `/configura`
+- **Framework**: Next.js 14 (App Router)
 
-Your project is live at:
+## 📦 Installazione
 
-**[https://vercel.com/lucamartello73-4767s-projects/v0-carport](https://vercel.com/lucamartello73-4767s-projects/v0-carport)**
+```bash
+npm install
+cp .env.local.example .env.local
+# Configura le variabili d'ambiente
+npm run dev
+```
 
-## Build your app
+## 🔧 Variabili d'Ambiente
 
-Continue building your app on:
+```env
+# Supabase (condiviso)
+NEXT_PUBLIC_SUPABASE_URL=https://qeqgvtwkqocnkwckxfon.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-key
 
-**[https://v0.app/chat/projects/Yb3NwsaoZOp](https://v0.app/chat/projects/Yb3NwsaoZOp)**
+# App Config
+NEXT_PUBLIC_APP_URL=https://carport-legno.martello1930.net
+NEXT_PUBLIC_CONFIGURATOR_TYPE=legno
 
-## How It Works
+# Gmail SMTP
+GMAIL_USER=your-email@gmail.com
+GMAIL_APP_PASSWORD=your-app-password
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+# Analytics
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-8BW6WP9PR1
+```
 
-<!-- Database aggiornato: Wed Nov 12 16:21:56 UTC 2025 -->
+## 📂 Struttura
+
+```
+app/
+├── page.tsx              # Redirect a /configura
+├── configura/            # Main configurator
+├── admin/                # Admin panel
+└── api/                  # API routes
+
+components/
+├── configurator/
+│   ├── steps/           # Step 1-7 configuratore legno
+│   └── shared/          # Header, Progress, Navigation
+└── ui/                  # Componenti UI Shadcn
+
+lib/
+├── supabase/            # Supabase client
+└── analytics/           # Google Analytics
+```
+
+## 🎨 Design System
+
+- **Palette**: Beige (#F5F1E8), Rosa (#E91E63), Marrone (#3E2723)
+- **Font**: Geist (fallback Inter)
+- **Card**: Bordi dashed rosa 2px
+- **Header**: Glassmorphism con backdrop-filter
+
+## 📊 JSON Output
+
+```json
+{
+  "tipo": "legno",
+  "dimensioni": {...},
+  "copertura_tetto": "...",
+  "trattamento_o_colore": "...",
+  "accessori": [],
+  "note": "",
+  "created_at": "2025-11-13T10:00:00Z"
+}
+```
+
+## 🔗 Repository Correlati
+
+- **Configuratore Ferro**: https://github.com/lucamartello73/configuratore-carport-ferro
+- **Progetto Unificato** (deprecato): https://github.com/lucamartello73/v0-carport1
+
+## 📝 Note
+
+- Backend Supabase condiviso con configuratore ferro
+- Differenziazione dati tramite campo `tipo: "legno"`
+- Deploy automatico su Vercel via GitHub hook
+
+---
+
+**Martello1930** - Artigiani del Legno dal 1930
