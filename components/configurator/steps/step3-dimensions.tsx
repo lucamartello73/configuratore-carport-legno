@@ -13,65 +13,12 @@ interface Step3Props {
 }
 
 const carSpotsData = [
-  { spots: 1, width: 300, depth: 500, height: 220, label: "1 Posto Auto" },
-  { spots: 2, width: 550, depth: 500, height: 220, label: "2 Posti Auto" },
-  { spots: 3, width: 800, depth: 500, height: 220, label: "3 Posti Auto" },
-  { spots: 4, width: 1050, depth: 500, height: 220, label: "4 Posti Auto" },
-  { spots: 5, width: 1300, depth: 500, height: 220, label: "5+ Posti Auto" },
+  { spots: 1, width: 300, depth: 500, height: 220, label: "1 Posto" },
+  { spots: 2, width: 550, depth: 500, height: 220, label: "2 Posti" },
+  { spots: 3, width: 800, depth: 500, height: 220, label: "3 Posti" },
+  { spots: 4, width: 1050, depth: 500, height: 220, label: "4 Posti" },
+  { spots: 5, width: 1300, depth: 500, height: 220, label: "5+ Posti" },
 ]
-
-// Componente SVG Auto Realistica - VISTA FRONTALE
-const CarFrontIcon = ({ x = 0, y = 0, scale = 1 }) => (
-  <g transform={`translate(${x}, ${y}) scale(${scale})`}>
-    {/* Carrozzeria principale */}
-    <path
-      d="M 15 45 Q 10 40 10 30 L 10 25 Q 10 20 15 18 L 20 15 Q 25 12 30 12 L 50 12 Q 55 12 60 15 L 65 18 Q 70 20 70 25 L 70 30 Q 70 40 65 45 L 60 50 L 20 50 Z"
-      fill="#3b82f6"
-      stroke="#1e40af"
-      strokeWidth="2"
-    />
-    
-    {/* Parabrezza */}
-    <path
-      d="M 20 18 Q 25 14 40 14 Q 55 14 60 18 L 58 22 Q 55 20 40 20 Q 25 20 22 22 Z"
-      fill="#93c5fd"
-      opacity="0.7"
-    />
-    
-    {/* Tetto */}
-    <rect x="22" y="12" width="36" height="8" rx="3" fill="#1e3a8a"/>
-    
-    {/* Fari */}
-    <ellipse cx="20" cy="48" rx="5" ry="4" fill="#fef3c7" stroke="#f59e0b" strokeWidth="1"/>
-    <ellipse cx="60" cy="48" rx="5" ry="4" fill="#fef3c7" stroke="#f59e0b" strokeWidth="1"/>
-    
-    {/* Griglia anteriore */}
-    <rect x="32" y="44" width="16" height="6" rx="1" fill="#1f2937" opacity="0.6"/>
-    <line x1="35" y1="44" x2="35" y2="50" stroke="#6b7280" strokeWidth="0.5"/>
-    <line x1="40" y1="44" x2="40" y2="50" stroke="#6b7280" strokeWidth="0.5"/>
-    <line x1="45" y1="44" x2="45" y2="50" stroke="#6b7280" strokeWidth="0.5"/>
-    
-    {/* Ruote anteriori */}
-    <g>
-      {/* Ruota sinistra */}
-      <ellipse cx="18" cy="52" rx="8" ry="6" fill="#1f2937"/>
-      <ellipse cx="18" cy="52" rx="5" ry="4" fill="#6b7280"/>
-      <ellipse cx="18" cy="52" rx="2.5" ry="2" fill="#9ca3af"/>
-      
-      {/* Ruota destra */}
-      <ellipse cx="62" cy="52" rx="8" ry="6" fill="#1f2937"/>
-      <ellipse cx="62" cy="52" rx="5" ry="4" fill="#6b7280"/>
-      <ellipse cx="62" cy="52" rx="2.5" ry="2" fill="#9ca3af"/>
-    </g>
-    
-    {/* Specchietti */}
-    <ellipse cx="8" cy="28" rx="3" ry="4" fill="#1e40af" opacity="0.8"/>
-    <ellipse cx="72" cy="28" rx="3" ry="4" fill="#1e40af" opacity="0.8"/>
-    
-    {/* Dettagli cofano */}
-    <line x1="25" y1="38" x2="55" y2="38" stroke="#1e40af" strokeWidth="1" opacity="0.5"/>
-  </g>
-)
 
 export function Step3Dimensions({ configuration, updateConfiguration }: Step3Props) {
   const [carSpots, setCarSpots] = useState(configuration.carSpots || 1)
@@ -102,206 +49,195 @@ export function Step3Dimensions({ configuration, updateConfiguration }: Step3Pro
         </p>
       </div>
 
-      {/* Selezione Posti Auto con Card Visuali */}
-      <div className="space-y-6">
-        <h3 className="text-xl font-semibold text-primary text-center">Quanti posti auto ti servono?</h3>
+      {/* Layout: Pulsanti + Immagine Grande */}
+      <div className="grid md:grid-cols-2 gap-8">
+        
+        {/* Colonna Sinistra: Pulsanti Selezione */}
+        <div className="space-y-6">
+          <h3 className="text-xl font-semibold text-primary text-center">Quanti posti auto ti servono?</h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          {carSpotsData.map((data) => (
-            <div
-              key={data.spots}
-              onClick={() => handleCarSpotsChange(data.spots)}
-              className={`product-card cursor-pointer transition-all duration-300 ${
-                carSpots === data.spots ? 'product-card-selected' : ''
-              }`}
-            >
-              {/* Icona Badge Selezionato */}
-              {carSpots === data.spots && (
-                <div className="badge-selected">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              )}
-
-              {/* Schema Visuale Posti Auto - VISTA FRONTALE */}
-              <div className="mb-4 bg-gradient-to-b from-sky-50 to-gray-100 rounded-lg p-4 border-2 border-gray-300">
-                <svg viewBox="0 0 220 90" className="w-full h-auto">
-                  {/* Linea orizzonte/strada */}
-                  <line x1="0" y1="65" x2="220" y2="65" stroke="#9ca3af" strokeWidth="2"/>
-                  
-                  {/* Sfondo carport (tetto) */}
-                  <rect x="5" y="0" width="210" height="12" fill="#8B4513" opacity="0.7" rx="2"/>
-                  <rect x="5" y="10" width="210" height="3" fill="#6B4423" opacity="0.5"/>
-                  
-                  {/* Linee divisorie parcheggi */}
-                  {Array.from({ length: data.spots }, (_, i) => {
-                    const sectionWidth = 200 / data.spots
-                    const lineX = 10 + (i * sectionWidth) + sectionWidth
-                    if (i < data.spots - 1) {
-                      return (
-                        <line 
-                          key={`divider-${i}`}
-                          x1={lineX} 
-                          y1="15" 
-                          x2={lineX} 
-                          y2="65" 
-                          stroke="#d1d5db" 
-                          strokeWidth="2" 
-                          strokeDasharray="6,4"
-                        />
-                      )
-                    }
-                    return null
-                  })}
-                  
-                  {/* Auto vista frontale affiancate */}
-                  {Array.from({ length: Math.min(data.spots, 5) }, (_, i) => {
-                    const sectionWidth = 200 / data.spots
-                    const carX = 10 + (i * sectionWidth) + (sectionWidth / 2) - 40
-                    const carScale = Math.min(1, sectionWidth / 85)
-                    
-                    return (
-                      <CarFrontIcon 
-                        key={i} 
-                        x={carX} 
-                        y={8}
-                        scale={carScale}
+          {/* Pulsanti Grandi Numerici */}
+          <div className="grid grid-cols-3 gap-4">
+            {carSpotsData.map((data) => (
+              <button
+                key={data.spots}
+                onClick={() => handleCarSpotsChange(data.spots)}
+                className={`relative p-6 rounded-xl border-3 transition-all duration-300 ${
+                  carSpots === data.spots
+                    ? "bg-primary text-white border-primary shadow-2xl scale-105"
+                    : "bg-white text-primary border-gray-300 hover:border-accent-pink hover:shadow-lg"
+                }`}
+              >
+                {/* Badge Selezionato */}
+                {carSpots === data.spots && (
+                  <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-1.5 shadow-lg">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
                       />
-                    )
-                  })}
-                  
-                  {/* Linee strada (strisce parcheggio) */}
-                  <line x1="10" y1="65" x2="10" y2="85" stroke="#fbbf24" strokeWidth="3"/>
-                  <line x1="210" y1="65" x2="210" y2="85" stroke="#fbbf24" strokeWidth="3"/>
-                </svg>
-              </div>
+                    </svg>
+                  </div>
+                )}
 
-              {/* Numero Posti */}
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-1">
+                {/* Numero Grande */}
+                <div className="text-5xl font-bold mb-2">
                   {data.spots}{data.spots === 5 ? "+" : ""}
                 </div>
-                <div className="text-sm font-medium text-secondary mb-2">{data.label}</div>
                 
-                {/* Dimensioni Suggerite */}
-                <div className="text-xs text-secondary space-y-1 mt-3 pt-3 border-t border-gray-200">
-                  <div>📏 <span className="font-semibold">{data.width}cm</span> larghezza</div>
-                  <div>📐 <span className="font-semibold">{data.depth}cm</span> profondità</div>
-                  <div>📊 <span className="font-semibold">{data.height}cm</span> altezza</div>
+                {/* Label */}
+                <div className="text-sm font-medium">
+                  {data.label}
                 </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Info Dimensioni Suggerite */}
+          <div className="product-card bg-surface-beige border-2 border-accent-pink">
+            <h4 className="font-semibold text-primary text-lg mb-3 flex items-center gap-2">
+              <span className="text-2xl">📐</span>
+              Dimensioni Suggerite
+            </h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-secondary">Larghezza:</span>
+                <span className="font-bold text-primary text-lg">{carSpotsData.find(d => d.spots === carSpots)?.width} cm</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-secondary">Profondità:</span>
+                <span className="font-bold text-primary text-lg">{carSpotsData.find(d => d.spots === carSpots)?.depth} cm</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-secondary">Altezza:</span>
+                <span className="font-bold text-primary text-lg">{carSpotsData.find(d => d.spots === carSpots)?.height} cm</span>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Riquadro Info Dimensioni Selezionate */}
-      <div className="product-card bg-surface-beige border-accent-pink">
-        <div className="flex items-start gap-3 mb-4">
-          <div className="text-3xl">📐</div>
-          <div>
-            <h4 className="font-semibold text-primary text-lg mb-1">
-              Dimensioni per {carSpots} posto{carSpots > 1 ? "i" : ""} auto
-            </h4>
-            <p className="text-sm text-secondary">
-              Dimensioni ottimali suggerite dal nostro sistema. Puoi personalizzarle qui sotto.
+            <p className="text-xs text-secondary mt-3 italic">
+              💡 Puoi personalizzare le misure nei campi qui sotto
             </p>
           </div>
         </div>
 
-        {/* Schema Dimensionale 3D */}
-        <div className="bg-white rounded-lg p-6 border-2 border-accent-pink/30">
-          <svg viewBox="0 0 400 280" className="w-full h-auto">
-            {/* Vista isometrica carport */}
-            {/* Base terra */}
-            <polygon 
-              points="50,220 350,220 380,190 80,190" 
-              fill="#e5e7eb" 
-              stroke="#9ca3af" 
-              strokeWidth="2"
-            />
+        {/* Colonna Destra: Immagine Dinamica Grande */}
+        <div className="flex items-center justify-center">
+          <div className="product-card bg-gradient-to-b from-sky-50 to-gray-100 border-2 border-accent-pink w-full">
+            <h4 className="font-semibold text-primary text-lg mb-4 text-center">
+              🚗 Anteprima: {carSpots} Auto Parcheggiate
+            </h4>
             
-            {/* Parete frontale */}
-            <polygon 
-              points="50,90 350,90 350,220 50,220" 
-              fill="#f3f4f6" 
-              stroke="#8B4513" 
-              strokeWidth="3"
-            />
-            
-            {/* Parete laterale */}
-            <polygon 
-              points="350,90 380,60 380,190 350,220" 
-              fill="#e5e7eb" 
-              stroke="#8B4513" 
-              strokeWidth="3"
-            />
-            
-            {/* Tetto */}
-            <polygon 
-              points="50,90 350,90 380,60 80,60" 
-              fill="#8B4513" 
-              opacity="0.8"
-              stroke="#6B4423" 
-              strokeWidth="3"
-            />
+            {/* SVG Immagine Carport con Auto */}
+            <div className="bg-white rounded-lg p-4 border-2 border-gray-200">
+              <svg viewBox="0 0 400 300" className="w-full h-auto">
+                {/* Sfondo cielo */}
+                <rect x="0" y="0" width="400" height="150" fill="#e0f2fe"/>
+                
+                {/* Tetto Carport */}
+                <rect x="20" y="40" width="360" height="20" fill="#8B4513" rx="4"/>
+                <rect x="20" y="55" width="360" height="8" fill="#6B4423" opacity="0.7"/>
+                
+                {/* Pilastri laterali */}
+                <rect x="20" y="60" width="15" height="140" fill="#8B4513"/>
+                <rect x="365" y="60" width="15" height="140" fill="#8B4513"/>
+                
+                {/* Pavimento */}
+                <rect x="0" y="200" width="400" height="100" fill="#9ca3af"/>
+                
+                {/* Linee stradali */}
+                <rect x="0" y="195" width="400" height="5" fill="#fbbf24"/>
+                
+                {/* Linee divisorie parcheggio */}
+                {Array.from({ length: carSpots - 1 }, (_, i) => {
+                  const spacing = 340 / carSpots
+                  const x = 40 + (i + 1) * spacing
+                  return (
+                    <line 
+                      key={i}
+                      x1={x} 
+                      y1="65" 
+                      x2={x} 
+                      y2="200" 
+                      stroke="#fbbf24" 
+                      strokeWidth="3" 
+                      strokeDasharray="10,8"
+                    />
+                  )
+                })}
+                
+                {/* Auto parcheggiate - EMOJI REALI */}
+                {Array.from({ length: Math.min(carSpots, 5) }, (_, i) => {
+                  const spacing = 340 / carSpots
+                  const x = 40 + (i * spacing) + (spacing / 2)
+                  const carWidth = Math.min(60, spacing * 0.8)
+                  
+                  return (
+                    <g key={i}>
+                      {/* Carrozzeria auto stile foto reale */}
+                      <defs>
+                        <linearGradient id={`carGradient${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" style={{stopColor: '#3b82f6', stopOpacity: 1}} />
+                          <stop offset="100%" style={{stopColor: '#1e40af', stopOpacity: 1}} />
+                        </linearGradient>
+                      </defs>
+                      
+                      {/* Corpo auto */}
+                      <rect 
+                        x={x - carWidth/2} 
+                        y="130" 
+                        width={carWidth} 
+                        height="50" 
+                        fill={`url(#carGradient${i})`}
+                        rx="8"
+                        stroke="#1e40af"
+                        strokeWidth="2"
+                      />
+                      
+                      {/* Tetto auto */}
+                      <path
+                        d={`M ${x - carWidth/2 + 8} 130 Q ${x} 115 ${x + carWidth/2 - 8} 130`}
+                        fill="#1e3a8a"
+                        stroke="#1e40af"
+                        strokeWidth="1.5"
+                      />
+                      
+                      {/* Parabrezza */}
+                      <path
+                        d={`M ${x - carWidth/2 + 12} 130 Q ${x} 120 ${x + carWidth/2 - 12} 130`}
+                        fill="#93c5fd"
+                        opacity="0.6"
+                      />
+                      
+                      {/* Fari anteriori */}
+                      <ellipse cx={x - carWidth/2 + 8} cy="175" rx="5" ry="4" fill="#fef3c7" stroke="#f59e0b" strokeWidth="1.5"/>
+                      <ellipse cx={x + carWidth/2 - 8} cy="175" rx="5" ry="4" fill="#fef3c7" stroke="#f59e0b" strokeWidth="1.5"/>
+                      
+                      {/* Ruote */}
+                      <ellipse cx={x - carWidth/2 + 12} cy="182" rx="8" ry="6" fill="#1f2937"/>
+                      <ellipse cx={x + carWidth/2 - 12} cy="182" rx="8" ry="6" fill="#1f2937"/>
+                      <ellipse cx={x - carWidth/2 + 12} cy="182" rx="5" ry="4" fill="#6b7280"/>
+                      <ellipse cx={x + carWidth/2 - 12} cy="182" rx="5" ry="4" fill="#6b7280"/>
+                      
+                      {/* Ombra */}
+                      <ellipse 
+                        cx={x} 
+                        cy="195" 
+                        rx={carWidth * 0.6} 
+                        ry="8" 
+                        fill="#000000" 
+                        opacity="0.2"
+                      />
+                    </g>
+                  )
+                })}
+              </svg>
+            </div>
 
-            {/* Auto dentro carport - Vista laterale realistica */}
-            <g opacity="0.7">
-              {/* Carrozzeria */}
-              <path
-                d="M 110 180 L 130 170 L 170 165 L 240 165 L 280 170 L 300 180 L 300 200 L 290 205 L 120 205 L 110 200 Z"
-                fill="#3b82f6"
-                stroke="#1e40af"
-                strokeWidth="2"
-              />
-              {/* Tetto */}
-              <path
-                d="M 140 170 L 150 160 L 200 158 L 250 160 L 260 170"
-                fill="#1e3a8a"
-                stroke="#1e40af"
-                strokeWidth="1.5"
-              />
-              {/* Finestrini */}
-              <polygon points="155,165 180,162 180,170 160,170" fill="#93c5fd" opacity="0.6"/>
-              <polygon points="230,162 255,165 250,170 230,170" fill="#93c5fd" opacity="0.6"/>
-              {/* Ruote */}
-              <ellipse cx="140" cy="205" rx="12" ry="8" fill="#1f2937"/>
-              <ellipse cx="270" cy="205" rx="12" ry="8" fill="#1f2937"/>
-              <ellipse cx="140" cy="205" rx="7" ry="5" fill="#6b7280"/>
-              <ellipse cx="270" cy="205" rx="7" ry="5" fill="#6b7280"/>
-            </g>
-
-            {/* Quote dimensionali */}
-            {/* Larghezza */}
-            <line x1="50" y1="235" x2="350" y2="235" stroke="#ef4444" strokeWidth="2.5"/>
-            <line x1="50" y1="230" x2="50" y2="240" stroke="#ef4444" strokeWidth="2.5"/>
-            <line x1="350" y1="230" x2="350" y2="240" stroke="#ef4444" strokeWidth="2.5"/>
-            <text x="200" y="260" textAnchor="middle" fill="#ef4444" fontSize="20" fontWeight="bold">
-              ↔ {width} cm
-            </text>
-
-            {/* Profondità */}
-            <line x1="360" y1="220" x2="390" y2="190" stroke="#3b82f6" strokeWidth="2.5"/>
-            <line x1="355" y1="220" x2="365" y2="220" stroke="#3b82f6" strokeWidth="2.5"/>
-            <line x1="385" y1="190" x2="395" y2="190" stroke="#3b82f6" strokeWidth="2.5"/>
-            <text x="420" y="208" textAnchor="start" fill="#3b82f6" fontSize="18" fontWeight="bold">
-              {depth} cm
-            </text>
-
-            {/* Altezza */}
-            <line x1="30" y1="90" x2="30" y2="220" stroke="#10b981" strokeWidth="2.5"/>
-            <line x1="25" y1="90" x2="35" y2="90" stroke="#10b981" strokeWidth="2.5"/>
-            <line x1="25" y1="220" x2="35" y2="220" stroke="#10b981" strokeWidth="2.5"/>
-            <text x="15" y="160" textAnchor="end" fill="#10b981" fontSize="18" fontWeight="bold">
-              ↕ {height} cm
-            </text>
-          </svg>
+            {/* Label descrittiva */}
+            <p className="text-center text-sm text-secondary mt-3">
+              Vista frontale del carport con <strong className="text-primary">{carSpots} auto</strong> parcheggiate
+            </p>
+          </div>
         </div>
       </div>
 
