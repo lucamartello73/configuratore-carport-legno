@@ -1,20 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import type { ConfigurationData } from '@/types/configuration'
 
 interface Step3DimensionsProps {
-  selectedSpaces: number
-  onSpacesChange: (spaces: number) => void
-  customWidth: string
-  customDepth: string
-  customHeight: string
-  onCustomWidthChange: (width: string) => void
-  onCustomDepthChange: (depth: string) => void
-  onCustomHeightChange: (height: string) => void
-  onNext: () => void
+  configuration: Partial<ConfigurationData>
+  updateConfiguration: (data: Partial<ConfigurationData>) => void
+  onAutoAdvance?: () => void
 }
 
 // Dimensioni suggerite per numero posti auto
@@ -80,7 +75,6 @@ const CarportTopView = ({ numCars }: { numCars: number }) => {
     const positions: { x: number; y: number }[] = []
     const carWidth = 80
     const carHeight = 130
-    const spacing = 20
     
     if (numCars === 1) {
       positions.push({ x: carportWidth / 2 - carWidth / 2, y: carportHeight / 2 - carHeight / 2 })
@@ -158,33 +152,50 @@ const CarportTopView = ({ numCars }: { numCars: number }) => {
   )
 }
 
-export default function Step3Dimensions({
-  selectedSpaces,
-  onSpacesChange,
-  customWidth,
-  customDepth,
-  customHeight,
-  onCustomWidthChange,
-  onCustomDepthChange,
-  onCustomHeightChange,
-  onNext,
+export function Step3Dimensions({
+  configuration,
+  updateConfiguration,
+  onAutoAdvance,
 }: Step3DimensionsProps) {
-  const [localSelectedSpaces, setLocalSelectedSpaces] = useState<number | null>(selectedSpaces || null)
+  const [localSelectedSpaces, setLocalSelectedSpaces] = useState<number | null>(
+    configuration.spaces || null
+  )
+  const [localWidth, setLocalWidth] = useState(configuration.width?.toString() || '')
+  const [localDepth, setLocalDepth] = useState(configuration.depth?.toString() || '')
+  const [localHeight, setLocalHeight] = useState(configuration.height?.toString() || '')
 
   const handleSpaceSelection = (spaces: number) => {
     setLocalSelectedSpaces(spaces)
-    onSpacesChange(spaces)
     
     // Imposta dimensioni suggerite
     const suggested = SUGGESTED_DIMENSIONS[spaces as keyof typeof SUGGESTED_DIMENSIONS]
-    onCustomWidthChange(suggested.width.toString())
-    onCustomDepthChange(suggested.depth.toString())
-    onCustomHeightChange(suggested.height.toString())
+    setLocalWidth(suggested.width.toString())
+    setLocalDepth(suggested.depth.toString())
+    setLocalHeight(suggested.height.toString())
+    
+    // Aggiorna configurazione
+    updateConfiguration({
+      spaces,
+      width: suggested.width,
+      depth: suggested.depth,
+      height: suggested.height,
+    })
   }
 
   const handleConfirm = () => {
     if (localSelectedSpaces) {
-      onNext()
+      // Assicura che i valori siano salvati
+      updateConfiguration({
+        spaces: localSelectedSpaces,
+        width: parseInt(localWidth) || 0,
+        depth: parseInt(localDepth) || 0,
+        height: parseInt(localHeight) || 0,
+      })
+      
+      // Avanza allo step successivo se la callback è fornita
+      if (onAutoAdvance) {
+        onAutoAdvance()
+      }
     }
   }
 
@@ -290,8 +301,11 @@ export default function Step3Dimensions({
                 <Input
                   id="width"
                   type="number"
-                  value={customWidth}
-                  onChange={(e) => onCustomWidthChange(e.target.value)}
+                  value={localWidth}
+                  onChange={(e) => {
+                    setLocalWidth(e.target.value)
+                    updateConfiguration({ width: parseInt(e.target.value) || 0 })
+                  }}
                   placeholder="es. 800"
                   className="w-full"
                 />
@@ -304,8 +318,11 @@ export default function Step3Dimensions({
                 <Input
                   id="depth"
                   type="number"
-                  value={customDepth}
-                  onChange={(e) => onCustomDepthChange(e.target.value)}
+                  value={localDepth}
+                  onChange={(e) => {
+                    setLocalDepth(e.target.value)
+                    updateConfiguration({ depth: parseInt(e.target.value) || 0 })
+                  }}
                   placeholder="es. 500"
                   className="w-full"
                 />
@@ -318,8 +335,11 @@ export default function Step3Dimensions({
                 <Input
                   id="height"
                   type="number"
-                  value={customHeight}
-                  onChange={(e) => onCustomHeightChange(e.target.value)}
+                  value={localHeight}
+                  onChange={(e) => {
+                    setLocalHeight(e.target.value)
+                    updateConfiguration({ height: parseInt(e.target.value) || 0 })
+                  }}
                   placeholder="es. 220"
                   className="w-full"
                 />
@@ -342,3 +362,5 @@ export default function Step3Dimensions({
     </div>
   )
 }
+
+export default Step3Dimensions
