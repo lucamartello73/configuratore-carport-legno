@@ -21,133 +21,168 @@ const SUGGESTED_DIMENSIONS = {
   5: { width: 1300, depth: 500, height: 220 },
 }
 
-// Componente SVG per auto vista dall'alto (BLU per LEGNO)
-const CarTopView = () => (
-  <g>
-    {/* Carrozzeria principale con gradient */}
-    <defs>
-      <linearGradient id="carBodyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" style={{ stopColor: '#2563eb', stopOpacity: 1 }} />
-        <stop offset="100%" style={{ stopColor: '#3b82f6', stopOpacity: 1 }} />
-      </linearGradient>
-    </defs>
+// Componente per sagoma auto SCHEMATICA semplice (per LEGNO = BLU)
+const SchematicCar = ({ x, y, color = '#2563eb' }: { x: number; y: number; color?: string }) => (
+  <g transform={`translate(${x}, ${y})`}>
+    {/* Ombra leggera */}
+    <ellipse cx="50" cy="105" rx="45" ry="8" fill="black" opacity="0.15"/>
     
-    {/* Ombra */}
-    <ellipse cx="40" cy="72" rx="28" ry="8" fill="black" opacity="0.2"/>
+    {/* Corpo auto rettangolare semplice */}
+    <rect 
+      x="5" 
+      y="5" 
+      width="90" 
+      height="180" 
+      rx="12" 
+      fill={color} 
+      stroke="#1e40af" 
+      strokeWidth="3"
+    />
     
-    {/* Corpo auto */}
-    <rect x="12" y="10" width="56" height="110" rx="8" fill="url(#carBodyGradient)" stroke="#1e40af" strokeWidth="1"/>
+    {/* Parabrezza anteriore */}
+    <rect x="15" y="15" width="70" height="40" rx="6" fill="white" opacity="0.3"/>
     
-    {/* Tetto/abitacolo */}
-    <rect x="18" y="35" width="44" height="50" rx="4" fill="#1d4ed8" opacity="0.7"/>
+    {/* Parabrezza posteriore */}
+    <rect x="15" y="135" width="70" height="40" rx="6" fill="white" opacity="0.3"/>
     
-    {/* Finestrini */}
-    <rect x="22" y="40" width="16" height="18" rx="2" fill="#93c5fd" opacity="0.6"/>
-    <rect x="42" y="40" width="16" height="18" rx="2" fill="#93c5fd" opacity="0.6"/>
-    <rect x="22" y="67" width="16" height="18" rx="2" fill="#93c5fd" opacity="0.6"/>
-    <rect x="42" y="67" width="16" height="18" rx="2" fill="#93c5fd" opacity="0.6"/>
-    
-    {/* Cofano anteriore */}
-    <rect x="20" y="12" width="40" height="18" rx="3" fill="#1e40af" opacity="0.5"/>
-    
-    {/* Bagagliaio posteriore */}
-    <rect x="20" y="100" width="40" height="18" rx="3" fill="#1e40af" opacity="0.5"/>
-    
-    {/* Specchietti */}
-    <rect x="8" y="55" width="4" height="8" rx="1" fill="#1e3a8a"/>
-    <rect x="68" y="55" width="4" height="8" rx="1" fill="#1e3a8a"/>
+    {/* Finestrini laterali */}
+    <rect x="15" y="65" width="30" height="35" rx="4" fill="white" opacity="0.25"/>
+    <rect x="55" y="65" width="30" height="35" rx="4" fill="white" opacity="0.25"/>
     
     {/* Ruote */}
-    <circle cx="18" cy="25" r="6" fill="#1f2937" stroke="#374151" strokeWidth="1"/>
-    <circle cx="62" cy="25" r="6" fill="#1f2937" stroke="#374151" strokeWidth="1"/>
-    <circle cx="18" cy="105" r="6" fill="#1f2937" stroke="#374151" strokeWidth="1"/>
-    <circle cx="62" cy="105" r="6" fill="#1f2937" stroke="#374151" strokeWidth="1"/>
+    <circle cx="20" cy="35" r="12" fill="#1f2937"/>
+    <circle cx="80" cy="35" r="12" fill="#1f2937"/>
+    <circle cx="20" cy="155" r="12" fill="#1f2937"/>
+    <circle cx="80" cy="155" r="12" fill="#1f2937"/>
+    
+    {/* Cerchi ruote */}
+    <circle cx="20" cy="35" r="6" fill="#6b7280"/>
+    <circle cx="80" cy="35" r="6" fill="#6b7280"/>
+    <circle cx="20" cy="155" r="6" fill="#6b7280"/>
+    <circle cx="80" cy="155" r="6" fill="#6b7280"/>
   </g>
 )
 
-// Componente per carport vista dall'alto con numero variabile di auto
-const CarportTopView = ({ numCars }: { numCars: number }) => {
-  const carportWidth = 400
-  const carportHeight = 300
+// Componente illustrazione schematica carport con N auto
+const SchematicCarportView = ({ numCars }: { numCars: number }) => {
+  const carColor = '#2563eb' // BLU per LEGNO
   
-  // Calcola posizioni auto in base al numero
-  const getCarPositions = () => {
-    const positions: { x: number; y: number }[] = []
-    const carWidth = 80
-    const carHeight = 130
-    
-    if (numCars === 1) {
-      positions.push({ x: carportWidth / 2 - carWidth / 2, y: carportHeight / 2 - carHeight / 2 })
-    } else if (numCars === 2) {
-      positions.push(
-        { x: carportWidth / 3 - carWidth / 2, y: carportHeight / 2 - carHeight / 2 },
-        { x: (2 * carportWidth) / 3 - carWidth / 2, y: carportHeight / 2 - carHeight / 2 }
-      )
-    } else if (numCars === 3) {
-      positions.push(
-        { x: carportWidth / 4 - carWidth / 2, y: carportHeight / 2 - carHeight / 2 },
-        { x: carportWidth / 2 - carWidth / 2, y: carportHeight / 2 - carHeight / 2 },
-        { x: (3 * carportWidth) / 4 - carWidth / 2, y: carportHeight / 2 - carHeight / 2 }
-      )
-    } else if (numCars === 4) {
-      positions.push(
-        { x: carportWidth / 3 - carWidth / 2, y: carportHeight / 3 - carHeight / 2 },
-        { x: (2 * carportWidth) / 3 - carWidth / 2, y: carportHeight / 3 - carHeight / 2 },
-        { x: carportWidth / 3 - carWidth / 2, y: (2 * carportHeight) / 3 - carHeight / 2 },
-        { x: (2 * carportWidth) / 3 - carWidth / 2, y: (2 * carportHeight) / 3 - carHeight / 2 }
-      )
-    } else {
-      // 5+ auto
-      positions.push(
-        { x: carportWidth / 4 - carWidth / 2, y: carportHeight / 3 - carHeight / 2 },
-        { x: carportWidth / 2 - carWidth / 2, y: carportHeight / 3 - carHeight / 2 },
-        { x: (3 * carportWidth) / 4 - carWidth / 2, y: carportHeight / 3 - carHeight / 2 },
-        { x: carportWidth / 3 - carWidth / 2, y: (2 * carportHeight) / 3 - carHeight / 2 },
-        { x: (2 * carportWidth) / 3 - carWidth / 2, y: (2 * carportHeight) / 3 - carHeight / 2 }
-      )
-    }
-    
-    return positions
+  // Calcola dimensioni canvas in base al numero auto
+  const carWidth = 100
+  const carHeight = 190
+  const carSpacing = 40 // SPAZIO EVIDENTE tra auto
+  
+  let canvasWidth: number
+  let canvasHeight: number
+  let carPositions: { x: number; y: number }[] = []
+  
+  if (numCars === 1) {
+    // 1 auto centrata
+    canvasWidth = 250
+    canvasHeight = 280
+    carPositions = [{ x: 75, y: 45 }]
+  } else if (numCars === 2) {
+    // 2 auto affiancate ORIZZONTALMENTE
+    canvasWidth = 280
+    canvasHeight = 280
+    carPositions = [
+      { x: 30, y: 45 },
+      { x: 150, y: 45 }
+    ]
+  } else if (numCars === 3) {
+    // 3 auto in fila ORIZZONTALE
+    canvasWidth = 400
+    canvasHeight = 280
+    carPositions = [
+      { x: 20, y: 45 },
+      { x: 150, y: 45 },
+      { x: 280, y: 45 }
+    ]
+  } else if (numCars === 4) {
+    // 4 auto in GRIGLIA 2x2
+    canvasWidth = 280
+    canvasHeight = 480
+    carPositions = [
+      { x: 30, y: 30 },
+      { x: 150, y: 30 },
+      { x: 30, y: 260 },
+      { x: 150, y: 260 }
+    ]
+  } else {
+    // 5+ auto: 3 sopra + 2 sotto
+    canvasWidth = 400
+    canvasHeight = 480
+    carPositions = [
+      { x: 20, y: 30 },
+      { x: 150, y: 30 },
+      { x: 280, y: 30 },
+      { x: 85, y: 260 },
+      { x: 215, y: 260 }
+    ]
   }
   
-  const carPositions = getCarPositions()
-  
   return (
-    <svg viewBox={`0 0 ${carportWidth} ${carportHeight}`} className="w-full h-auto max-w-3xl mx-auto">
-      {/* Tetto carport marrone per LEGNO */}
-      <rect x="10" y="10" width={carportWidth - 20} height={carportHeight - 20} fill="#8B4513" opacity="0.3" rx="4"/>
+    <svg 
+      viewBox={`0 0 ${canvasWidth} ${canvasHeight}`} 
+      className="w-full h-auto max-w-4xl mx-auto"
+      style={{ maxHeight: '500px' }}
+    >
+      {/* Struttura rettangolare NEUTRA (bordo carport) */}
+      <rect 
+        x="10" 
+        y="10" 
+        width={canvasWidth - 20} 
+        height={canvasHeight - 20} 
+        fill="none" 
+        stroke="#8B4513" 
+        strokeWidth="4" 
+        strokeDasharray="10,5"
+        rx="8"
+      />
       
-      {/* Pilastri agli angoli */}
-      <circle cx="20" cy="20" r="8" fill="#654321" stroke="#4a3216" strokeWidth="2"/>
-      <circle cx={carportWidth - 20} cy="20" r="8" fill="#654321" stroke="#4a3216" strokeWidth="2"/>
-      <circle cx="20" cy={carportHeight - 20} r="8" fill="#654321" stroke="#4a3216" strokeWidth="2"/>
-      <circle cx={carportWidth - 20} cy={carportHeight - 20} r="8" fill="#654321" stroke="#4a3216" strokeWidth="2"/>
+      {/* Tetto semitrasparente marrone chiaro */}
+      <rect 
+        x="10" 
+        y="10" 
+        width={canvasWidth - 20} 
+        height={canvasHeight - 20} 
+        fill="#D2691E" 
+        opacity="0.08"
+        rx="8"
+      />
       
-      {/* Linee divisorie posti (se più di 1 auto) */}
-      {numCars > 1 && numCars <= 3 && (
-        <>
-          {Array.from({ length: numCars - 1 }).map((_, i) => (
+      {/* Linee divisorie verticali tra posti (solo per 2-3 auto in fila) */}
+      {(numCars === 2 || numCars === 3) && carPositions.map((_, index) => {
+        if (index < carPositions.length - 1) {
+          const nextPos = carPositions[index + 1]
+          const dividerX = (carPositions[index].x + nextPos.x) / 2 + carWidth / 2
+          return (
             <line
-              key={i}
-              x1={(carportWidth / numCars) * (i + 1)}
-              y1="15"
-              x2={(carportWidth / numCars) * (i + 1)}
-              y2={carportHeight - 15}
-              stroke="#654321"
-              strokeWidth="1"
-              strokeDasharray="4,4"
-              opacity="0.4"
+              key={`divider-${index}`}
+              x1={dividerX}
+              y1="20"
+              x2={dividerX}
+              y2={canvasHeight - 20}
+              stroke="#8B4513"
+              strokeWidth="2"
+              strokeDasharray="8,4"
+              opacity="0.3"
             />
-          ))}
-        </>
-      )}
+          )
+        }
+        return null
+      })}
       
-      {/* Auto parcheggiate */}
+      {/* Sagome auto BEN SEPARATE */}
       {carPositions.map((pos, index) => (
-        <g key={index} transform={`translate(${pos.x}, ${pos.y})`}>
-          <CarTopView />
-        </g>
+        <SchematicCar key={index} x={pos.x} y={pos.y} color={carColor} />
       ))}
+      
+      {/* Pilastri agli angoli (piccoli cerchi) */}
+      <circle cx="20" cy="20" r="8" fill="#654321" opacity="0.6"/>
+      <circle cx={canvasWidth - 20} cy="20" r="8" fill="#654321" opacity="0.6"/>
+      <circle cx="20" cy={canvasHeight - 20} r="8" fill="#654321" opacity="0.6"/>
+      <circle cx={canvasWidth - 20} cy={canvasHeight - 20} r="8" fill="#654321" opacity="0.6"/>
     </svg>
   )
 }
@@ -252,12 +287,12 @@ export function Step3Dimensions({
         ))}
       </div>
 
-      {/* FASE 2: Immagine GRANDE + Dimensioni (appaiono solo dopo selezione) */}
+      {/* FASE 2: Illustrazione SCHEMATICA + Dimensioni (appaiono solo dopo selezione) */}
       {localSelectedSpaces && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {/* Immagine carport con auto GRANDE - Esempio 1 */}
-          <div className="bg-gray-50 rounded-xl p-8 border border-gray-200">
-            <CarportTopView numCars={localSelectedSpaces} />
+          {/* Illustrazione schematica carport */}
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 border-2 border-gray-200 shadow-sm">
+            <SchematicCarportView numCars={localSelectedSpaces} />
           </div>
 
           {/* Dimensioni consigliate */}
