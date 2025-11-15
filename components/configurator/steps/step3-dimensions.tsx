@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -21,120 +21,7 @@ const SUGGESTED_DIMENSIONS = {
   5: { width: 1300, depth: 500, height: 220 },
 }
 
-// Componente SVG per auto vista dall'alto PICCOLA (per preview pulsanti)
-const MiniCarTopView = ({ color = '#2563eb' }: { color?: string }) => (
-  <svg viewBox="0 0 40 60" className="w-full h-full">
-    <defs>
-      <linearGradient id={`miniCarGradient-${color}`} x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" style={{ stopColor: color, stopOpacity: 1 }} />
-        <stop offset="100%" style={{ stopColor: color, stopOpacity: 0.8 }} />
-      </linearGradient>
-    </defs>
-    {/* Ombra */}
-    <ellipse cx="20" cy="55" rx="15" ry="3" fill="black" opacity="0.2"/>
-    {/* Corpo auto */}
-    <rect x="6" y="8" width="28" height="48" rx="4" fill={`url(#miniCarGradient-${color})`} stroke="#1e40af" strokeWidth="0.5"/>
-    {/* Tetto */}
-    <rect x="9" y="18" width="22" height="24" rx="2" fill="#1d4ed8" opacity="0.5"/>
-    {/* Finestrini */}
-    <rect x="11" y="20" width="8" height="8" rx="1" fill="#93c5fd" opacity="0.4"/>
-    <rect x="21" y="20" width="8" height="8" rx="1" fill="#93c5fd" opacity="0.4"/>
-    {/* Ruote */}
-    <circle cx="10" cy="15" r="3" fill="#1f2937"/>
-    <circle cx="30" cy="15" r="3" fill="#1f2937"/>
-    <circle cx="10" cy="48" r="3" fill="#1f2937"/>
-    <circle cx="30" cy="48" r="3" fill="#1f2937"/>
-  </svg>
-)
-
-// Componente per preview mini carport con numero auto (nei pulsanti)
-const MiniCarportPreview = ({ numCars }: { numCars: number }) => {
-  const color = '#2563eb' // BLU per LEGNO
-  
-  return (
-    <svg viewBox="0 0 200 80" className="w-full h-16">
-      {/* Tetto carport */}
-      <rect x="5" y="5" width="190" height="70" fill="#8B4513" opacity="0.15" rx="2"/>
-      
-      {/* Auto disposte in base al numero */}
-      {numCars === 1 && (
-        <g transform="translate(80, 10)">
-          <MiniCarTopView color={color} />
-        </g>
-      )}
-      
-      {numCars === 2 && (
-        <>
-          <g transform="translate(50, 10)">
-            <MiniCarTopView color={color} />
-          </g>
-          <g transform="translate(110, 10)">
-            <MiniCarTopView color={color} />
-          </g>
-        </>
-      )}
-      
-      {numCars === 3 && (
-        <>
-          <g transform="translate(20, 10)">
-            <MiniCarTopView color={color} />
-          </g>
-          <g transform="translate(80, 10)">
-            <MiniCarTopView color={color} />
-          </g>
-          <g transform="translate(140, 10)">
-            <MiniCarTopView color={color} />
-          </g>
-        </>
-      )}
-      
-      {numCars === 4 && (
-        <>
-          <g transform="translate(40, 5)">
-            <MiniCarTopView color={color} />
-          </g>
-          <g transform="translate(120, 5)">
-            <MiniCarTopView color={color} />
-          </g>
-          <g transform="translate(40, 40)" opacity="0.7">
-            <MiniCarTopView color={color} />
-          </g>
-          <g transform="translate(120, 40)" opacity="0.7">
-            <MiniCarTopView color={color} />
-          </g>
-        </>
-      )}
-      
-      {numCars >= 5 && (
-        <>
-          <g transform="translate(10, 10)">
-            <MiniCarTopView color={color} />
-          </g>
-          <g transform="translate(60, 10)">
-            <MiniCarTopView color={color} />
-          </g>
-          <g transform="translate(110, 10)">
-            <MiniCarTopView color={color} />
-          </g>
-          <g transform="translate(35, 40)" opacity="0.7">
-            <MiniCarTopView color={color} />
-          </g>
-          <g transform="translate(85, 40)" opacity="0.7">
-            <MiniCarTopView color={color} />
-          </g>
-        </>
-      )}
-      
-      {/* Pilastri agli angoli */}
-      <circle cx="10" cy="10" r="2" fill="#654321"/>
-      <circle cx="190" cy="10" r="2" fill="#654321"/>
-      <circle cx="10" cy="70" r="2" fill="#654321"/>
-      <circle cx="190" cy="70" r="2" fill="#654321"/>
-    </svg>
-  )
-}
-
-// Componente SVG per auto vista dall'alto GRANDE (per immagine dopo selezione)
+// Componente SVG per auto vista dall'alto (BLU per LEGNO)
 const CarTopView = () => (
   <g>
     {/* Carrozzeria principale con gradient */}
@@ -178,7 +65,7 @@ const CarTopView = () => (
   </g>
 )
 
-// Componente per carport vista dall'alto con numero variabile di auto GRANDE
+// Componente per carport vista dall'alto con numero variabile di auto
 const CarportTopView = ({ numCars }: { numCars: number }) => {
   const carportWidth = 400
   const carportHeight = 300
@@ -226,7 +113,7 @@ const CarportTopView = ({ numCars }: { numCars: number }) => {
   const carPositions = getCarPositions()
   
   return (
-    <svg viewBox={`0 0 ${carportWidth} ${carportHeight}`} className="w-full h-auto max-w-2xl mx-auto">
+    <svg viewBox={`0 0 ${carportWidth} ${carportHeight}`} className="w-full h-auto max-w-3xl mx-auto">
       {/* Tetto carport marrone per LEGNO */}
       <rect x="10" y="10" width={carportWidth - 20} height={carportHeight - 20} fill="#8B4513" opacity="0.3" rx="4"/>
       
@@ -237,7 +124,7 @@ const CarportTopView = ({ numCars }: { numCars: number }) => {
       <circle cx={carportWidth - 20} cy={carportHeight - 20} r="8" fill="#654321" stroke="#4a3216" strokeWidth="2"/>
       
       {/* Linee divisorie posti (se più di 1 auto) */}
-      {numCars > 1 && (
+      {numCars > 1 && numCars <= 3 && (
         <>
           {Array.from({ length: numCars - 1 }).map((_, i) => (
             <line
@@ -327,15 +214,15 @@ export function Step3Dimensions({
         <p className="text-gray-600">Seleziona il numero di posti auto per il tuo carport</p>
       </div>
 
-      {/* FASE 1: Pulsanti selezione posti CON MINI-PREVIEW */}
+      {/* FASE 1: Pulsanti SEMPLICI - Solo numero e label */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-4xl mx-auto">
         {spaceOptions.map((option) => (
           <button
             key={option.value}
             onClick={() => handleSpaceSelection(option.value)}
             className={`
-              relative p-4 rounded-lg border-2 transition-all duration-200
-              flex flex-col items-center justify-center gap-2
+              relative p-8 rounded-lg border-2 transition-all duration-200
+              flex flex-col items-center justify-center gap-3
               ${
                 localSelectedSpaces === option.value
                   ? 'border-green-500 bg-green-50 shadow-lg scale-105'
@@ -345,41 +232,30 @@ export function Step3Dimensions({
           >
             {/* Badge checkmark se selezionato */}
             {localSelectedSpaces === option.value && (
-              <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg z-10">
+              <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
             )}
             
-            {/* MINI-PREVIEW CARPORT con auto */}
-            <div className="w-full h-16 mb-2">
-              <MiniCarportPreview numCars={option.value} />
-            </div>
-            
             {/* Numero grande */}
-            <div className="text-3xl font-bold text-gray-900">
+            <div className="text-6xl font-bold text-gray-900">
               {option.value === 5 ? '5+' : option.value}
             </div>
             
             {/* Label */}
-            <div className="text-xs font-medium text-gray-700 text-center">
+            <div className="text-sm font-medium text-gray-700 text-center">
               {option.label}
-            </div>
-            
-            {/* Dimensioni mini */}
-            <div className="text-[10px] text-gray-500 text-center mt-1">
-              {SUGGESTED_DIMENSIONS[option.value as keyof typeof SUGGESTED_DIMENSIONS].width}×
-              {SUGGESTED_DIMENSIONS[option.value as keyof typeof SUGGESTED_DIMENSIONS].depth} cm
             </div>
           </button>
         ))}
       </div>
 
-      {/* FASE 2 & 3: Immagine auto + Dimensioni (appaiono solo dopo selezione) */}
+      {/* FASE 2: Immagine GRANDE + Dimensioni (appaiono solo dopo selezione) */}
       {localSelectedSpaces && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {/* Immagine carport con auto GRANDE */}
+          {/* Immagine carport con auto GRANDE - Esempio 1 */}
           <div className="bg-gray-50 rounded-xl p-8 border border-gray-200">
             <CarportTopView numCars={localSelectedSpaces} />
           </div>
