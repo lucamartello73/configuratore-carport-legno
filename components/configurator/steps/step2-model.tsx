@@ -17,7 +17,7 @@ interface Model {
   id: string
   name: string
   description: string
-  image_url: string
+  image: string
   base_price: number
   structure_type_id: string
   attivo: boolean
@@ -123,7 +123,7 @@ export function Step2Model({ configuration, updateConfiguration, onAutoAdvance }
 
       <div className="product-grid">
         {models.map((model) => {
-          const imageUrl = getImageUrlOrPlaceholder(model.image_url)
+          const imageUrl = getImageUrlOrPlaceholder(model.image)
           const description = getDescriptionOrFallback(model.description)
           
           return (

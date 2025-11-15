@@ -17,7 +17,7 @@ interface StructureType {
   id: string
   name: string
   description: string
-  image_url: string
+  image: string
   features: string[]
   attivo: boolean
   base_price?: number
@@ -84,7 +84,7 @@ export function Step1StructureType({ configuration, updateConfiguration, onAutoA
 
       <div className="product-grid">
         {structureTypes.map((type) => {
-          const imageUrl = getImageUrlOrPlaceholder(type.image_url)
+          const imageUrl = getImageUrlOrPlaceholder(type.image)
           const description = getDescriptionOrFallback(type.description)
           
           return (

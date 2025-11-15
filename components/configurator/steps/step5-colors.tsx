@@ -19,7 +19,7 @@ interface Color {
   hex_color: string
   price_modifier: number
   category: string
-  image_url: string
+  image: string
   attivo: boolean
 }
 
@@ -85,7 +85,7 @@ export function Step5Colors({ configuration, updateConfiguration, onAutoAdvance 
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {colorsList.map((color) => {
-            const imageUrl = getImageUrlOrPlaceholder(color.image_url)
+            const imageUrl = getImageUrlOrPlaceholder(color.image)
             
             return (
               <div
