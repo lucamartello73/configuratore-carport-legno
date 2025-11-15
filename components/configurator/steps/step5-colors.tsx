@@ -6,6 +6,8 @@ import { useConfiguratorData, getImageUrlOrPlaceholder } from "@/lib/supabase/fe
 import type { ConfigurationData } from "@/types/configuration"
 
 interface Step5Props {
+  onAutoAdvance?: () => void
+
   configuration: Partial<ConfigurationData>
   updateConfiguration: (data: Partial<ConfigurationData>) => void
 }
@@ -21,7 +23,7 @@ interface Color {
   attivo: boolean
 }
 
-export function Step5Colors({ configuration, updateConfiguration }: Step5Props) {
+export function Step5Colors({ configuration, updateConfiguration, onAutoAdvance }: Step5Props) {
   const [selectedColor, setSelectedColor] = useState(configuration.colorId || "")
   const [isUpdating, setIsUpdating] = useState(false)
 
@@ -40,9 +42,16 @@ export function Step5Colors({ configuration, updateConfiguration }: Step5Props) 
           colorName: selectedColorData?.name || selectedColor,
         })
         setIsUpdating(false)
+        
+        // Auto-avanzamento dopo selezione
+        if (onAutoAdvance) {
+          setTimeout(() => {
+            onAutoAdvance()
+          }, 800)
+        }
       }, 300)
     }
-  }, [selectedColor, colors])
+  }, [selectedColor, colors, updateConfiguration, onAutoAdvance])
 
   if (isLoading) {
     return (

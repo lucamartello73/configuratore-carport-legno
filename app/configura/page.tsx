@@ -135,17 +135,17 @@ export default function ConfiguratoreLegnoPage() {
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <Step1StructureType configuration={configuration} updateConfiguration={updateConfiguration} />
+        return <Step1StructureType configuration={configuration} updateConfiguration={updateConfiguration} onAutoAdvance={nextStep} />
       case 2:
-        return <Step2Model configuration={configuration} updateConfiguration={updateConfiguration} />
+        return <Step2Model configuration={configuration} updateConfiguration={updateConfiguration} onAutoAdvance={nextStep} />
       case 3:
-        return <Step3Dimensions configuration={configuration} updateConfiguration={updateConfiguration} />
+        return <Step3Dimensions configuration={configuration} updateConfiguration={updateConfiguration} onAutoAdvance={nextStep} />
       case 4:
-        return <Step4Coverage configuration={configuration} updateConfiguration={updateConfiguration} />
+        return <Step4Coverage configuration={configuration} updateConfiguration={updateConfiguration} onAutoAdvance={nextStep} />
       case 5:
-        return <Step5Colors configuration={configuration} updateConfiguration={updateConfiguration} />
+        return <Step5Colors configuration={configuration} updateConfiguration={updateConfiguration} onAutoAdvance={nextStep} />
       case 6:
-        return <Step6Surface configuration={configuration} updateConfiguration={updateConfiguration} />
+        return <Step6Surface configuration={configuration} updateConfiguration={updateConfiguration} onAutoAdvance={nextStep} />
       case 7:
         return (
           <Step7Package

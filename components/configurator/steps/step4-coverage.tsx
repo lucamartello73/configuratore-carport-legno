@@ -7,6 +7,8 @@ import { useConfiguratorData, getImageUrlOrPlaceholder, getDescriptionOrFallback
 import type { ConfigurationData } from "@/types/configuration"
 
 interface Step4Props {
+  onAutoAdvance?: () => void
+
   configuration: Partial<ConfigurationData>
   updateConfiguration: (data: Partial<ConfigurationData>) => void
 }
@@ -20,7 +22,7 @@ interface CoverageType {
   attivo: boolean
 }
 
-export function Step4Coverage({ configuration, updateConfiguration }: Step4Props) {
+export function Step4Coverage({ configuration, updateConfiguration, onAutoAdvance }: Step4Props) {
   const [selectedCoverage, setSelectedCoverage] = useState(configuration.coverageId || "")
 
   const { data: coverageTypes, isLoading, error } = useConfiguratorData<CoverageType>({
@@ -31,8 +33,15 @@ export function Step4Coverage({ configuration, updateConfiguration }: Step4Props
   useEffect(() => {
     if (selectedCoverage) {
       updateConfiguration({ coverageId: selectedCoverage })
+      
+      // Auto-avanzamento dopo selezione
+      if (onAutoAdvance) {
+        setTimeout(() => {
+          onAutoAdvance()
+        }, 800)
+      }
     }
-  }, [selectedCoverage])
+  }, [selectedCoverage, updateConfiguration, onAutoAdvance])
 
   if (isLoading) {
     return (

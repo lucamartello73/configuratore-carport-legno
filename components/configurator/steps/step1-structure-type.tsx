@@ -10,6 +10,7 @@ import type { ConfigurationData } from "@/types/configuration"
 interface Step1Props {
   configuration: Partial<ConfigurationData>
   updateConfiguration: (data: Partial<ConfigurationData>) => void
+  onAutoAdvance?: () => void
 }
 
 interface StructureType {
@@ -22,7 +23,7 @@ interface StructureType {
   base_price?: number
 }
 
-export function Step1StructureType({ configuration, updateConfiguration }: Step1Props) {
+export function Step1StructureType({ configuration, updateConfiguration, onAutoAdvance }: Step1Props) {
   const [selectedType, setSelectedType] = useState(configuration.structureTypeId || "")
   const [isUpdating, setIsUpdating] = useState(false)
 
@@ -41,9 +42,16 @@ export function Step1StructureType({ configuration, updateConfiguration }: Step1
           structureType: selectedStructure?.name || selectedType,
         })
         setIsUpdating(false)
+        
+        // Auto-avanzamento dopo selezione
+        if (onAutoAdvance) {
+          setTimeout(() => {
+            onAutoAdvance()
+          }, 800)
+        }
       }, 300)
     }
-  }, [selectedType, structureTypes])
+  }, [selectedType, structureTypes, updateConfiguration, onAutoAdvance])
 
   if (isLoading) {
     return (

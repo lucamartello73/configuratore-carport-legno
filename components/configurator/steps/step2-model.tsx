@@ -10,6 +10,7 @@ import type { ConfigurationData } from "@/types/configuration"
 interface Step2Props {
   configuration: Partial<ConfigurationData>
   updateConfiguration: (data: Partial<ConfigurationData>) => void
+  onAutoAdvance?: () => void
 }
 
 interface Model {
@@ -22,7 +23,7 @@ interface Model {
   attivo: boolean
 }
 
-export function Step2Model({ configuration, updateConfiguration }: Step2Props) {
+export function Step2Model({ configuration, updateConfiguration, onAutoAdvance }: Step2Props) {
   const [selectedModel, setSelectedModel] = useState(configuration.modelId || "")
   const [isUpdating, setIsUpdating] = useState(false)
 
@@ -45,9 +46,16 @@ export function Step2Model({ configuration, updateConfiguration }: Step2Props) {
           modelName: selectedModelData?.name || selectedModel,
         })
         setIsUpdating(false)
+        
+        // Auto-avanzamento dopo selezione (con delay per feedback visivo)
+        if (onAutoAdvance) {
+          setTimeout(() => {
+            onAutoAdvance()
+          }, 800)
+        }
       }, 300)
     }
-  }, [selectedModel, models])
+  }, [selectedModel, models, updateConfiguration, onAutoAdvance])
 
   if (isLoading) {
     return (

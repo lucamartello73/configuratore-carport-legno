@@ -7,6 +7,8 @@ import { useConfiguratorData, getImageUrlOrPlaceholder, getDescriptionOrFallback
 import type { ConfigurationData } from "@/types/configuration"
 
 interface Step6Props {
+  onAutoAdvance?: () => void
+
   configuration: Partial<ConfigurationData>
   updateConfiguration: (data: Partial<ConfigurationData>) => void
 }
@@ -21,7 +23,7 @@ interface Surface {
   display_order?: number
 }
 
-export function Step6Surface({ configuration, updateConfiguration }: Step6Props) {
+export function Step6Surface({ configuration, updateConfiguration, onAutoAdvance }: Step6Props) {
   const [selectedSurface, setSelectedSurface] = useState(configuration.surfaceId || "")
 
   const surfaceArea =
@@ -35,8 +37,15 @@ export function Step6Surface({ configuration, updateConfiguration }: Step6Props)
   useEffect(() => {
     if (selectedSurface) {
       updateConfiguration({ surfaceId: selectedSurface })
+      
+      // Auto-avanzamento dopo selezione
+      if (onAutoAdvance) {
+        setTimeout(() => {
+          onAutoAdvance()
+        }, 800)
+      }
     }
-  }, [selectedSurface])
+  }, [selectedSurface, updateConfiguration, onAutoAdvance])
 
   if (isLoading) {
     return (
