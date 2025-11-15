@@ -13,18 +13,18 @@ interface Step3Props {
 }
 
 const carSpotsData = [
-  { spots: 1, width: 230, depth: 400, height: 200, label: "1 Posto Auto" },
-  { spots: 2, width: 460, depth: 400, height: 200, label: "2 Posti Auto" },
-  { spots: 3, width: 690, depth: 400, height: 200, label: "3 Posti Auto" },
-  { spots: 4, width: 920, depth: 400, height: 200, label: "4 Posti Auto" },
-  { spots: 5, width: 1150, depth: 400, height: 200, label: "5+ Posti Auto" },
+  { spots: 1, width: 300, depth: 500, height: 220, label: "1 Posto Auto", icon: "🚗" },
+  { spots: 2, width: 550, depth: 500, height: 220, label: "2 Posti Auto", icon: "🚗🚗" },
+  { spots: 3, width: 800, depth: 500, height: 220, label: "3 Posti Auto", icon: "🚗🚗🚗" },
+  { spots: 4, width: 1050, depth: 500, height: 220, label: "4 Posti Auto", icon: "🚗🚗🚗🚗" },
+  { spots: 5, width: 1300, depth: 500, height: 220, label: "5+ Posti Auto", icon: "🚗🚗🚗🚗🚗" },
 ]
 
 export function Step3Dimensions({ configuration, updateConfiguration }: Step3Props) {
   const [carSpots, setCarSpots] = useState(configuration.carSpots || 1)
-  const [width, setWidth] = useState(configuration.width || 230)
-  const [depth, setDepth] = useState(configuration.depth || 400)
-  const [height, setHeight] = useState(configuration.height || 200)
+  const [width, setWidth] = useState(configuration.width || 300)
+  const [depth, setDepth] = useState(configuration.depth || 500)
+  const [height, setHeight] = useState(configuration.height || 220)
 
   const handleCarSpotsChange = (spots: number) => {
     const selectedData = carSpotsData.find((data) => data.spots === spots)
@@ -49,182 +49,263 @@ export function Step3Dimensions({ configuration, updateConfiguration }: Step3Pro
         </p>
       </div>
 
+      {/* Selezione Posti Auto con Card Visuali */}
       <div className="space-y-6">
-        <h3 className="text-xl font-semibold text-primary text-center">Quanti posti auto?</h3>
+        <h3 className="text-xl font-semibold text-primary text-center">Quanti posti auto ti servono?</h3>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {carSpotsData.map((data) => (
-            <button
+            <div
               key={data.spots}
               onClick={() => handleCarSpotsChange(data.spots)}
-              className={`h-auto p-4 flex flex-col items-center gap-2 rounded-lg border-2 transition-all duration-300 ${
-                carSpots === data.spots
-                  ? "bg-primary text-white border-primary shadow-lg"
-                  : "bg-white text-primary border-gray-300 hover:border-accent-pink hover:shadow-md"
+              className={`product-card cursor-pointer transition-all duration-300 ${
+                carSpots === data.spots ? 'product-card-selected' : ''
               }`}
             >
-              <span className="text-2xl font-bold">
-                {data.spots}
-                {data.spots === 5 ? "+" : ""}
-              </span>
-              <span className="text-sm text-center">{data.label}</span>
-            </button>
-          ))}
-        </div>
+              {/* Icona Badge Selezionato */}
+              {carSpots === data.spots && (
+                <div className="badge-selected">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              )}
 
-        <div className="product-card bg-surface-beige border-accent-pink">
-          <h4 className="font-semibold text-primary mb-3">
-            Dimensioni suggerite per {carSpots} posto{carSpots > 1 ? "i" : ""} auto:
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div className="text-center">
-              <div className="font-medium text-secondary">Larghezza frontale</div>
-              <div className="text-lg font-bold text-primary">
-                {carSpotsData.find((d) => d.spots === carSpots)?.width} cm
+              {/* Schema Visuale Posti Auto */}
+              <div className="mb-4">
+                <svg viewBox="0 0 200 120" className="w-full h-auto">
+                  {/* Sfondo Carport */}
+                  <rect x="10" y="10" width="180" height="100" fill="#f3f4f6" stroke="#8B4513" strokeWidth="3" rx="8"/>
+                  
+                  {/* Icone Auto */}
+                  {Array.from({ length: Math.min(data.spots, 5) }, (_, i) => {
+                    const carWidth = 160 / data.spots
+                    const carX = 20 + (i * carWidth)
+                    return (
+                      <g key={i}>
+                        {/* Auto semplificata */}
+                        <rect 
+                          x={carX} 
+                          y="35" 
+                          width={carWidth - 8} 
+                          height="50" 
+                          fill="#8B4513" 
+                          rx="4"
+                          opacity="0.8"
+                        />
+                        {/* Ruote */}
+                        <circle cx={carX + 10} cy="85" r="5" fill="#333"/>
+                        <circle cx={carX + carWidth - 18} cy="85" r="5" fill="#333"/>
+                        {/* Finestrini */}
+                        <rect 
+                          x={carX + 5} 
+                          y="42" 
+                          width={(carWidth - 8) * 0.4} 
+                          height="18" 
+                          fill="#87CEEB" 
+                          opacity="0.6"
+                          rx="2"
+                        />
+                      </g>
+                    )
+                  })}
+                </svg>
               </div>
-              <div className="text-xs text-secondary">dove entra l'auto</div>
-            </div>
-            <div className="text-center">
-              <div className="font-medium text-secondary">Profondità minima</div>
-              <div className="text-lg font-bold text-primary">
-                {carSpotsData.find((d) => d.spots === carSpots)?.depth} cm
+
+              {/* Numero Posti */}
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary mb-1">
+                  {data.spots}{data.spots === 5 ? "+" : ""}
+                </div>
+                <div className="text-sm font-medium text-secondary mb-2">{data.label}</div>
+                
+                {/* Dimensioni Suggerite */}
+                <div className="text-xs text-secondary space-y-1 mt-3 pt-3 border-t border-gray-200">
+                  <div>📏 <span className="font-semibold">{data.width}cm</span> larghezza</div>
+                  <div>📐 <span className="font-semibold">{data.depth}cm</span> profondità</div>
+                  <div>📊 <span className="font-semibold">{data.height}cm</span> altezza</div>
+                </div>
               </div>
-              <div className="text-xs text-secondary">lunghezza auto</div>
             </div>
-            <div className="text-center">
-              <div className="font-medium text-secondary">Altezza suggerita</div>
-              <div className="text-lg font-bold text-primary">
-                {carSpotsData.find((d) => d.spots === carSpots)?.height} cm
-              </div>
-              <div className="text-xs text-secondary">clearance minima</div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="space-y-6">
-          <div className="product-card">
-            <Label className="text-primary font-semibold mb-4 block">Larghezza: {width} cm</Label>
+      {/* Riquadro Info Dimensioni Selezionate */}
+      <div className="product-card bg-surface-beige border-accent-pink">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="text-3xl">📐</div>
+          <div>
+            <h4 className="font-semibold text-primary text-lg mb-1">
+              Dimensioni per {carSpots} posto{carSpots > 1 ? "i" : ""} auto
+            </h4>
+            <p className="text-sm text-secondary">
+              Dimensioni ottimali suggerite dal nostro sistema. Puoi personalizzarle qui sotto.
+            </p>
+          </div>
+        </div>
+
+        {/* Schema Dimensionale 3D */}
+        <div className="bg-white rounded-lg p-6 border-2 border-accent-pink/30">
+          <svg viewBox="0 0 400 250" className="w-full h-auto">
+            {/* Vista isometrica carport */}
+            {/* Base terra */}
+            <polygon 
+              points="50,200 350,200 380,170 80,170" 
+              fill="#e5e7eb" 
+              stroke="#9ca3af" 
+              strokeWidth="2"
+            />
+            
+            {/* Parete frontale */}
+            <polygon 
+              points="50,80 350,80 350,200 50,200" 
+              fill="#f3f4f6" 
+              stroke="#8B4513" 
+              strokeWidth="3"
+            />
+            
+            {/* Parete laterale */}
+            <polygon 
+              points="350,80 380,50 380,170 350,200" 
+              fill="#e5e7eb" 
+              stroke="#8B4513" 
+              strokeWidth="3"
+            />
+            
+            {/* Tetto */}
+            <polygon 
+              points="50,80 350,80 380,50 80,50" 
+              fill="#8B4513" 
+              opacity="0.8"
+              stroke="#6B4423" 
+              strokeWidth="3"
+            />
+
+            {/* Auto dentro carport */}
+            <g opacity="0.6">
+              <rect x="120" y="150" width="180" height="40" fill="#4B5563" rx="4"/>
+              <circle cx="135" cy="190" r="8" fill="#1f2937"/>
+              <circle cx="285" cy="190" r="8" fill="#1f2937"/>
+            </g>
+
+            {/* Quote dimensionali */}
+            {/* Larghezza */}
+            <line x1="50" y1="215" x2="350" y2="215" stroke="#ef4444" strokeWidth="2"/>
+            <line x1="50" y1="210" x2="50" y2="220" stroke="#ef4444" strokeWidth="2"/>
+            <line x1="350" y1="210" x2="350" y2="220" stroke="#ef4444" strokeWidth="2"/>
+            <text x="200" y="240" textAnchor="middle" fill="#ef4444" fontSize="18" fontWeight="bold">
+              {width} cm
+            </text>
+
+            {/* Profondità */}
+            <line x1="360" y1="200" x2="390" y2="170" stroke="#3b82f6" strokeWidth="2"/>
+            <line x1="355" y1="200" x2="365" y2="200" stroke="#3b82f6" strokeWidth="2"/>
+            <line x1="385" y1="170" x2="395" y2="170" stroke="#3b82f6" strokeWidth="2"/>
+            <text x="420" y="185" textAnchor="start" fill="#3b82f6" fontSize="16" fontWeight="bold">
+              {depth} cm
+            </text>
+
+            {/* Altezza */}
+            <line x1="30" y1="80" x2="30" y2="200" stroke="#10b981" strokeWidth="2"/>
+            <line x1="25" y1="80" x2="35" y2="80" stroke="#10b981" strokeWidth="2"/>
+            <line x1="25" y1="200" x2="35" y2="200" stroke="#10b981" strokeWidth="2"/>
+            <text x="15" y="145" textAnchor="end" fill="#10b981" fontSize="16" fontWeight="bold">
+              {height} cm
+            </text>
+          </svg>
+        </div>
+      </div>
+
+      {/* Input Personalizzati */}
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="product-card">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-2xl">↔️</span>
+            <Label className="text-primary font-semibold">Larghezza</Label>
+          </div>
+          <div className="flex items-center gap-3">
             <Input
               type="number"
               value={width}
               onChange={(e) => setWidth(Number(e.target.value))}
               min={200}
-              max={1500}
-              className="w-full"
+              max={2000}
+              step={10}
+              className="text-lg font-semibold"
             />
+            <span className="text-secondary font-medium">cm</span>
           </div>
+          <p className="text-xs text-secondary mt-2">Min: 200cm - Max: 2000cm</p>
+        </div>
 
-          <div className="product-card">
-            <Label className="text-primary font-semibold mb-4 block">Profondità: {depth} cm</Label>
+        <div className="product-card">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-2xl">⬆️</span>
+            <Label className="text-primary font-semibold">Profondità</Label>
+          </div>
+          <div className="flex items-center gap-3">
             <Input
               type="number"
               value={depth}
               onChange={(e) => setDepth(Number(e.target.value))}
               min={300}
               max={1000}
-              className="w-full"
+              step={10}
+              className="text-lg font-semibold"
             />
+            <span className="text-secondary font-medium">cm</span>
           </div>
+          <p className="text-xs text-secondary mt-2">Min: 300cm - Max: 1000cm</p>
+        </div>
 
-          <div className="product-card">
-            <Label className="text-primary font-semibold mb-4 block">Altezza: {height} cm</Label>
+        <div className="product-card">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-2xl">📏</span>
+            <Label className="text-primary font-semibold">Altezza</Label>
+          </div>
+          <div className="flex items-center gap-3">
             <Input
               type="number"
               value={height}
               onChange={(e) => setHeight(Number(e.target.value))}
               min={180}
               max={350}
-              className="w-full"
+              step={5}
+              className="text-lg font-semibold"
             />
+            <span className="text-secondary font-medium">cm</span>
           </div>
+          <p className="text-xs text-secondary mt-2">Min: 180cm - Max: 350cm</p>
         </div>
+      </div>
 
-        <div className="flex items-center justify-center">
-          <div className="product-card bg-surface-beige w-full">
-            <h3 className="text-primary font-semibold mb-4 text-center">Riepilogo Dimensioni</h3>
-            <div className="text-center space-y-4">
-              <div className="mb-4 flex justify-center">
-                <div className="relative">
-                  <div
-                    className="border-2 border-accent-pink bg-white relative transition-all duration-300"
-                    style={{
-                      width: Math.max(78, Math.min(260, (width / depth) * 156)),
-                      height: 156,
-                    }}
-                  >
-                    <div className="absolute -top-16 left-0 right-0 flex flex-col items-center gap-2">
-                      <div className="flex items-center gap-2 bg-surface-beige px-3 py-1 rounded-full border border-accent-pink">
-                        <svg className="w-4 h-4 text-accent-pink" fill="currentColor" viewBox="0 0 20 20">
-                          <path
-                            fillRule="evenodd"
-                            d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L16.586 11H5a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span className="text-xs font-medium text-primary">
-                          {carSpots} auto entrano da questo lato
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        <svg className="w-5 h-5 text-accent-pink" fill="currentColor" viewBox="0 0 20 20">
-                          <path
-                            fillRule="evenodd"
-                            d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L4.414 10l3.293 3.293a1 1 0 010 1.414z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        {Array.from({ length: Math.min(carSpots, 5) }, (_, i) => (
-                          <div key={i} className="w-2 h-8 bg-accent-pink mx-1 rounded-sm"></div>
-                        ))}
-                        {carSpots > 5 && <span className="text-sm text-accent-pink font-bold mx-1">+</span>}
-                        <svg className="w-5 h-5 text-accent-pink" fill="currentColor" viewBox="0 0 20 20">
-                          <path
-                            fillRule="evenodd"
-                            d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L16.586 11H5a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-
-                    <div className="absolute -top-6 left-0 right-0 h-px bg-accent-pink"></div>
-                    <div className="absolute -top-6 left-0 w-px h-3 bg-accent-pink"></div>
-                    <div className="absolute -top-6 right-0 w-px h-3 bg-accent-pink"></div>
-
-                    <div className="absolute -left-8 top-0 bottom-0 w-px bg-accent-pink"></div>
-                    <div className="absolute -left-8 top-0 h-px w-3 bg-accent-pink"></div>
-                    <div className="absolute -left-8 bottom-0 h-px w-3 bg-accent-pink"></div>
-
-                    <div className="absolute -left-16 top-1/2 transform -translate-y-1/2 -rotate-90 text-sm text-accent-pink font-medium whitespace-nowrap">
-                      {depth}cm
-                    </div>
-                  </div>
-
-                  <div className="text-sm text-accent-pink font-medium mt-3">{width}cm</div>
-                </div>
-              </div>
-
-              <div className="text-sm text-primary bg-amber-50 p-4 rounded-lg border-2 border-amber-300 shadow-sm">
-                <div className="flex items-start gap-3">
-                  <svg className="w-6 h-6 text-amber-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fillRule="evenodd"
-                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <div className="text-left">
-                    <div className="font-bold text-amber-800 mb-1">⚠️ IMPORTANTE</div>
-                    <div className="text-amber-700 leading-relaxed">
-                      Le dimensioni suggerite selezionando i tasti posti auto sono <strong>solo indicative</strong>.
-                      Puoi inserire a tuo piacimento altre dimensioni personalizzate utilizzando i campi di input.
-                    </div>
-                  </div>
-                </div>
-              </div>
+      {/* Warning Dimensioni Personalizzabili */}
+      <div className="product-card bg-amber-50 border-2 border-amber-300">
+        <div className="flex items-start gap-3">
+          <svg className="w-8 h-8 text-amber-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <div>
+            <div className="font-bold text-amber-800 text-lg mb-2">💡 Nota Importante</div>
+            <div className="text-amber-700 leading-relaxed space-y-2">
+              <p>
+                Le dimensioni suggerite sono <strong>indicative</strong> e basate su misure standard per veicoli normali.
+              </p>
+              <p>
+                <strong>Puoi personalizzarle</strong> usando i campi di input sopra per adattarle perfettamente al tuo spazio e alle tue esigenze.
+              </p>
+              <p className="text-sm">
+                🚗 <strong>Suggerimento:</strong> Lascia almeno 50cm di margine per agevolare entrata/uscita dall'auto.
+              </p>
             </div>
           </div>
         </div>
