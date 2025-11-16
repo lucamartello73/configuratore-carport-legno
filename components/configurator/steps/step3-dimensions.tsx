@@ -25,7 +25,7 @@ const MINIMUM_DIMENSIONS = {
 const BRAND_COLOR = '#5A3A1A'
 const BRAND_DARK = '#3E2914'
 
-// Icona auto più piccola (max-width: 38px)
+// Icona auto più piccola (max-width: 38px) per pulsanti
 const CarIcon = ({ isSelected }: { isSelected: boolean }) => (
   <svg 
     style={{ maxWidth: '38px', width: '38px', height: 'auto' }} 
@@ -34,6 +34,22 @@ const CarIcon = ({ isSelected }: { isSelected: boolean }) => (
     xmlns="http://www.w3.org/2000/svg"
   >
     <path d="M5 11l1.5-4.5h11L19 11m-1.5 5a1.5 1.5 0 01-1.5-1.5 1.5 1.5 0 011.5-1.5 1.5 1.5 0 011.5 1.5 1.5 1.5 0 01-1.5 1.5m-11 0A1.5 1.5 0 015 14.5 1.5 1.5 0 016.5 13 1.5 1.5 0 018 14.5 1.5 1.5 0 016.5 16M18.92 6c-.2-.58-.76-1-1.42-1h-11c-.66 0-1.22.42-1.42 1L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-6z" />
+  </svg>
+)
+
+// Icona auto VISTA DALL'ALTO (per colonne rettangolo)
+const CarTopViewIcon = () => (
+  <svg 
+    style={{ height: '40px', opacity: 0.85, width: 'auto' }} 
+    viewBox="0 0 24 24" 
+    fill="#00A000" 
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect x="6" y="4" width="12" height="16" rx="2" fill="#00A000" opacity="0.7" />
+    <rect x="7" y="6" width="4" height="3" fill="#FFFFFF" opacity="0.6" />
+    <rect x="13" y="6" width="4" height="3" fill="#FFFFFF" opacity="0.6" />
+    <rect x="7" y="15" width="4" height="3" fill="#FF4444" opacity="0.6" />
+    <rect x="13" y="15" width="4" height="3" fill="#FF4444" opacity="0.6" />
   </svg>
 )
 
@@ -139,6 +155,8 @@ export function Step3Dimensions({
   ]
 
   const minDims = MINIMUM_DIMENSIONS[localSelectedSpaces as keyof typeof MINIMUM_DIMENSIONS]
+  const currentWidth = parseInt(localWidth) || minDims.width
+  const currentDepth = parseInt(localDepth) || minDims.depth
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px' }}>
@@ -152,7 +170,7 @@ export function Step3Dimensions({
         </p>
       </div>
 
-      {/* PULSANTI POSTI AUTO - NUOVO STILE OBBLIGATORIO */}
+      {/* PULSANTI POSTI AUTO */}
       <div style={{ 
         display: 'flex', 
         justifyContent: 'center', 
@@ -193,42 +211,158 @@ export function Step3Dimensions({
                 e.currentTarget.style.transform = 'translateY(0)'
               }}
             >
-              {/* Icona auto più piccola (max-width: 38px) */}
               <CarIcon isSelected={isSelected} />
-              
-              {/* Testo */}
               <span style={{ textAlign: 'center', lineHeight: '1.2' }}>{option.label}</span>
             </button>
           )
         })}
       </div>
 
-      {/* RETTANGOLO TECNICO - margin-top: 15px, max 40px dai pulsanti */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '15px', marginBottom: '25px' }}>
+      {/* RETTANGOLO TECNICO MIGLIORATO */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '15px', marginBottom: '25px', position: 'relative' }}>
         <div 
           style={{ 
             maxWidth: '650px',
             width: '100%',
+            height: '180px', // Aumentato di 30px come richiesto
             border: '2px solid #5A3A1A',
             backgroundColor: '#F5F5F5',
             borderRadius: '8px',
-            padding: '24px',
-            textAlign: 'center'
+            position: 'relative',
+            overflow: 'hidden'
           }}
         >
-          <div style={{ fontSize: '14px', fontWeight: '500', color: '#6B7280', marginBottom: '8px' }}>
-            Area Copertura
+          {/* DIVISIONE VISIVA INTERNA - 5 COLONNE */}
+          <div style={{ 
+            display: 'flex', 
+            width: '100%', 
+            height: '100%', 
+            position: 'absolute', 
+            top: 0, 
+            left: 0 
+          }}>
+            {[1, 2, 3, 4, 5].map((colIndex) => {
+              const isActive = colIndex <= localSelectedSpaces
+              return (
+                <div 
+                  key={colIndex}
+                  style={{ 
+                    flex: 1, 
+                    borderRight: colIndex < 5 ? '1px solid #dcdcdc' : 'none',
+                    position: 'relative',
+                    background: isActive ? 'rgba(0, 160, 0, 0.25)' : 'rgba(0, 0, 0, 0.04)',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  {/* AUTO VISTA DALL'ALTO in ogni colonna attiva */}
+                  {isActive && (
+                    <div style={{ 
+                      position: 'absolute', 
+                      top: '50%', 
+                      left: '50%', 
+                      transform: 'translate(-50%, -50%)' 
+                    }}>
+                      <CarTopViewIcon />
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
-          <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#5A3A1A', marginBottom: '8px' }}>
-            {parseInt(localWidth) || minDims.width} × {parseInt(localDepth) || minDims.depth} cm
+
+          {/* TESTO CENTRALE (sopra le colonne) */}
+          <div style={{ 
+            position: 'relative', 
+            zIndex: 10, 
+            textAlign: 'center', 
+            paddingTop: '20px' 
+          }}>
+            <div style={{ fontSize: '14px', fontWeight: '500', color: '#6B7280', marginBottom: '8px' }}>
+              Area Copertura
+            </div>
+            <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#5A3A1A', marginBottom: '8px' }}>
+              {currentWidth} × {currentDepth} cm
+            </div>
+            <div style={{ fontSize: '14px', color: '#6B7280' }}>
+              {localSelectedSpaces} {localSelectedSpaces === 1 ? 'Posto Auto' : 'Posti Auto'}
+            </div>
           </div>
-          <div style={{ fontSize: '14px', color: '#6B7280' }}>
-            {localSelectedSpaces} {localSelectedSpaces === 1 ? 'Posto Auto' : 'Posti Auto'}
+
+          {/* MISURE LATERALI - SINISTRA (Larghezza) */}
+          <div style={{ 
+            position: 'absolute', 
+            left: '-120px', 
+            top: '50%', 
+            transform: 'translateY(-50%)',
+            fontSize: '12px', 
+            color: '#444', 
+            lineHeight: '14px',
+            textAlign: 'right'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '4px' }}>
+              {/* Triangolo CSS sinistra */}
+              <div style={{ 
+                width: 0, 
+                height: 0, 
+                borderTop: '5px solid transparent', 
+                borderBottom: '5px solid transparent', 
+                borderRight: '7px solid #444',
+                marginRight: '4px'
+              }}></div>
+              <span><strong>Consigliata:</strong> {minDims.width} cm</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+              <div style={{ 
+                width: 0, 
+                height: 0, 
+                borderTop: '5px solid transparent', 
+                borderBottom: '5px solid transparent', 
+                borderRight: '7px solid #00A000',
+                marginRight: '4px'
+              }}></div>
+              <span style={{ color: '#00A000', fontWeight: 'bold' }}>Scelta: {currentWidth} cm</span>
+            </div>
+          </div>
+
+          {/* MISURE LATERALI - DESTRA (Profondità) */}
+          <div style={{ 
+            position: 'absolute', 
+            right: '-120px', 
+            top: '50%', 
+            transform: 'translateY(-50%)',
+            fontSize: '12px', 
+            color: '#444', 
+            lineHeight: '14px',
+            textAlign: 'left'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+              <span><strong>Consigliata:</strong> {minDims.depth} cm</span>
+              {/* Triangolo CSS destra */}
+              <div style={{ 
+                width: 0, 
+                height: 0, 
+                borderTop: '5px solid transparent', 
+                borderBottom: '5px solid transparent', 
+                borderLeft: '7px solid #444',
+                marginLeft: '4px'
+              }}></div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ color: '#00A000', fontWeight: 'bold' }}>Scelta: {currentDepth} cm</span>
+              <div style={{ 
+                width: 0, 
+                height: 0, 
+                borderTop: '5px solid transparent', 
+                borderBottom: '5px solid transparent', 
+                borderLeft: '7px solid #00A000',
+                marginLeft: '4px'
+              }}></div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* SEZIONE "PERSONALIZZA LE DIMENSIONI" - RESTYLING OBBLIGATORIO */}
+      {/* SEZIONE "PERSONALIZZA LE DIMENSIONI" */}
       <div style={{ 
         background: '#F7F4ED',
         padding: '22px',
@@ -361,7 +495,7 @@ export function Step3Dimensions({
         </div>
       </div>
 
-      {/* "CONFERMA E CONTINUA" - VERO PULSANTE - spazio sotto ridotto del 30% */}
+      {/* PULSANTE CONFERMA */}
       <button
         onClick={handleConfirm}
         disabled={!!widthError || !!depthError}
