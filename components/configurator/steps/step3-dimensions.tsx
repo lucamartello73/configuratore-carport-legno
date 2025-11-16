@@ -12,7 +12,7 @@ interface Step3DimensionsProps {
   onAutoAdvance?: () => void
 }
 
-// Dimensioni minime consigliate per numero posti auto (facilmente modificabili)
+// Dimensioni minime consigliate per numero posti auto
 const MINIMUM_DIMENSIONS = {
   1: { width: 300, depth: 500, height: 220 },
   2: { width: 550, depth: 500, height: 220 },
@@ -23,73 +23,19 @@ const MINIMUM_DIMENSIONS = {
 
 // Colore brand (marrone legno)
 const BRAND_COLOR = '#5A3A1A'
-const BRAND_BEIGE = '#F5E6D3'
 
-// SVG icona macchinina inline (riutilizzabile)
-const CarIcon = ({ className = "w-6 h-6", color = "currentColor" }: { className?: string; color?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path 
-      d="M5 13h14M5 13c0-.55.45-1 1-1h2l2-4h4l2 4h2c.55 0 1 .45 1 1M5 13v5c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-5M7 15.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm10 0a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z" 
-      stroke={color} 
-      strokeWidth="1.5" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    />
+// UNA SOLA icona auto minimal
+const CarIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5 11l1.5-4.5h11L19 11m-1.5 5a1.5 1.5 0 01-1.5-1.5 1.5 1.5 0 011.5-1.5 1.5 1.5 0 011.5 1.5 1.5 1.5 0 01-1.5 1.5m-11 0A1.5 1.5 0 015 14.5 1.5 1.5 0 016.5 13 1.5 1.5 0 018 14.5 1.5 1.5 0 016.5 16M18.92 6c-.2-.58-.76-1-1.42-1h-11c-.66 0-1.22.42-1.42 1L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-6z" />
   </svg>
 )
-
-// Componente per visualizzazione rettangolo tecnico dinamico proporzionato
-interface DynamicSizePreviewProps {
-  count: number
-  customWidth: number
-  customDepth: number
-}
-
-const DynamicSizePreview = ({ count, customWidth, customDepth }: DynamicSizePreviewProps) => {
-  // Calcola dimensioni rettangolo in proporzione (scala ridotta per evitare gigantismo)
-  const baseScale = 0.35 // Ridotto da 0.5 a 0.35 per rettangolo più proporzionato
-  const rectWidth = Math.max(customWidth * baseScale, 150) // Min 150px
-  const rectDepth = Math.min(customDepth * baseScale, 250) // Max 250px altezza
-  
-  return (
-    <div className="flex items-center justify-center py-8">
-      <div
-        className="relative transition-all duration-300 ease-out"
-        style={{
-          width: `${rectWidth}px`,
-          height: `${rectDepth}px`,
-          border: `2px solid ${BRAND_COLOR}`,
-          borderRadius: '8px',
-          backgroundColor: BRAND_BEIGE,
-          boxShadow: '0 2px 8px rgba(90, 58, 26, 0.15)',
-        }}
-      >
-        {/* Label dimensioni centrata nel rettangolo */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-xs font-medium text-gray-600 mb-1">Area Copertura</div>
-            <div className="font-bold text-base" style={{ color: BRAND_COLOR }}>
-              {customWidth} × {customDepth} cm
-            </div>
-          </div>
-        </div>
-        
-        {/* Indicatori angolari */}
-        <div className="absolute top-1 left-1 w-2 h-2 border-t-2 border-l-2" style={{ borderColor: BRAND_COLOR }} />
-        <div className="absolute top-1 right-1 w-2 h-2 border-t-2 border-r-2" style={{ borderColor: BRAND_COLOR }} />
-        <div className="absolute bottom-1 left-1 w-2 h-2 border-b-2 border-l-2" style={{ borderColor: BRAND_COLOR }} />
-        <div className="absolute bottom-1 right-1 w-2 h-2 border-b-2 border-r-2" style={{ borderColor: BRAND_COLOR }} />
-      </div>
-    </div>
-  )
-}
 
 export function Step3Dimensions({
   configuration,
   updateConfiguration,
   onAutoAdvance,
 }: Step3DimensionsProps) {
-  // Default 1 posto auto selezionato
   const [localSelectedSpaces, setLocalSelectedSpaces] = useState<number>(
     configuration.spaces || 1
   )
@@ -97,11 +43,10 @@ export function Step3Dimensions({
   const [localDepth, setLocalDepth] = useState(configuration.depth?.toString() || '500')
   const [localHeight, setLocalHeight] = useState(configuration.height?.toString() || '220')
   
-  // Validation errors
   const [widthError, setWidthError] = useState('')
   const [depthError, setDepthError] = useState('')
 
-  // Inizializza default 1 posto auto al primo caricamento
+  // Inizializza default 1 posto auto
   useEffect(() => {
     if (!configuration.spaces) {
       const minDims = MINIMUM_DIMENSIONS[1]
@@ -120,17 +65,14 @@ export function Step3Dimensions({
   const handleSpaceSelection = (spaces: number) => {
     setLocalSelectedSpaces(spaces)
     
-    // Imposta dimensioni minime
     const minDims = MINIMUM_DIMENSIONS[spaces as keyof typeof MINIMUM_DIMENSIONS]
     setLocalWidth(minDims.width.toString())
     setLocalDepth(minDims.depth.toString())
     setLocalHeight(minDims.height.toString())
     
-    // Reset errori
     setWidthError('')
     setDepthError('')
     
-    // Aggiorna configurazione
     updateConfiguration({
       spaces,
       width: minDims.width,
@@ -169,7 +111,6 @@ export function Step3Dimensions({
 
   const handleConfirm = () => {
     if (!widthError && !depthError) {
-      // Assicura che i valori siano salvati
       updateConfiguration({
         spaces: localSelectedSpaces,
         width: parseInt(localWidth) || 0,
@@ -177,7 +118,6 @@ export function Step3Dimensions({
         height: parseInt(localHeight) || 0,
       })
       
-      // Avanza allo step successivo se la callback è fornita
       if (onAutoAdvance) {
         onAutoAdvance()
       }
@@ -194,143 +134,68 @@ export function Step3Dimensions({
 
   const minDims = MINIMUM_DIMENSIONS[localSelectedSpaces as keyof typeof MINIMUM_DIMENSIONS]
 
-  // Funzione per renderizzare icone auto nel pulsante
-  const renderCarIcons = (count: number, isSelected: boolean) => {
-    const iconColor = isSelected ? 'white' : BRAND_COLOR
-    const iconSize = count >= 3 ? 'w-4 h-4' : 'w-5 h-5'
-    
-    if (count === 1) {
-      return <CarIcon className={iconSize} color={iconColor} />
-    } else if (count === 2) {
-      return (
-        <div className="flex gap-1">
-          <CarIcon className={iconSize} color={iconColor} />
-          <CarIcon className={iconSize} color={iconColor} />
-        </div>
-      )
-    } else if (count === 3) {
-      return (
-        <div className="flex gap-0.5">
-          <CarIcon className={iconSize} color={iconColor} />
-          <CarIcon className={iconSize} color={iconColor} />
-          <CarIcon className={iconSize} color={iconColor} />
-        </div>
-      )
-    } else if (count === 4) {
-      return (
-        <div className="flex flex-col gap-0.5">
-          <div className="flex gap-0.5">
-            <CarIcon className="w-4 h-4" color={iconColor} />
-            <CarIcon className="w-4 h-4" color={iconColor} />
-          </div>
-          <div className="flex gap-0.5">
-            <CarIcon className="w-4 h-4" color={iconColor} />
-            <CarIcon className="w-4 h-4" color={iconColor} />
-          </div>
-        </div>
-      )
-    } else {
-      return (
-        <div className="flex items-center gap-1">
-          <CarIcon className={iconSize} color={iconColor} />
-          <span className="text-sm font-bold">5+</span>
-        </div>
-      )
-    }
-  }
-
   return (
-    <div className="space-y-8 max-w-5xl mx-auto px-4 py-6">
+    <div className="space-y-6 max-w-4xl mx-auto px-4 py-6">
       {/* Header */}
-      <div className="text-center space-y-3 mb-8">
+      <div className="text-center space-y-2 mb-6">
         <h2 className="text-3xl font-bold text-gray-900">Quanti posti auto ti servono?</h2>
-        <p className="text-gray-600 text-lg">Seleziona il numero di posti auto per il tuo carport</p>
+        <p className="text-gray-600">Seleziona il numero di posti auto per il tuo carport</p>
       </div>
 
-      {/* PULSANTI MODERNI PILL CON ICONE AUTO */}
-      <div className="flex flex-wrap items-center justify-center gap-4 mb-10">
+      {/* PULSANTI PILL ORIZZONTALI - LAYOUT MINIMAL */}
+      <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
         {spaceOptions.map((option) => {
           const isSelected = localSelectedSpaces === option.value
           return (
             <button
               key={option.value}
               onClick={() => handleSpaceSelection(option.value)}
-              className="relative flex flex-col items-center justify-center gap-2 px-6 py-4 rounded-full font-semibold text-base transition-all duration-200 hover:scale-105 min-h-[54px]"
+              className="flex items-center gap-2 font-medium transition-all duration-200 hover:scale-105"
               style={{
-                borderWidth: '2px',
-                borderStyle: 'solid',
-                borderColor: BRAND_COLOR,
-                backgroundColor: isSelected ? BRAND_COLOR : BRAND_BEIGE,
-                color: isSelected ? 'white' : BRAND_COLOR,
-                boxShadow: isSelected 
-                  ? '0 4px 16px rgba(90, 58, 26, 0.35)' 
-                  : '0 2px 6px rgba(0, 0, 0, 0.08)',
+                padding: '12px 20px',
+                borderRadius: '999px',
+                border: '2px solid #5A3A1A',
+                backgroundColor: isSelected ? '#5A3A1A' : '#FFFFFF',
+                color: isSelected ? '#FFFFFF' : '#5A3A1A',
               }}
             >
-              {/* Icone auto */}
-              <div className="flex items-center justify-center">
-                {renderCarIcons(option.value, isSelected)}
-              </div>
-              
-              {/* Label */}
-              <span className="text-sm font-semibold">{option.label}</span>
+              {/* UNA SOLA icona auto */}
+              <CarIcon className="w-5 h-5" />
+              {/* Testo */}
+              <span>{option.label}</span>
             </button>
           )
         })}
       </div>
 
-      {/* BOX DIMENSIONI MINIME EVIDENZIATO */}
-      <div 
-        className="rounded-xl p-6 text-center max-w-2xl mx-auto shadow-sm"
-        style={{ 
-          backgroundColor: BRAND_BEIGE,
-          border: `2px solid ${BRAND_COLOR}`
-        }}
-      >
-        <h3 className="text-lg font-bold text-gray-900 mb-4" style={{ color: BRAND_COLOR }}>
-          📐 Dimensioni Minime Consigliate
+      {/* RETTANGOLO TECNICO MINIMAL - max 600-700px */}
+      <div className="flex justify-center mb-6">
+        <div 
+          className="rounded-lg p-6 text-center"
+          style={{ 
+            maxWidth: '650px',
+            border: '2px solid #5A3A1A',
+            backgroundColor: '#F5F5F5'
+          }}
+        >
+          <div className="text-sm font-medium text-gray-600 mb-2">Area Copertura</div>
+          <div className="text-3xl font-bold mb-2" style={{ color: '#5A3A1A' }}>
+            {parseInt(localWidth) || minDims.width} × {parseInt(localDepth) || minDims.depth} cm
+          </div>
+          <div className="text-sm text-gray-600">{localSelectedSpaces} {localSelectedSpaces === 1 ? 'Posto Auto' : 'Posti Auto'}</div>
+        </div>
+      </div>
+
+      {/* FORM PERSONALIZZAZIONE - subito sotto, senza distanze esagerate */}
+      <div className="bg-white border-2 rounded-xl p-6 max-w-3xl mx-auto space-y-5" style={{ borderColor: '#5A3A1A' }}>
+        <h3 className="text-xl font-bold text-gray-900">
+          Personalizza le Dimensioni
         </h3>
-        <div className="grid grid-cols-2 gap-4 text-gray-800">
-          <div className="text-center">
-            <p className="text-sm font-medium text-gray-600 mb-1">Larghezza</p>
-            <p className="text-2xl font-bold" style={{ color: BRAND_COLOR }}>
-              {minDims.width} <span className="text-base">cm</span>
-            </p>
-          </div>
-          <div className="text-center">
-            <p className="text-sm font-medium text-gray-600 mb-1">Profondità</p>
-            <p className="text-2xl font-bold" style={{ color: BRAND_COLOR }}>
-              {minDims.depth} <span className="text-base">cm</span>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* RETTANGOLO TECNICO con spacing migliorato */}
-      <div className="my-10">
-        <DynamicSizePreview 
-          count={localSelectedSpaces}
-          customWidth={parseInt(localWidth) || minDims.width}
-          customDepth={parseInt(localDepth) || minDims.depth}
-        />
-      </div>
-
-      {/* FORM PERSONALIZZAZIONE con icona matita e spacing armonioso */}
-      <div className="bg-white border-2 rounded-xl p-8 max-w-3xl mx-auto space-y-6 shadow-sm" style={{ borderColor: BRAND_COLOR }}>
-        <div className="flex items-center gap-3">
-          {/* Icona matita inline SVG */}
-          <svg className="w-6 h-6" style={{ color: BRAND_COLOR }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-          <h3 className="text-xl font-bold text-gray-900">
-            Personalizza le Dimensioni
-          </h3>
-        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Larghezza */}
-          <div className="space-y-3">
-            <Label htmlFor="width" className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+          <div className="space-y-2">
+            <Label htmlFor="width" className="text-sm font-semibold text-gray-700">
               Larghezza (cm)
             </Label>
             <Input
@@ -341,20 +206,21 @@ export function Step3Dimensions({
               placeholder="es. 300"
               className="text-lg font-medium border-2 rounded-lg px-4 py-3"
               style={{ 
-                borderColor: widthError ? '#ef4444' : BRAND_COLOR,
+                borderColor: widthError ? '#ef4444' : '#5A3A1A',
                 backgroundColor: widthError ? '#fee2e2' : 'white'
               }}
             />
             {widthError && (
-              <p className="text-sm text-red-600 font-medium flex items-center gap-1">
+              <p className="text-sm text-red-600 font-medium">
                 ⚠️ {widthError}
               </p>
             )}
+            <p className="text-xs text-gray-500">Minimo: {minDims.width} cm</p>
           </div>
 
           {/* Profondità */}
-          <div className="space-y-3">
-            <Label htmlFor="depth" className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+          <div className="space-y-2">
+            <Label htmlFor="depth" className="text-sm font-semibold text-gray-700">
               Profondità (cm)
             </Label>
             <Input
@@ -365,20 +231,21 @@ export function Step3Dimensions({
               placeholder="es. 500"
               className="text-lg font-medium border-2 rounded-lg px-4 py-3"
               style={{ 
-                borderColor: depthError ? '#ef4444' : BRAND_COLOR,
+                borderColor: depthError ? '#ef4444' : '#5A3A1A',
                 backgroundColor: depthError ? '#fee2e2' : 'white'
               }}
             />
             {depthError && (
-              <p className="text-sm text-red-600 font-medium flex items-center gap-1">
+              <p className="text-sm text-red-600 font-medium">
                 ⚠️ {depthError}
               </p>
             )}
+            <p className="text-xs text-gray-500">Minimo: {minDims.depth} cm</p>
           </div>
         </div>
 
         {/* Altezza */}
-        <div className="space-y-3 pt-4 border-t border-gray-200">
+        <div className="space-y-2 pt-3 border-t border-gray-200">
           <Label htmlFor="height" className="text-sm font-semibold text-gray-700">
             Altezza (cm)
           </Label>
@@ -392,21 +259,14 @@ export function Step3Dimensions({
             }}
             placeholder="es. 220"
             className="max-w-xs border-2 rounded-lg px-4 py-3 text-lg font-medium"
-            style={{ borderColor: BRAND_COLOR }}
+            style={{ borderColor: '#5A3A1A' }}
           />
-        </div>
-
-        {/* Info tecnica */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
-          <div className="text-blue-900">
-            <p className="font-semibold">Note:</p>
-            <p>Le dimensioni indicate sono i minimi consigliati. Puoi aumentarle in base alle tue esigenze.</p>
-          </div>
+          <p className="text-xs text-gray-500">Standard: 220 cm</p>
         </div>
       </div>
 
       {/* Bottone conferma */}
-      <div className="flex justify-center pt-8 pb-4">
+      <div className="flex justify-center pt-6">
         <Button
           onClick={handleConfirm}
           disabled={!!widthError || !!depthError}
