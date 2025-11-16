@@ -23,10 +23,16 @@ const MINIMUM_DIMENSIONS = {
 
 // Colore brand (marrone legno)
 const BRAND_COLOR = '#5A3A1A'
+const BRAND_DARK = '#3E2914'
 
-// UNA SOLA icona auto minimal
-const CarIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+// Icona auto più piccola (max-width: 38px)
+const CarIcon = ({ isSelected }: { isSelected: boolean }) => (
+  <svg 
+    style={{ maxWidth: '38px', width: '38px', height: 'auto' }} 
+    viewBox="0 0 24 24" 
+    fill={isSelected ? '#FFFFFF' : '#5A3A1A'} 
+    xmlns="http://www.w3.org/2000/svg"
+  >
     <path d="M5 11l1.5-4.5h11L19 11m-1.5 5a1.5 1.5 0 01-1.5-1.5 1.5 1.5 0 011.5-1.5 1.5 1.5 0 011.5 1.5 1.5 1.5 0 01-1.5 1.5m-11 0A1.5 1.5 0 015 14.5 1.5 1.5 0 016.5 13 1.5 1.5 0 018 14.5 1.5 1.5 0 016.5 16M18.92 6c-.2-.58-.76-1-1.42-1h-11c-.66 0-1.22.42-1.42 1L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-6z" />
   </svg>
 )
@@ -135,121 +141,203 @@ export function Step3Dimensions({
   const minDims = MINIMUM_DIMENSIONS[localSelectedSpaces as keyof typeof MINIMUM_DIMENSIONS]
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto px-4 py-6">
-      {/* Header */}
-      <div className="text-center space-y-2 mb-6">
-        <h2 className="text-3xl font-bold text-gray-900">Quanti posti auto ti servono?</h2>
-        <p className="text-gray-600">Seleziona il numero di posti auto per il tuo carport</p>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px' }}>
+      {/* Header - ridotto spazio sopra del 30% */}
+      <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+        <h2 style={{ fontSize: '30px', fontWeight: 'bold', color: '#111827', marginBottom: '8px' }}>
+          Quanti posti auto ti servono?
+        </h2>
+        <p style={{ color: '#6B7280', fontSize: '16px' }}>
+          Seleziona il numero di posti auto per il tuo carport
+        </p>
       </div>
 
-      {/* PULSANTI PILL ORIZZONTALI - LAYOUT MINIMAL */}
-      <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
+      {/* PULSANTI POSTI AUTO - NUOVO STILE OBBLIGATORIO */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        gap: '20px', 
+        marginTop: '20px', 
+        marginBottom: '20px',
+        flexWrap: 'wrap'
+      }}>
         {spaceOptions.map((option) => {
           const isSelected = localSelectedSpaces === option.value
           return (
             <button
               key={option.value}
               onClick={() => handleSpaceSelection(option.value)}
-              className="flex items-center gap-2 font-medium transition-all duration-200 hover:scale-105"
               style={{
-                padding: '12px 20px',
+                width: '110px',
+                height: '110px',
                 borderRadius: '999px',
-                border: '2px solid #5A3A1A',
-                backgroundColor: isSelected ? '#5A3A1A' : '#FFFFFF',
+                background: isSelected ? '#5A3A1A' : '#FFFFFF',
+                border: isSelected ? '3px solid #3E2914' : '3px solid #5A3A1A',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '14px',
+                fontWeight: '600',
                 color: isSelected ? '#FFFFFF' : '#5A3A1A',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: isSelected ? '0 6px 14px rgba(0,0,0,0.35)' : 'none'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
               }}
             >
-              {/* UNA SOLA icona auto */}
-              <CarIcon className="w-5 h-5" />
+              {/* Icona auto più piccola (max-width: 38px) */}
+              <CarIcon isSelected={isSelected} />
+              
               {/* Testo */}
-              <span>{option.label}</span>
+              <span style={{ textAlign: 'center', lineHeight: '1.2' }}>{option.label}</span>
             </button>
           )
         })}
       </div>
 
-      {/* RETTANGOLO TECNICO MINIMAL - max 600-700px */}
-      <div className="flex justify-center mb-6">
+      {/* RETTANGOLO TECNICO - margin-top: 15px, max 40px dai pulsanti */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '15px', marginBottom: '25px' }}>
         <div 
-          className="rounded-lg p-6 text-center"
           style={{ 
             maxWidth: '650px',
+            width: '100%',
             border: '2px solid #5A3A1A',
-            backgroundColor: '#F5F5F5'
+            backgroundColor: '#F5F5F5',
+            borderRadius: '8px',
+            padding: '24px',
+            textAlign: 'center'
           }}
         >
-          <div className="text-sm font-medium text-gray-600 mb-2">Area Copertura</div>
-          <div className="text-3xl font-bold mb-2" style={{ color: '#5A3A1A' }}>
+          <div style={{ fontSize: '14px', fontWeight: '500', color: '#6B7280', marginBottom: '8px' }}>
+            Area Copertura
+          </div>
+          <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#5A3A1A', marginBottom: '8px' }}>
             {parseInt(localWidth) || minDims.width} × {parseInt(localDepth) || minDims.depth} cm
           </div>
-          <div className="text-sm text-gray-600">{localSelectedSpaces} {localSelectedSpaces === 1 ? 'Posto Auto' : 'Posti Auto'}</div>
+          <div style={{ fontSize: '14px', color: '#6B7280' }}>
+            {localSelectedSpaces} {localSelectedSpaces === 1 ? 'Posto Auto' : 'Posti Auto'}
+          </div>
         </div>
       </div>
 
-      {/* FORM PERSONALIZZAZIONE - subito sotto, senza distanze esagerate */}
-      <div className="bg-white border-2 rounded-xl p-6 max-w-3xl mx-auto space-y-5" style={{ borderColor: '#5A3A1A' }}>
-        <h3 className="text-xl font-bold text-gray-900">
+      {/* SEZIONE "PERSONALIZZA LE DIMENSIONI" - RESTYLING OBBLIGATORIO */}
+      <div style={{ 
+        background: '#F7F4ED',
+        padding: '22px',
+        borderRadius: '12px',
+        border: '1px solid #D8D2C6',
+        maxWidth: '420px',
+        margin: '25px auto 30px auto'
+      }}>
+        <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#111827', marginBottom: '18px' }}>
           Personalizza le Dimensioni
         </h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Larghezza */}
-          <div className="space-y-2">
-            <Label htmlFor="width" className="text-sm font-semibold text-gray-700">
-              Larghezza (cm)
-            </Label>
-            <Input
-              id="width"
-              type="number"
-              value={localWidth}
-              onChange={(e) => handleWidthChange(e.target.value)}
-              placeholder="es. 300"
-              className="text-lg font-medium border-2 rounded-lg px-4 py-3"
-              style={{ 
-                borderColor: widthError ? '#ef4444' : '#5A3A1A',
-                backgroundColor: widthError ? '#fee2e2' : 'white'
-              }}
-            />
-            {widthError && (
-              <p className="text-sm text-red-600 font-medium">
-                ⚠️ {widthError}
-              </p>
-            )}
-            <p className="text-xs text-gray-500">Minimo: {minDims.width} cm</p>
-          </div>
+        {/* Larghezza */}
+        <div style={{ marginBottom: '16px' }}>
+          <label 
+            htmlFor="width" 
+            style={{ 
+              fontSize: '14px', 
+              fontWeight: '600', 
+              color: '#3E2914',
+              display: 'block',
+              marginBottom: '5px'
+            }}
+          >
+            Larghezza (cm)
+          </label>
+          <input
+            id="width"
+            type="number"
+            value={localWidth}
+            onChange={(e) => handleWidthChange(e.target.value)}
+            placeholder="es. 300"
+            style={{ 
+              width: '100%',
+              maxWidth: '240px',
+              border: '2px solid #5A3A1A',
+              borderRadius: '6px',
+              padding: '10px',
+              fontSize: '15px',
+              marginTop: '5px',
+              marginBottom: '12px',
+              backgroundColor: widthError ? '#fee2e2' : 'white',
+              borderColor: widthError ? '#ef4444' : '#5A3A1A'
+            }}
+          />
+          {widthError && (
+            <p style={{ fontSize: '13px', color: '#ef4444', marginTop: '4px' }}>
+              ⚠️ {widthError}
+            </p>
+          )}
+          <p style={{ fontSize: '12px', color: '#6B7280' }}>Minimo: {minDims.width} cm</p>
+        </div>
 
-          {/* Profondità */}
-          <div className="space-y-2">
-            <Label htmlFor="depth" className="text-sm font-semibold text-gray-700">
-              Profondità (cm)
-            </Label>
-            <Input
-              id="depth"
-              type="number"
-              value={localDepth}
-              onChange={(e) => handleDepthChange(e.target.value)}
-              placeholder="es. 500"
-              className="text-lg font-medium border-2 rounded-lg px-4 py-3"
-              style={{ 
-                borderColor: depthError ? '#ef4444' : '#5A3A1A',
-                backgroundColor: depthError ? '#fee2e2' : 'white'
-              }}
-            />
-            {depthError && (
-              <p className="text-sm text-red-600 font-medium">
-                ⚠️ {depthError}
-              </p>
-            )}
-            <p className="text-xs text-gray-500">Minimo: {minDims.depth} cm</p>
-          </div>
+        {/* Profondità */}
+        <div style={{ marginBottom: '16px' }}>
+          <label 
+            htmlFor="depth" 
+            style={{ 
+              fontSize: '14px', 
+              fontWeight: '600', 
+              color: '#3E2914',
+              display: 'block',
+              marginBottom: '5px'
+            }}
+          >
+            Profondità (cm)
+          </label>
+          <input
+            id="depth"
+            type="number"
+            value={localDepth}
+            onChange={(e) => handleDepthChange(e.target.value)}
+            placeholder="es. 500"
+            style={{ 
+              width: '100%',
+              maxWidth: '240px',
+              border: '2px solid #5A3A1A',
+              borderRadius: '6px',
+              padding: '10px',
+              fontSize: '15px',
+              marginTop: '5px',
+              marginBottom: '12px',
+              backgroundColor: depthError ? '#fee2e2' : 'white',
+              borderColor: depthError ? '#ef4444' : '#5A3A1A'
+            }}
+          />
+          {depthError && (
+            <p style={{ fontSize: '13px', color: '#ef4444', marginTop: '4px' }}>
+              ⚠️ {depthError}
+            </p>
+          )}
+          <p style={{ fontSize: '12px', color: '#6B7280' }}>Minimo: {minDims.depth} cm</p>
         </div>
 
         {/* Altezza */}
-        <div className="space-y-2 pt-3 border-t border-gray-200">
-          <Label htmlFor="height" className="text-sm font-semibold text-gray-700">
+        <div style={{ marginBottom: '8px', paddingTop: '12px', borderTop: '1px solid #D8D2C6' }}>
+          <label 
+            htmlFor="height" 
+            style={{ 
+              fontSize: '14px', 
+              fontWeight: '600', 
+              color: '#3E2914',
+              display: 'block',
+              marginBottom: '5px'
+            }}
+          >
             Altezza (cm)
-          </Label>
-          <Input
+          </label>
+          <input
             id="height"
             type="number"
             value={localHeight}
@@ -258,28 +346,54 @@ export function Step3Dimensions({
               updateConfiguration({ height: parseInt(e.target.value) || 0 })
             }}
             placeholder="es. 220"
-            className="max-w-xs border-2 rounded-lg px-4 py-3 text-lg font-medium"
-            style={{ borderColor: '#5A3A1A' }}
+            style={{ 
+              width: '100%',
+              maxWidth: '240px',
+              border: '2px solid #5A3A1A',
+              borderRadius: '6px',
+              padding: '10px',
+              fontSize: '15px',
+              marginTop: '5px',
+              marginBottom: '12px'
+            }}
           />
-          <p className="text-xs text-gray-500">Standard: 220 cm</p>
+          <p style={{ fontSize: '12px', color: '#6B7280' }}>Standard: 220 cm</p>
         </div>
       </div>
 
-      {/* Bottone conferma */}
-      <div className="flex justify-center pt-6">
-        <Button
-          onClick={handleConfirm}
-          disabled={!!widthError || !!depthError}
-          size="lg"
-          className="px-10 py-4 text-lg font-bold rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105"
-          style={{
-            backgroundColor: (widthError || depthError) ? '#9ca3af' : '#16a34a',
-            color: 'white'
-          }}
-        >
-          Conferma e Continua →
-        </Button>
-      </div>
+      {/* "CONFERMA E CONTINUA" - VERO PULSANTE - spazio sotto ridotto del 30% */}
+      <button
+        onClick={handleConfirm}
+        disabled={!!widthError || !!depthError}
+        style={{
+          background: (widthError || depthError) ? '#9ca3af' : '#5A3A1A',
+          color: 'white',
+          fontSize: '16px',
+          fontWeight: '600',
+          padding: '12px 26px',
+          borderRadius: '8px',
+          border: 'none',
+          cursor: (widthError || depthError) ? 'not-allowed' : 'pointer',
+          display: 'block',
+          margin: '18px auto 0 auto',
+          transition: 'all 0.2s ease',
+          opacity: (widthError || depthError) ? '0.5' : '1'
+        }}
+        onMouseEnter={(e) => {
+          if (!widthError && !depthError) {
+            e.currentTarget.style.background = '#4A2C14'
+            e.currentTarget.style.transform = 'translateY(-1px)'
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!widthError && !depthError) {
+            e.currentTarget.style.background = '#5A3A1A'
+            e.currentTarget.style.transform = 'translateY(0)'
+          }
+        }}
+      >
+        Conferma e Continua →
+      </button>
     </div>
   )
 }
