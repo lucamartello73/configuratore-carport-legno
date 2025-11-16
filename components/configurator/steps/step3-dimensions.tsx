@@ -37,19 +37,29 @@ const CarIcon = ({ isSelected }: { isSelected: boolean }) => (
   </svg>
 )
 
-// Icona auto VISTA DALL'ALTO (per colonne rettangolo)
+// Icona auto VISTA DALL'ALTO MIGLIORATA (stile parcheggio europeo)
 const CarTopViewIcon = () => (
   <svg 
-    style={{ height: '40px', opacity: 0.85, width: 'auto' }} 
+    style={{ 
+      height: '60px', 
+      width: 'auto',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      opacity: 0.9
+    }} 
     viewBox="0 0 24 24" 
-    fill="#00A000" 
+    fill="none"
+    stroke="#333" 
+    strokeWidth="2.5"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect x="6" y="4" width="12" height="16" rx="2" fill="#00A000" opacity="0.7" />
-    <rect x="7" y="6" width="4" height="3" fill="#FFFFFF" opacity="0.6" />
-    <rect x="13" y="6" width="4" height="3" fill="#FFFFFF" opacity="0.6" />
-    <rect x="7" y="15" width="4" height="3" fill="#FF4444" opacity="0.6" />
-    <rect x="13" y="15" width="4" height="3" fill="#FF4444" opacity="0.6" />
+    <rect x="7" y="5" width="10" height="14" rx="1.5" stroke="#333" strokeWidth="2.5" fill="#FFFFFF" opacity="0.85" />
+    <rect x="8" y="7" width="3" height="2.5" fill="#87CEEB" opacity="0.7" />
+    <rect x="13" y="7" width="3" height="2.5" fill="#87CEEB" opacity="0.7" />
+    <rect x="8" y="14.5" width="3" height="2.5" fill="#FFD700" opacity="0.7" />
+    <rect x="13" y="14.5" width="3" height="2.5" fill="#FFD700" opacity="0.7" />
   </svg>
 )
 
@@ -255,16 +265,7 @@ export function Step3Dimensions({
                   }}
                 >
                   {/* AUTO VISTA DALL'ALTO in ogni colonna attiva */}
-                  {isActive && (
-                    <div style={{ 
-                      position: 'absolute', 
-                      top: '50%', 
-                      left: '50%', 
-                      transform: 'translate(-50%, -50%)' 
-                    }}>
-                      <CarTopViewIcon />
-                    </div>
-                  )}
+                  {isActive && <CarTopViewIcon />}
                 </div>
               )
             })}
@@ -288,20 +289,22 @@ export function Step3Dimensions({
             </div>
           </div>
 
-          {/* MISURE LATERALI - SINISTRA (Larghezza) */}
+          {/* MISURE LATERALI - SINISTRA (Larghezza) - DENTRO IL RETTANGOLO */}
           <div style={{ 
             position: 'absolute', 
-            left: '-120px', 
+            left: '6px', 
             top: '50%', 
             transform: 'translateY(-50%)',
             fontSize: '12px', 
             color: '#444', 
             lineHeight: '14px',
-            textAlign: 'right'
+            textAlign: 'left',
+            zIndex: 20
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '4px' }}>
-              {/* Triangolo CSS sinistra */}
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+              {/* Triangolo CSS puntato a DESTRA */}
               <div style={{ 
+                display: 'inline-block',
                 width: 0, 
                 height: 0, 
                 borderTop: '5px solid transparent', 
@@ -309,10 +312,11 @@ export function Step3Dimensions({
                 borderRight: '7px solid #444',
                 marginRight: '4px'
               }}></div>
-              <span><strong>Consigliata:</strong> {minDims.width} cm</span>
+              <span><strong>Cons:</strong> {minDims.width}cm</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
               <div style={{ 
+                display: 'inline-block',
                 width: 0, 
                 height: 0, 
                 borderTop: '5px solid transparent', 
@@ -320,25 +324,27 @@ export function Step3Dimensions({
                 borderRight: '7px solid #00A000',
                 marginRight: '4px'
               }}></div>
-              <span style={{ color: '#00A000', fontWeight: 'bold' }}>Scelta: {currentWidth} cm</span>
+              <span style={{ color: '#00A000', fontWeight: 'bold' }}>Scelta: {currentWidth}cm</span>
             </div>
           </div>
 
-          {/* MISURE LATERALI - DESTRA (Profondità) */}
+          {/* MISURE LATERALI - DESTRA (Profondità) - DENTRO IL RETTANGOLO */}
           <div style={{ 
             position: 'absolute', 
-            right: '-120px', 
+            right: '6px', 
             top: '50%', 
             transform: 'translateY(-50%)',
             fontSize: '12px', 
             color: '#444', 
             lineHeight: '14px',
-            textAlign: 'left'
+            textAlign: 'right',
+            zIndex: 20
           }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
-              <span><strong>Consigliata:</strong> {minDims.depth} cm</span>
-              {/* Triangolo CSS destra */}
+              <span><strong>Cons:</strong> {minDims.depth}cm</span>
+              {/* Triangolo CSS puntato a SINISTRA */}
               <div style={{ 
+                display: 'inline-block',
                 width: 0, 
                 height: 0, 
                 borderTop: '5px solid transparent', 
@@ -348,8 +354,9 @@ export function Step3Dimensions({
               }}></div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <span style={{ color: '#00A000', fontWeight: 'bold' }}>Scelta: {currentDepth} cm</span>
+              <span style={{ color: '#00A000', fontWeight: 'bold' }}>Scelta: {currentDepth}cm</span>
               <div style={{ 
+                display: 'inline-block',
                 width: 0, 
                 height: 0, 
                 borderTop: '5px solid transparent', 
