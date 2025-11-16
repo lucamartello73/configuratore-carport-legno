@@ -21,169 +21,101 @@ const SUGGESTED_DIMENSIONS = {
   5: { width: 1300, depth: 500, height: 220 },
 }
 
-// Componente per sagoma auto SCHEMATICA semplice (per LEGNO = BLU)
-const SchematicCar = ({ x, y, color = '#2563eb' }: { x: number; y: number; color?: string }) => (
-  <g transform={`translate(${x}, ${y})`}>
-    {/* Ombra leggera */}
-    <ellipse cx="50" cy="105" rx="45" ry="8" fill="black" opacity="0.15"/>
+// Colore brand (marrone legno)
+const BRAND_COLOR = '#5A3A1A'
+
+// Componente per singola auto vista dall'alto (BLU per LEGNO)
+const SingleCar = () => (
+  <svg width="90" height="180" viewBox="0 0 90 180" className="flex-shrink-0">
+    <defs>
+      <linearGradient id="carBodyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style={{ stopColor: '#2563eb', stopOpacity: 1 }} />
+        <stop offset="100%" style={{ stopColor: '#3b82f6', stopOpacity: 1 }} />
+      </linearGradient>
+    </defs>
     
-    {/* Corpo auto rettangolare semplice */}
+    {/* Ombra leggera */}
+    <ellipse cx="45" cy="165" rx="40" ry="6" fill="black" opacity="0.12"/>
+    
+    {/* Corpo auto */}
     <rect 
       x="5" 
       y="5" 
-      width="90" 
-      height="180" 
-      rx="12" 
-      fill={color} 
+      width="80" 
+      height="160" 
+      rx="10" 
+      fill="url(#carBodyGradient)" 
       stroke="#1e40af" 
-      strokeWidth="3"
+      strokeWidth="2"
     />
     
     {/* Parabrezza anteriore */}
-    <rect x="15" y="15" width="70" height="40" rx="6" fill="white" opacity="0.3"/>
+    <rect x="12" y="12" width="66" height="35" rx="5" fill="white" opacity="0.3"/>
     
     {/* Parabrezza posteriore */}
-    <rect x="15" y="135" width="70" height="40" rx="6" fill="white" opacity="0.3"/>
+    <rect x="12" y="123" width="66" height="35" rx="5" fill="white" opacity="0.3"/>
     
     {/* Finestrini laterali */}
-    <rect x="15" y="65" width="30" height="35" rx="4" fill="white" opacity="0.25"/>
-    <rect x="55" y="65" width="30" height="35" rx="4" fill="white" opacity="0.25"/>
+    <rect x="12" y="58" width="28" height="32" rx="3" fill="white" opacity="0.25"/>
+    <rect x="50" y="58" width="28" height="32" rx="3" fill="white" opacity="0.25"/>
     
     {/* Ruote */}
-    <circle cx="20" cy="35" r="12" fill="#1f2937"/>
-    <circle cx="80" cy="35" r="12" fill="#1f2937"/>
-    <circle cx="20" cy="155" r="12" fill="#1f2937"/>
-    <circle cx="80" cy="155" r="12" fill="#1f2937"/>
+    <circle cx="18" cy="32" r="10" fill="#1f2937"/>
+    <circle cx="72" cy="32" r="10" fill="#1f2937"/>
+    <circle cx="18" cy="148" r="10" fill="#1f2937"/>
+    <circle cx="72" cy="148" r="10" fill="#1f2937"/>
     
     {/* Cerchi ruote */}
-    <circle cx="20" cy="35" r="6" fill="#6b7280"/>
-    <circle cx="80" cy="35" r="6" fill="#6b7280"/>
-    <circle cx="20" cy="155" r="6" fill="#6b7280"/>
-    <circle cx="80" cy="155" r="6" fill="#6b7280"/>
-  </g>
+    <circle cx="18" cy="32" r="5" fill="#6b7280"/>
+    <circle cx="72" cy="32" r="5" fill="#6b7280"/>
+    <circle cx="18" cy="148" r="5" fill="#6b7280"/>
+    <circle cx="72" cy="148" r="5" fill="#6b7280"/>
+  </svg>
 )
 
-// Componente illustrazione schematica carport con N auto
-const SchematicCarportView = ({ numCars }: { numCars: number }) => {
-  const carColor = '#2563eb' // BLU per LEGNO
-  
-  // Calcola dimensioni canvas in base al numero auto
-  const carWidth = 100
-  const carHeight = 190
-  const carSpacing = 40 // SPAZIO EVIDENTE tra auto
-  
-  let canvasWidth: number
-  let canvasHeight: number
-  let carPositions: { x: number; y: number }[] = []
-  
-  if (numCars === 1) {
-    // 1 auto centrata
-    canvasWidth = 250
-    canvasHeight = 280
-    carPositions = [{ x: 75, y: 45 }]
-  } else if (numCars === 2) {
-    // 2 auto affiancate ORIZZONTALMENTE
-    canvasWidth = 280
-    canvasHeight = 280
-    carPositions = [
-      { x: 30, y: 45 },
-      { x: 150, y: 45 }
-    ]
-  } else if (numCars === 3) {
-    // 3 auto in fila ORIZZONTALE
-    canvasWidth = 400
-    canvasHeight = 280
-    carPositions = [
-      { x: 20, y: 45 },
-      { x: 150, y: 45 },
-      { x: 280, y: 45 }
-    ]
-  } else if (numCars === 4) {
-    // 4 auto in GRIGLIA 2x2
-    canvasWidth = 280
-    canvasHeight = 480
-    carPositions = [
-      { x: 30, y: 30 },
-      { x: 150, y: 30 },
-      { x: 30, y: 260 },
-      { x: 150, y: 260 }
-    ]
-  } else {
-    // 5+ auto: 3 sopra + 2 sotto
-    canvasWidth = 400
-    canvasHeight = 480
-    carPositions = [
-      { x: 20, y: 30 },
-      { x: 150, y: 30 },
-      { x: 280, y: 30 },
-      { x: 85, y: 260 },
-      { x: 215, y: 260 }
-    ]
-  }
+// Componente dedicato per anteprima auto in FILA SINGOLA
+interface CarPreviewProps {
+  count: number
+}
+
+const CarPreview = ({ count }: CarPreviewProps) => {
+  const carSpacing = 25 // Distanza uniforme tra auto (25px)
   
   return (
-    <svg 
-      viewBox={`0 0 ${canvasWidth} ${canvasHeight}`} 
-      className="w-full h-auto max-w-4xl mx-auto"
-      style={{ maxHeight: '500px' }}
+    <div 
+      className="relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-12 border"
+      style={{ 
+        borderWidth: '1.5px',
+        borderColor: BRAND_COLOR,
+        borderStyle: 'dashed',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.06)'
+      }}
     >
-      {/* Struttura rettangolare NEUTRA (bordo carport) */}
-      <rect 
-        x="10" 
-        y="10" 
-        width={canvasWidth - 20} 
-        height={canvasHeight - 20} 
-        fill="none" 
-        stroke="#8B4513" 
-        strokeWidth="4" 
-        strokeDasharray="10,5"
-        rx="8"
+      {/* Tetto semitrasparente */}
+      <div 
+        className="absolute inset-0 rounded-2xl pointer-events-none"
+        style={{
+          backgroundColor: '#D2691E',
+          opacity: 0.05
+        }}
       />
       
-      {/* Tetto semitrasparente marrone chiaro */}
-      <rect 
-        x="10" 
-        y="10" 
-        width={canvasWidth - 20} 
-        height={canvasHeight - 20} 
-        fill="#D2691E" 
-        opacity="0.08"
-        rx="8"
-      />
-      
-      {/* Linee divisorie verticali tra posti (solo per 2-3 auto in fila) */}
-      {(numCars === 2 || numCars === 3) && carPositions.map((_, index) => {
-        if (index < carPositions.length - 1) {
-          const nextPos = carPositions[index + 1]
-          const dividerX = (carPositions[index].x + nextPos.x) / 2 + carWidth / 2
-          return (
-            <line
-              key={`divider-${index}`}
-              x1={dividerX}
-              y1="20"
-              x2={dividerX}
-              y2={canvasHeight - 20}
-              stroke="#8B4513"
-              strokeWidth="2"
-              strokeDasharray="8,4"
-              opacity="0.3"
-            />
-          )
-        }
-        return null
-      })}
-      
-      {/* Sagome auto BEN SEPARATE */}
-      {carPositions.map((pos, index) => (
-        <SchematicCar key={index} x={pos.x} y={pos.y} color={carColor} />
-      ))}
+      {/* Auto in FILA SINGOLA con flexbox orizzontale */}
+      <div 
+        className="flex items-center justify-center relative z-10"
+        style={{ gap: `${carSpacing}px` }}
+      >
+        {Array.from({ length: count }).map((_, index) => (
+          <SingleCar key={index} />
+        ))}
+      </div>
       
       {/* Pilastri agli angoli (piccoli cerchi) */}
-      <circle cx="20" cy="20" r="8" fill="#654321" opacity="0.6"/>
-      <circle cx={canvasWidth - 20} cy="20" r="8" fill="#654321" opacity="0.6"/>
-      <circle cx="20" cy={canvasHeight - 20} r="8" fill="#654321" opacity="0.6"/>
-      <circle cx={canvasWidth - 20} cy={canvasHeight - 20} r="8" fill="#654321" opacity="0.6"/>
-    </svg>
+      <div className="absolute top-4 left-4 w-3 h-3 rounded-full" style={{ backgroundColor: BRAND_COLOR, opacity: 0.4 }} />
+      <div className="absolute top-4 right-4 w-3 h-3 rounded-full" style={{ backgroundColor: BRAND_COLOR, opacity: 0.4 }} />
+      <div className="absolute bottom-4 left-4 w-3 h-3 rounded-full" style={{ backgroundColor: BRAND_COLOR, opacity: 0.4 }} />
+      <div className="absolute bottom-4 right-4 w-3 h-3 rounded-full" style={{ backgroundColor: BRAND_COLOR, opacity: 0.4 }} />
+    </div>
   )
 }
 
@@ -249,51 +181,53 @@ export function Step3Dimensions({
         <p className="text-gray-600">Seleziona il numero di posti auto per il tuo carport</p>
       </div>
 
-      {/* FASE 1: Pulsanti SEMPLICI - Solo numero e label */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-4xl mx-auto">
+      {/* PULSANTI MODERNI PILL SHAPE */}
+      <div className="flex flex-wrap items-center justify-center gap-3 max-w-4xl mx-auto">
         {spaceOptions.map((option) => (
           <button
             key={option.value}
             onClick={() => handleSpaceSelection(option.value)}
-            className={`
-              relative p-8 rounded-lg border-2 transition-all duration-200
-              flex flex-col items-center justify-center gap-3
-              ${
-                localSelectedSpaces === option.value
-                  ? 'border-green-500 bg-green-50 shadow-lg scale-105'
-                  : 'border-gray-200 hover:border-gray-300 hover:shadow-md bg-white'
+            className="relative px-6 py-3.5 rounded-full font-medium text-sm transition-all duration-200"
+            style={{
+              borderWidth: '1.5px',
+              borderStyle: 'solid',
+              borderColor: BRAND_COLOR,
+              backgroundColor: localSelectedSpaces === option.value ? BRAND_COLOR : 'white',
+              color: localSelectedSpaces === option.value ? 'white' : BRAND_COLOR,
+              boxShadow: localSelectedSpaces === option.value 
+                ? '0 4px 12px rgba(90, 58, 26, 0.25)' 
+                : 'none',
+            }}
+            onMouseEnter={(e) => {
+              if (localSelectedSpaces !== option.value) {
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(90, 58, 26, 0.15)'
               }
-            `}
+            }}
+            onMouseLeave={(e) => {
+              if (localSelectedSpaces !== option.value) {
+                e.currentTarget.style.boxShadow = 'none'
+              }
+            }}
           >
+            {option.label}
+            
             {/* Badge checkmark se selezionato */}
             {localSelectedSpaces === option.value && (
-              <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span className="ml-2 inline-flex items-center justify-center w-5 h-5 bg-white rounded-full">
+                <svg className="w-3 h-3" style={{ color: BRAND_COLOR }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
-              </div>
+              </span>
             )}
-            
-            {/* Numero grande */}
-            <div className="text-6xl font-bold text-gray-900">
-              {option.value === 5 ? '5+' : option.value}
-            </div>
-            
-            {/* Label */}
-            <div className="text-sm font-medium text-gray-700 text-center">
-              {option.label}
-            </div>
           </button>
         ))}
       </div>
 
-      {/* FASE 2: Illustrazione SCHEMATICA + Dimensioni (appaiono solo dopo selezione) */}
+      {/* ANTEPRIMA AUTO + DIMENSIONI (appaiono solo dopo selezione) */}
       {localSelectedSpaces && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {/* Illustrazione schematica carport */}
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 border-2 border-gray-200 shadow-sm">
-            <SchematicCarportView numCars={localSelectedSpaces} />
-          </div>
+          {/* Anteprima auto in FILA SINGOLA */}
+          <CarPreview count={localSelectedSpaces} />
 
           {/* Dimensioni consigliate */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-2xl mx-auto">
