@@ -170,6 +170,15 @@ export function Step3Dimensions({
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px' }}>
+      {/* LOGO MARTELLO1930 */}
+      <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <img 
+          src="https://www.genspark.ai/api/files/s/AAO1wRaO" 
+          alt="Martello1930" 
+          style={{ height: '70px', width: 'auto' }}
+        />
+      </div>
+
       {/* Header - ridotto spazio sopra del 30% */}
       <div style={{ textAlign: 'center', marginBottom: '14px' }}>
         <h2 style={{ fontSize: '30px', fontWeight: 'bold', color: '#111827', marginBottom: '8px' }}>
@@ -269,11 +278,11 @@ export function Step3Dimensions({
             })}
           </div>
 
-          {/* GRUPPO AUTO PREMIUM CENTRATO */}
+          {/* GRUPPO AUTO PREMIUM - SOLO NELLA FASCIA VERDE SELEZIONATA */}
           <div className="auto-group" style={{
             position: 'absolute',
             top: '50%',
-            left: '50%',
+            left: `${(localSelectedSpaces / 10) * 100}%`, // Centra nella fascia verde attiva
             transform: 'translate(-50%, -50%)',
             display: 'flex',
             gap: '12px',
