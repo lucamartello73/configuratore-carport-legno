@@ -1,53 +1,141 @@
 "use client"
 
 import { useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import type { ConfigurationData } from "@/types/configuration"
 import { saveConfiguration } from "@/app/actions/save-configuration"
 import { trackConfiguratorSubmit } from "@/lib/analytics/gtag"
 
+const CheckCircle = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+)
+
+const Wrench = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+    />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+)
+
+const Package = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+    />
+  </svg>
+)
+
+const Mail = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+    />
+  </svg>
+)
+
+const Phone = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+    />
+  </svg>
+)
+
+const MessageCircle = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+    />
+  </svg>
+)
+
 interface Step7Props {
   configuration: Partial<ConfigurationData>
   updateConfiguration: (data: Partial<ConfigurationData>) => void
-  onValidationError?: (error: string) => void
+  onValidationError?: (error: string) => void // Added validation error callback
 }
 
-const CheckIcon = () => (
-  <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-  </svg>
-)
-
-const CheckCircleIcon = () => (
-  <svg className="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-)
+const packageTypes = [
+  {
+    id: "chiavi-in-mano",
+    name: "Servizio Chiavi in Mano",
+    description: "Trasporto, montaggio e installazione completa inclusi",
+    icon: Wrench,
+    recommended: true,
+    features: [
+      "Trasporto della pergola al tuo indirizzo",
+      "Montaggio professionale da parte dei nostri tecnici",
+      "Installazione e messa in opera completa",
+    ],
+    note: "Risparmia tempo e assicurati un montaggio perfetto",
+  },
+  {
+    id: "fai-da-te",
+    name: "Solo Struttura - Fai da Te",
+    description: "Ricevi solo la struttura per il montaggio autonomo",
+    icon: Package,
+    recommended: false,
+    features: [
+      "Struttura completa con tutti i componenti",
+      "Supporto telefonico per il montaggio",
+      "Garanzia sui materiali",
+    ],
+    note: "Richiede competenze di base nel montaggio",
+  },
+]
 
 export function Step7Package({ configuration, updateConfiguration, onValidationError }: Step7Props) {
   const [selectedPackage, setSelectedPackage] = useState(configuration.packageType || "")
   const [contactPreference, setContactPreference] = useState(configuration.contactPreference || "email")
   const [customerData, setCustomerData] = useState({
     name: configuration.customerName || "",
-    surname: configuration.customerSurname || "",
     email: configuration.customerEmail || "",
     phone: configuration.customerPhone || "",
-    city: configuration.customerCity || "",
     address: configuration.customerAddress || "",
-    notes: configuration.customerNotes || "",
+    city: configuration.customerCity || "",
+    cap: configuration.customerCap || "",
+    province: configuration.customerProvince || "",
   })
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
 
   const handleSubmit = async () => {
-    // Validation
     if (!selectedPackage) {
-      onValidationError?.("⚠️ Seleziona un tipo di servizio")
+      onValidationError?.("⚠️ Seleziona un tipo di servizio (Chiavi in Mano o Fai da Te)")
       return
     }
 
-    if (!customerData.name || !customerData.surname || !customerData.email || !customerData.phone || !customerData.city) {
-      onValidationError?.("⚠️ Compila tutti i campi obbligatori (Nome, Cognome, Email, Telefono, Città)")
+    if (!customerData.name || !customerData.email || !customerData.phone) {
+      onValidationError?.("⚠️ Compila tutti i campi obbligatori: Nome, Email e Telefono")
       return
     }
 
@@ -58,12 +146,38 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
     }
 
     if (!privacyAccepted) {
-      onValidationError?.("⚠️ Devi accettare l'informativa sulla privacy")
+      onValidationError?.("⚠️ Devi accettare l'informativa sulla privacy per continuare")
       return
     }
 
-    if (!configuration.modelId || !configuration.coverageId || !configuration.structureColor) {
-      onValidationError?.("⚠️ Configurazione incompleta. Torna indietro e completa tutti i passaggi")
+    console.log("[Legno] Configuration validation check:", {
+      structureTypeId: configuration.structureTypeId,
+      modelId: configuration.modelId,
+      width: configuration.width,
+      depth: configuration.depth,
+      height: configuration.height,
+      coverageId: configuration.coverageId,
+      colorId: configuration.colorId,
+      surfaceId: configuration.surfaceId,
+    })
+
+    if (
+      !configuration.structureTypeId ||
+      !configuration.modelId ||
+      !configuration.coverageId ||
+      !configuration.colorId ||
+      !configuration.surfaceId
+    ) {
+      console.log("[Legno] Missing required fields:", {
+        structureTypeId: !configuration.structureTypeId ? "MISSING" : "OK",
+        modelId: !configuration.modelId ? "MISSING" : "OK",
+        coverageId: !configuration.coverageId ? "MISSING" : "OK",
+        colorId: !configuration.colorId ? "MISSING" : "OK",
+        surfaceId: !configuration.surfaceId ? "MISSING" : "OK",
+      })
+      onValidationError?.(
+        "⚠️ Configurazione incompleta. Torna indietro e completa tutti i passaggi obbligatori (Tipo Struttura, Modello, Dimensioni, Copertura, Colori, Superficie)",
+      )
       return
     }
 
@@ -71,23 +185,22 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
 
     try {
       const configurationData = {
-        configurator_type: 'legno' as const,
-        structure_type: configuration.structureType || configuration.structureTypeId || "",
+        configurator_type: 'legno',
+        structure_type_id: configuration.structureTypeId,
         model_id: configuration.modelId,
         width: configuration.width || 0,
         depth: configuration.depth || 0,
         height: configuration.height || 0,
         coverage_id: configuration.coverageId,
-        structure_color: configuration.structureColor,
-        coverage_color: configuration.coverageColor,
+        color_id: configuration.colorId,
         surface_id: configuration.surfaceId,
-        customer_name: `${customerData.name} ${customerData.surname}`,
+        customer_name: customerData.name,
         customer_email: customerData.email,
         customer_phone: customerData.phone,
         customer_address: customerData.address,
         customer_city: customerData.city,
-        customer_cap: "",
-        customer_province: "",
+        customer_cap: customerData.cap,
+        customer_province: customerData.province,
         package_type: selectedPackage,
         contact_preference: contactPreference,
         total_price: 0,
@@ -98,7 +211,7 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
 
       if (!result.success) {
         console.error("Error saving configuration:", result.error)
-        onValidationError?.("❌ Errore nel salvare la configurazione. Riprova.")
+        onValidationError?.("❌ Errore nel salvare la configurazione. Riprova o contatta l'assistenza.")
         return
       }
 
@@ -106,7 +219,7 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
         package_type: selectedPackage,
         contact_preference: contactPreference,
         customer_city: customerData.city,
-        customer_province: "",
+        customer_province: customerData.province,
         structure_type: configuration.structureType || configuration.structureTypeId,
         has_dimensions: !!(configuration.width && configuration.depth && configuration.height),
       })
@@ -115,9 +228,11 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
         try {
           await fetch("/api/send-configuration-email", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify({
-              customerName: `${customerData.name} ${customerData.surname}`,
+              customerName: customerData.name,
               customerEmail: customerData.email,
               configurationId: result.data.id,
               totalPrice: 0,
@@ -128,16 +243,17 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
           })
         } catch (emailError) {
           console.error("Error sending email:", emailError)
+          // Don't fail the whole process if email fails
         }
       }
 
       setIsSubmitted(true)
       setTimeout(() => {
         window.location.href = "https://www.martello1930.net"
-      }, 3000)
+      }, 2000) // Wait 2 seconds to show success message before redirecting
     } catch (error) {
       console.error("Error:", error)
-      onValidationError?.("❌ Errore nel salvare la configurazione. Riprova.")
+      onValidationError?.("❌ Errore nel salvare la configurazione. Riprova o contatta l'assistenza.")
     } finally {
       setIsSubmitting(false)
     }
@@ -145,349 +261,250 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
 
   if (isSubmitted) {
     return (
-      <div className="text-center py-16">
-        <CheckCircleIcon />
-        <h2 className="text-3xl font-bold text-primary mb-4 mt-6">Configurazione Inviata!</h2>
-        <p className="text-secondary text-lg max-w-xl mx-auto">
-          Grazie per aver configurato il tuo carport. Ti contatteremo presto per finalizzare il progetto e fornirti un preventivo personalizzato.
+      <div className="text-center py-12">
+        <CheckCircle className="w-16 h-16 text-accent-pink mx-auto mb-4" />
+        <h2 className="text-2xl font-bold text-primary mb-4">Configurazione Inviata!</h2>
+        <p className="text-secondary mb-6">
+          Grazie per aver configurato il tuo carport. Ti contatteremo presto per finalizzare il progetto e fornirti un
+          preventivo personalizzato.
         </p>
       </div>
     )
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-12 pb-12">
-      {/* INTESTAZIONE */}
-      <div className="text-center space-y-4 pt-8">
-        <h1 className="text-4xl font-bold text-primary">Dati di Contatto</h1>
-        <p className="text-lg text-secondary max-w-2xl mx-auto">
-          Scegli il tipo di servizio e inserisci i tuoi dati per ricevere il preventivo personalizzato
+    <div className="space-y-8">
+      {/* Package Selection */}
+      <div>
+        <h3 className="text-primary font-semibold mb-2 text-xl">Tipo di Servizio</h3>
+        <p className="text-secondary mb-6">
+          Scegli se vuoi il servizio completo di installazione o preferisci montare la pergola autonomamente
         </p>
-      </div>
 
-      {/* BLOCCO 1: SCELTA TIPO SERVIZIO */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-        <h2 className="text-2xl font-bold text-primary mb-6">Tipo di Servizio</h2>
-        
         <div className="grid md:grid-cols-2 gap-6">
-          {/* CARD A: CHIAVI IN MANO */}
-          <div
-            onClick={() => setSelectedPackage("chiavi-in-mano")}
-            className={`relative cursor-pointer rounded-xl border-2 p-6 transition-all ${
-              selectedPackage === "chiavi-in-mano"
-                ? "border-primary bg-surface-beige shadow-md"
-                : "border-gray-300 hover:border-gray-400 bg-white"
-            }`}
-          >
-            {/* Radio Button */}
-            <div className="absolute top-6 right-6">
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                selectedPackage === "chiavi-in-mano" ? "border-primary bg-primary" : "border-gray-400"
-              }`}>
-                {selectedPackage === "chiavi-in-mano" && (
-                  <div className="w-3 h-3 rounded-full bg-white"></div>
+          {packageTypes.map((pkg) => {
+            const IconComponent = pkg.icon
+            return (
+              <Card
+                key={pkg.id}
+                className={`cursor-pointer transition-all relative product-card ${
+                  selectedPackage === pkg.id
+                    ? "product-card-selected"
+                    : ""
+                }`}
+                onClick={() => setSelectedPackage(pkg.id)}
+              >
+                {pkg.recommended && (
+                  <div className="badge-recommended">
+                    Consigliato
+                  </div>
                 )}
-              </div>
-            </div>
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      <IconComponent className="w-8 h-8 text-accent-pink" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-primary mb-2">{pkg.name}</h4>
+                      <p className="text-sm text-secondary mb-4">{pkg.description}</p>
 
-            {/* Contenuto */}
-            <div className="pr-10">
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-3xl">🔑</span>
-                <div>
-                  <h3 className="text-xl font-bold text-primary">Chiavi in Mano</h3>
-                  <span className="inline-block bg-yellow-400 text-yellow-900 text-xs font-semibold px-2 py-1 rounded">
-                    COMPLETO
-                  </span>
-                </div>
-              </div>
-              
-              <p className="text-sm font-semibold text-primary mb-3">Con Trasporto e Montaggio</p>
-              
-              <p className="text-sm text-secondary mb-4">
-                Servizio completo: progettazione, fornitura, trasporto e installazione professionale
-              </p>
+                      <div className="space-y-2 mb-4">
+                        <p className="text-sm font-medium text-primary">Include:</p>
+                        {pkg.features.map((feature, index) => (
+                          <div key={index} className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-accent-pink mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-secondary">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
 
-              <ul className="space-y-2">
-                {[
-                  "Sopralluogo gratuito",
-                  "Montaggio professionale",
-                  "Garanzia completa",
-                  "Assistenza post-vendita"
-                ].map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-2 text-sm text-secondary">
-                    <CheckIcon />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* CARD B: SOLO FORNITURA */}
-          <div
-            onClick={() => setSelectedPackage("fai-da-te")}
-            className={`relative cursor-pointer rounded-xl border-2 p-6 transition-all ${
-              selectedPackage === "fai-da-te"
-                ? "border-primary bg-surface-beige shadow-md"
-                : "border-gray-300 hover:border-gray-400 bg-white"
-            }`}
-          >
-            {/* Radio Button */}
-            <div className="absolute top-6 right-6">
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                selectedPackage === "fai-da-te" ? "border-primary bg-primary" : "border-gray-400"
-              }`}>
-                {selectedPackage === "fai-da-te" && (
-                  <div className="w-3 h-3 rounded-full bg-white"></div>
-                )}
-              </div>
-            </div>
-
-            {/* Contenuto */}
-            <div className="pr-10">
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-3xl">📦</span>
-                <div>
-                  <h3 className="text-xl font-bold text-primary">Solo Fornitura</h3>
-                  <span className="inline-block bg-orange-400 text-orange-900 text-xs font-semibold px-2 py-1 rounded">
-                    ECONOMICO
-                  </span>
-                </div>
-              </div>
-              
-              <p className="text-sm font-semibold text-primary mb-3">Fai da Te</p>
-              
-              <p className="text-sm text-secondary mb-4">
-                Solo materiali con istruzioni dettagliate per il montaggio autonomo
-              </p>
-
-              <ul className="space-y-2">
-                {[
-                  "Prezzo più conveniente",
-                  "Istruzioni dettagliate",
-                  "Supporto telefonico",
-                  "Video tutorial inclusi"
-                ].map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-2 text-sm text-secondary">
-                    <svg className="w-5 h-5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-sm">💡</span>
+                        <p className="text-sm text-secondary italic">{pkg.note}</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
       </div>
 
-      {/* BLOCCO 2: FORM DATI PERSONALI + PREFERENZE */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-        <h2 className="text-2xl font-bold text-primary mb-6">I Tuoi Dati</h2>
-
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* COLONNA SINISTRA: FORM */}
-          <div className="space-y-5">
-            {/* Nome */}
+      {/* Customer Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-primary text-xl">Dati di Contatto</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-primary mb-2">
-                Nome <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
+              <Label htmlFor="name">Nome e Cognome *</Label>
+              <Input
+                id="name"
                 value={customerData.name}
                 onChange={(e) => setCustomerData({ ...customerData, name: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Mario"
+                required
               />
             </div>
-
-            {/* Cognome */}
             <div>
-              <label className="block text-sm font-semibold text-primary mb-2">
-                Cognome <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={customerData.surname}
-                onChange={(e) => setCustomerData({ ...customerData, surname: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Rossi"
-              />
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-semibold text-primary mb-2">
-                Email <span className="text-red-500">*</span>
-              </label>
-              <input
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
                 type="email"
                 value={customerData.email}
                 onChange={(e) => setCustomerData({ ...customerData, email: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="mario.rossi@email.com"
+                required
               />
             </div>
-
-            {/* Telefono */}
             <div>
-              <label className="block text-sm font-semibold text-primary mb-2">
-                Telefono <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
+              <Label htmlFor="phone">Telefono *</Label>
+              <Input
+                id="phone"
                 value={customerData.phone}
                 onChange={(e) => setCustomerData({ ...customerData, phone: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="+39 333 123 4567"
+                required
               />
             </div>
-
-            {/* Città */}
             <div>
-              <label className="block text-sm font-semibold text-primary mb-2">
-                Città <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={customerData.city}
-                onChange={(e) => setCustomerData({ ...customerData, city: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Milano"
-              />
-            </div>
-
-            {/* Indirizzo */}
-            <div>
-              <label className="block text-sm font-semibold text-primary mb-2">
-                Indirizzo <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
+              <Label htmlFor="address">Indirizzo</Label>
+              <Input
+                id="address"
                 value={customerData.address}
                 onChange={(e) => setCustomerData({ ...customerData, address: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Via Roma 123"
               />
             </div>
-
-            {/* Note */}
             <div>
-              <label className="block text-sm font-semibold text-primary mb-2">
-                Note
-              </label>
-              <textarea
-                value={customerData.notes}
-                onChange={(e) => setCustomerData({ ...customerData, notes: e.target.value })}
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-                placeholder="Eventuali richieste o informazioni aggiuntive..."
+              <Label htmlFor="city">Città</Label>
+              <Input
+                id="city"
+                value={customerData.city}
+                onChange={(e) => setCustomerData({ ...customerData, city: e.target.value })}
               />
             </div>
-
-            {/* GDPR Checkbox */}
-            <div className="flex items-start gap-3 pt-2">
-              <input
-                type="checkbox"
-                id="privacy"
-                checked={privacyAccepted}
-                onChange={(e) => setPrivacyAccepted(e.target.checked)}
-                className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary"
+            <div>
+              <Label htmlFor="cap">CAP</Label>
+              <Input
+                id="cap"
+                value={customerData.cap}
+                onChange={(e) => setCustomerData({ ...customerData, cap: e.target.value })}
               />
-              <label htmlFor="privacy" className="text-sm text-secondary leading-relaxed">
-                Acconsento al trattamento dei miei dati personali secondo la{" "}
-                <a href="https://www.martello1930.net/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-                  Privacy Policy
-                </a>{" "}
-                in conformità al GDPR.
-              </label>
+            </div>
+            <div>
+              <Label htmlFor="province">Provincia</Label>
+              <Input
+                id="province"
+                value={customerData.province}
+                onChange={(e) => setCustomerData({ ...customerData, province: e.target.value })}
+              />
             </div>
           </div>
 
-          {/* COLONNA DESTRA: PREFERENZE CONTATTO */}
-          <div>
-            <h3 className="text-lg font-bold text-primary mb-4">Preferenza di Contatto</h3>
-            <p className="text-sm text-secondary mb-6">Come preferisci essere ricontattato?</p>
-
-            <div className="space-y-4">
-              {/* Email */}
-              <div
-                onClick={() => setContactPreference("email")}
-                className={`cursor-pointer rounded-xl border-2 p-5 transition-all flex items-center gap-4 ${
-                  contactPreference === "email"
-                    ? "border-primary bg-surface-beige shadow-md"
-                    : "border-gray-300 hover:border-gray-400 bg-white"
-                }`}
-              >
-                <span className="text-4xl">📧</span>
-                <div className="flex-1">
-                  <h4 className="font-bold text-primary">Email</h4>
-                  <p className="text-sm text-secondary">Ricevi il preventivo via email</p>
-                </div>
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                  contactPreference === "email" ? "border-primary bg-primary" : "border-gray-400"
-                }`}>
-                  {contactPreference === "email" && <div className="w-2.5 h-2.5 rounded-full bg-white"></div>}
-                </div>
-              </div>
-
-              {/* Telefono */}
-              <div
-                onClick={() => setContactPreference("phone")}
-                className={`cursor-pointer rounded-xl border-2 p-5 transition-all flex items-center gap-4 ${
-                  contactPreference === "phone"
-                    ? "border-primary bg-surface-beige shadow-md"
-                    : "border-gray-300 hover:border-gray-400 bg-white"
-                }`}
-              >
-                <span className="text-4xl">📞</span>
-                <div className="flex-1">
-                  <h4 className="font-bold text-primary">Telefono</h4>
-                  <p className="text-sm text-secondary">Chiamata diretta per discutere il preventivo</p>
-                </div>
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                  contactPreference === "phone" ? "border-primary bg-primary" : "border-gray-400"
-                }`}>
-                  {contactPreference === "phone" && <div className="w-2.5 h-2.5 rounded-full bg-white"></div>}
-                </div>
-              </div>
-
-              {/* WhatsApp */}
-              <div
-                onClick={() => setContactPreference("whatsapp")}
-                className={`cursor-pointer rounded-xl border-2 p-5 transition-all flex items-center gap-4 ${
-                  contactPreference === "whatsapp"
-                    ? "border-primary bg-surface-beige shadow-md"
-                    : "border-gray-300 hover:border-gray-400 bg-white"
-                }`}
-              >
-                <span className="text-4xl">💬</span>
-                <div className="flex-1">
-                  <h4 className="font-bold text-primary">WhatsApp</h4>
-                  <p className="text-sm text-secondary">Chat veloce e comoda su WhatsApp</p>
-                </div>
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                  contactPreference === "whatsapp" ? "border-primary bg-primary" : "border-gray-400"
-                }`}>
-                  {contactPreference === "whatsapp" && <div className="w-2.5 h-2.5 rounded-full bg-white"></div>}
-                </div>
-              </div>
+          {/* Contact Preference Selection */}
+          <div className="mt-6">
+            <Label className="text-base font-medium text-primary mb-4 block">Preferenza di Contatto *</Label>
+            <p className="text-sm text-secondary mb-4">
+              Come preferisci essere contattato per il preventivo e le informazioni sul tuo carport?
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                {
+                  id: "email",
+                  name: "Email",
+                  description: "Ricevi il preventivo via email",
+                  icon: Mail,
+                },
+                {
+                  id: "whatsapp",
+                  name: "WhatsApp",
+                  description: "Contatto rapido via WhatsApp",
+                  icon: MessageCircle,
+                },
+                {
+                  id: "telefono",
+                  name: "Telefono",
+                  description: "Chiamata telefonica diretta",
+                  icon: Phone,
+                },
+              ].map((option) => {
+                const IconComponent = option.icon
+                return (
+                  <Card
+                    key={option.id}
+                    className={`cursor-pointer transition-all product-card ${
+                      contactPreference === option.id
+                        ? "product-card-selected"
+                        : ""
+                    }`}
+                    onClick={() => setContactPreference(option.id)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3">
+                        <IconComponent className="w-6 h-6 text-accent-pink" />
+                        <div>
+                          <h4 className="font-medium text-primary">{option.name}</h4>
+                          <p className="text-sm text-secondary">{option.description}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* BOTTONE SUBMIT */}
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="w-full md:w-auto md:min-w-[300px] mx-auto block bg-primary hover:bg-primary/90 text-white font-bold py-4 px-8 rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+      {/* Privacy Acceptance Section */}
+      <Card>
+        <CardContent className="p-6">
+          <div
+            className="flex items-start space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+            onClick={() => setPrivacyAccepted(!privacyAccepted)}
           >
-            {isSubmitting ? "Invio in corso..." : "Invia Richiesta Preventivo"}
-          </button>
-        </div>
+            <Checkbox
+              id="privacy"
+              checked={privacyAccepted}
+              onCheckedChange={(checked) => setPrivacyAccepted(checked as boolean)}
+              className="mt-1 pointer-events-none"
+            />
+            <div className="space-y-2 flex-1">
+              <Label
+                htmlFor="privacy"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                Accettazione Privacy *
+              </Label>
+              <p className="text-sm text-secondary cursor-pointer">
+                Accetto l'informativa sulla privacy e autorizzo il trattamento dei miei dati personali per l'invio del
+                preventivo e per essere contattato in merito alla configurazione del carport. I dati saranno trattati in
+                conformità al GDPR (Regolamento UE 2016/679).
+              </p>
+              <p className="text-xs text-secondary cursor-pointer">
+                Puoi consultare la nostra informativa completa sulla privacy sul nostro sito web.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Submit Button */}
+      <div className="text-center">
+        <Button
+          onClick={handleSubmit}
+          disabled={
+            isSubmitting ||
+            !selectedPackage ||
+            !customerData.name ||
+            !customerData.email ||
+            !customerData.phone ||
+            !privacyAccepted
+          }
+          className="button-primary px-8 py-3 text-lg"
+        >
+          {isSubmitting ? "Invio in corso..." : "Invia Configurazione"}
+        </Button>
+        <p className="text-secondary text-sm mt-2">Riceverai un preventivo personalizzato via email</p>
       </div>
     </div>
   )
