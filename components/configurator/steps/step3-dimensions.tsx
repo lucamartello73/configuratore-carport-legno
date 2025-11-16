@@ -310,10 +310,7 @@ export function Step3Dimensions({
         </div>
 
         {/* Info tecnica */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3 text-sm">
-          <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
           <div className="text-blue-900">
             <p className="font-semibold">Note:</p>
             <p>Le dimensioni indicate sono i minimi consigliati. Puoi aumentarle in base alle tue esigenze.</p>
