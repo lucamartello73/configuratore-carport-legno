@@ -37,29 +37,29 @@ const CarIcon = ({ isSelected }: { isSelected: boolean }) => (
   </svg>
 )
 
-// Icona auto VISTA DALL'ALTO MIGLIORATA (stile parcheggio europeo)
-const CarTopViewIcon = () => (
-  <svg 
-    style={{ 
-      height: '60px', 
-      width: 'auto',
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      opacity: 0.9
-    }} 
-    viewBox="0 0 24 24" 
+// Icona auto PREMIUM (vista dall'alto dettagliata)
+const CarPremiumIcon = () => (
+  <svg
+    width="100"
+    height="200"
+    viewBox="0 0 100 200"
     fill="none"
-    stroke="#333" 
-    strokeWidth="2.5"
+    stroke="#3A3A3A"
+    strokeWidth="5"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect x="7" y="5" width="10" height="14" rx="1.5" stroke="#333" strokeWidth="2.5" fill="#FFFFFF" opacity="0.85" />
-    <rect x="8" y="7" width="3" height="2.5" fill="#87CEEB" opacity="0.7" />
-    <rect x="13" y="7" width="3" height="2.5" fill="#87CEEB" opacity="0.7" />
-    <rect x="8" y="14.5" width="3" height="2.5" fill="#FFD700" opacity="0.7" />
-    <rect x="13" y="14.5" width="3" height="2.5" fill="#FFD700" opacity="0.7" />
+    {/* carrozzeria */}
+    <rect x="20" y="10" width="60" height="180" rx="18" fill="white" />
+    {/* ruote sinistra */}
+    <rect x="8" y="60" width="20" height="40" rx="6" fill="#3A3A3A" />
+    <rect x="8" y="110" width="20" height="40" rx="6" fill="#3A3A3A" />
+    {/* ruote destra */}
+    <rect x="72" y="60" width="20" height="40" rx="6" fill="#3A3A3A" />
+    <rect x="72" y="110" width="20" height="40" rx="6" fill="#3A3A3A" />
+    {/* vetri / abitacolo */}
+    <rect x="30" y="20" width="40" height="40" fill="#E8E8E8" />
+    <rect x="30" y="70" width="40" height="60" fill="#E8E8E8" />
+    <rect x="30" y="140" width="40" height="40" fill="#E8E8E8" />
   </svg>
 )
 
@@ -264,11 +264,27 @@ export function Step3Dimensions({
                     transition: 'all 0.3s ease'
                   }}
                 >
-                  {/* AUTO VISTA DALL'ALTO in ogni colonna attiva */}
-                  {isActive && <CarTopViewIcon />}
                 </div>
               )
             })}
+          </div>
+
+          {/* GRUPPO AUTO PREMIUM CENTRATO */}
+          <div className="auto-group" style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            display: 'flex',
+            gap: '12px',
+            zIndex: 15,
+            pointerEvents: 'none'
+          }}>
+            {Array.from({ length: localSelectedSpaces }).map((_, index) => (
+              <div key={index} className="auto-item" style={{ height: '85px', opacity: 0.95 }}>
+                <CarPremiumIcon />
+              </div>
+            ))}
           </div>
 
           {/* TESTO CENTRALE (sopra le colonne) */}
@@ -289,81 +305,48 @@ export function Step3Dimensions({
             </div>
           </div>
 
-          {/* MISURE LATERALI - SINISTRA (Larghezza) - DENTRO IL RETTANGOLO */}
-          <div style={{ 
+          {/* MISURE LATERALI - SINISTRA (Larghezza) */}
+          <div className="dimension-label left-label" style={{ 
             position: 'absolute', 
-            left: '6px', 
+            left: '10px', 
             top: '50%', 
             transform: 'translateY(-50%)',
-            fontSize: '12px', 
-            color: '#444', 
-            lineHeight: '14px',
-            textAlign: 'left',
-            zIndex: 20
+            zIndex: 20,
+            background: 'rgba(255, 255, 255, 0.85)',
+            padding: '3px 8px',
+            borderRadius: '6px',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: '#333'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
-              {/* Triangolo CSS puntato a DESTRA */}
-              <div style={{ 
-                display: 'inline-block',
-                width: 0, 
-                height: 0, 
-                borderTop: '5px solid transparent', 
-                borderBottom: '5px solid transparent', 
-                borderRight: '7px solid #444',
-                marginRight: '4px'
-              }}></div>
-              <span><strong>Cons:</strong> {minDims.width}cm</span>
+            <div style={{ marginBottom: '2px' }}>
+              <strong>Cons:</strong> {minDims.width}cm
             </div>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <div style={{ 
-                display: 'inline-block',
-                width: 0, 
-                height: 0, 
-                borderTop: '5px solid transparent', 
-                borderBottom: '5px solid transparent', 
-                borderRight: '7px solid #00A000',
-                marginRight: '4px'
-              }}></div>
-              <span style={{ color: '#00A000', fontWeight: 'bold' }}>Scelta: {currentWidth}cm</span>
+            <div style={{ color: '#00A000' }}>
+              <strong>Scelta:</strong> {currentWidth}cm
             </div>
           </div>
 
-          {/* MISURE LATERALI - DESTRA (Profondità) - DENTRO IL RETTANGOLO */}
-          <div style={{ 
+          {/* MISURE LATERALI - DESTRA (Profondità) */}
+          <div className="dimension-label right-label" style={{ 
             position: 'absolute', 
-            right: '6px', 
+            right: '10px', 
             top: '50%', 
             transform: 'translateY(-50%)',
-            fontSize: '12px', 
-            color: '#444', 
-            lineHeight: '14px',
-            textAlign: 'right',
-            zIndex: 20
+            zIndex: 20,
+            background: 'rgba(255, 255, 255, 0.85)',
+            padding: '3px 8px',
+            borderRadius: '6px',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: '#333',
+            textAlign: 'right'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
-              <span><strong>Cons:</strong> {minDims.depth}cm</span>
-              {/* Triangolo CSS puntato a SINISTRA */}
-              <div style={{ 
-                display: 'inline-block',
-                width: 0, 
-                height: 0, 
-                borderTop: '5px solid transparent', 
-                borderBottom: '5px solid transparent', 
-                borderLeft: '7px solid #444',
-                marginLeft: '4px'
-              }}></div>
+            <div style={{ marginBottom: '2px' }}>
+              <strong>Cons:</strong> {minDims.depth}cm
             </div>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <span style={{ color: '#00A000', fontWeight: 'bold' }}>Scelta: {currentDepth}cm</span>
-              <div style={{ 
-                display: 'inline-block',
-                width: 0, 
-                height: 0, 
-                borderTop: '5px solid transparent', 
-                borderBottom: '5px solid transparent', 
-                borderLeft: '7px solid #00A000',
-                marginLeft: '4px'
-              }}></div>
+            <div style={{ color: '#00A000' }}>
+              <strong>Scelta:</strong> {currentDepth}cm
             </div>
           </div>
         </div>
