@@ -1,5 +1,4 @@
 import { ReactNode } from 'react'
-import Image from 'next/image'
 
 interface ModernCardProps {
   children?: ReactNode
@@ -48,14 +47,11 @@ export function ModernCard({
     >
       {/* Image */}
       {image && (
-        <div className="relative w-full h-48 bg-gray-200">
-          <Image
+        <div className="w-full h-48 bg-gray-200 overflow-hidden">
+          <img
             src={image}
             alt={title || 'Image'}
-            width={800}
-            height={600}
             className="w-full h-full object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         </div>
       )}
