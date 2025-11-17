@@ -17,6 +17,7 @@ import {
   ArrowLeft 
 } from "lucide-react"
 import { getAdminSession, clearAdminSession } from "@/lib/auth/admin-auth"
+import { ConfiguratorSelector } from "@/components/admin/ui/ConfiguratorSelector"
 
 interface ModernAdminWrapperProps {
   children: React.ReactNode
@@ -153,6 +154,11 @@ export function ModernAdminWrapper({ children, title }: ModernAdminWrapperProps)
         }}>
           {title}
         </h1>
+
+        {/* Selettore Configuratore */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
+          <ConfiguratorSelector />
+        </div>
 
         {/* Barra navigazione orizzontale */}
         <div style={{
