@@ -11,17 +11,6 @@ interface Step7Props {
   onValidationError?: (error: string) => void
 }
 
-// Type per errors
-type FormErrors = {
-  name?: string
-  surname?: string
-  email?: string
-  phone?: string
-  city?: string
-  address?: string
-  privacy_consent?: string
-}
-
 // Icona Check Verde
 const CheckIcon = () => (
   <svg className="w-5 h-5 text-[#10B981] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,78 +47,8 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
     notes: configuration.customerNotes || "",
   })
   const [privacyAccepted, setPrivacyAccepted] = useState(configuration.privacyAccepted || false)
-  const [errors, setErrors] = useState<FormErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
-
-  // Validazione Email
-  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-  
-  // Validazione Telefono (NUOVO - dallo spec)
-  const validatePhone = (phone: string) => /^[+]?[\d\s-()]{8,}$/.test(phone)
-
-  // Handle Input Change con Clear Error (NUOVO - dallo spec)
-  const handleInputChange = (field: keyof typeof customerData, value: string) => {
-    const newCustomerData = { ...customerData, [field]: value }
-    setCustomerData(newCustomerData)
-    
-    // Clear error quando user digita (SPEC requirement)
-    const errorKey = field as keyof FormErrors
-    if (errors[errorKey]) {
-      const newErrors = { ...errors }
-      delete newErrors[errorKey]
-      setErrors(newErrors)
-    }
-  }
-
-  // Validazione Form Completa
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {}
-    
-    // Required fields
-    if (!customerData.name.trim()) newErrors.name = "Nome richiesto"
-    if (!customerData.surname.trim()) newErrors.surname = "Cognome richiesto"
-    
-    // Email validation
-    if (!customerData.email.trim()) {
-      newErrors.email = "Email richiesta"
-    } else if (!validateEmail(customerData.email)) {
-      newErrors.email = "Email non valida"
-    }
-    
-    // Phone validation (NUOVO - dallo spec)
-    if (!customerData.phone.trim()) {
-      newErrors.phone = "Telefono richiesto"
-    } else if (!validatePhone(customerData.phone)) {
-      newErrors.phone = "Telefono non valido (es: +39 123 456 7890)"
-    }
-    
-    // Other required fields
-    if (!customerData.city.trim()) newErrors.city = "Città richiesta"
-    if (!customerData.address.trim()) newErrors.address = "Indirizzo richiesto"
-    
-    // Privacy consent
-    if (!privacyAccepted) {
-      newErrors.privacy_consent = "Consenso privacy richiesto"
-    }
-    
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  // Check se form è valido (per messaggio condizionale)
-  const isFormValid = () => {
-    return selectedPackage && 
-           customerData.name && 
-           customerData.surname && 
-           customerData.email && 
-           validateEmail(customerData.email) &&
-           customerData.phone && 
-           validatePhone(customerData.phone) &&
-           customerData.city && 
-           customerData.address && 
-           privacyAccepted
-  }
 
   const handleSubmit = async () => {
     if (!selectedPackage) {
@@ -137,10 +56,19 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
       return
     }
 
-    // Validazione completa con inline errors
-    if (!validateForm()) {
-      onValidationError?.("⚠️ Correggi gli errori nel form prima di inviare")
-      window.scrollTo({ top: 0, behavior: "smooth" })
+    if (!customerData.name || !customerData.surname || !customerData.email || !customerData.phone || !customerData.city) {
+      onValidationError?.("⚠️ Compila tutti i campi obbligatori (Nome, Cognome, Email, Telefono, Città)")
+      return
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(customerData.email)) {
+      onValidationError?.("⚠️ Inserisci un indirizzo email valido")
+      return
+    }
+
+    if (!privacyAccepted) {
+      onValidationError?.("⚠️ Devi accettare l'informativa sulla privacy")
       return
     }
 
@@ -273,8 +201,8 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
       <div className="max-w-[1000px] mx-auto px-4">
         {/* TITOLO CENTRALE */}
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-[#333333] mb-2">Dati di Contatto</h1>
-          <p className="text-lg text-[#666666]">
+          <h1 className="text-[28px] font-bold text-[#333333] mb-2">Dati di Contatto</h1>
+          <p className="text-[15px] text-[#666666]">
             Scegli il tipo di servizio e inserisci i tuoi dati per ricevere il preventivo personalizzato
           </p>
         </div>
@@ -297,13 +225,12 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
                   : "border-[#D0D0D0] bg-white hover:border-[#3E2723]/60 hover:shadow-lg hover:scale-105"
               }`}
             >
-              {/* Badge Checkmark Assoluto (NUOVO - dallo spec) */}
+              {/* Badge Checkmark Assoluto */}
               {selectedPackage === "chiavi-in-mano" && (
                 <div className="absolute -top-3 -right-3 bg-[#3E2723] text-white rounded-full p-2 shadow-lg">
                   <BadgeCheckIcon />
                 </div>
               )}
-              
               {/* Header con emoji e titolo */}
               <div className="flex items-start gap-3 mb-4">
                 <span className="text-3xl">🔧</span>
@@ -322,7 +249,7 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
                 Servizio completo: progettazione, fornitura, trasporto e installazione professionale
               </p>
 
-              {/* Box Vantaggi con Background Colorato (NUOVO - dallo spec) */}
+              {/* Box Vantaggi con Background Colorato */}
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-2">
                 <div className="flex items-start gap-2">
                   <CheckIcon />
@@ -352,13 +279,12 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
                   : "border-[#D0D0D0] bg-white hover:border-[#3E2723]/60 hover:shadow-lg hover:scale-105"
               }`}
             >
-              {/* Badge Checkmark Assoluto (NUOVO - dallo spec) */}
+              {/* Badge Checkmark Assoluto */}
               {selectedPackage === "fai-da-te" && (
                 <div className="absolute -top-3 -right-3 bg-[#3E2723] text-white rounded-full p-2 shadow-lg">
                   <BadgeCheckIcon />
                 </div>
               )}
-              
               {/* Header con emoji e titolo */}
               <div className="flex items-start gap-3 mb-4">
                 <span className="text-3xl">💡</span>
@@ -377,7 +303,7 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
                 Solo materiali con istruzioni dettagliate per il montaggio autonomo
               </p>
 
-              {/* Box Vantaggi con Background Colorato (NUOVO - dallo spec) */}
+              {/* Box Vantaggi con Background Colorato */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
                 <div className="flex items-start gap-2">
                   <CheckIcon />
@@ -401,169 +327,108 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
         </div>
 
         {/* GRID 2 COLONNE: FORM + PREFERENZE */}
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-6">
           {/* COLONNA SINISTRA: DATI PERSONALI */}
-          <div className="bg-white rounded-xl border border-[#E8E8E8] p-8 shadow-sm">
-            <h2 className="text-2xl font-bold text-[#333333] mb-6">Dati Personali</h2>
+          <div className="bg-white rounded-lg border border-[#E8E8E8] p-6 shadow-sm">
+            <h2 className="text-2xl font-bold text-[#3E2723] mb-5">Dati Personali</h2>
 
-            <div className="grid md:grid-cols-2 gap-4 mb-4">
-              <div className="space-y-2">
-                <label htmlFor="nome" className="block text-sm font-medium text-[#333333]">
-                  Nome *
-                </label>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label className="block text-[13px] font-medium text-[#333333] mb-1.5">Nome *</label>
                 <input
-                  id="nome"
                   type="text"
                   value={customerData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
-                  className={`w-full px-4 py-3 text-[14px] border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3E2723] focus:border-transparent transition-all ${
-                    errors.name ? "border-red-500" : "border-[#D0D0D0]"
-                  }`}
-                  aria-invalid={errors.name ? "true" : "false"}
-                  aria-describedby={errors.name ? "nome-error" : undefined}
+                  onChange={(e) => setCustomerData({ ...customerData, name: e.target.value })}
+                  className="w-full px-3 py-2.5 text-[14px] border border-[#D0D0D0] rounded focus:outline-none focus:ring-2 focus:ring-[#3E2723] focus:border-transparent transition-all"
+                  placeholder=""
                 />
-                {errors.name && (
-                  <p id="nome-error" className="text-xs text-red-600">{errors.name}</p>
-                )}
               </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="cognome" className="block text-sm font-medium text-[#333333]">
-                  Cognome *
-                </label>
+              <div>
+                <label className="block text-[13px] font-medium text-[#333333] mb-1.5">Cognome *</label>
                 <input
-                  id="cognome"
                   type="text"
                   value={customerData.surname}
-                  onChange={(e) => handleInputChange("surname", e.target.value)}
-                  className={`w-full px-4 py-3 text-[14px] border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3E2723] focus:border-transparent transition-all ${
-                    errors.surname ? "border-red-500" : "border-[#D0D0D0]"
-                  }`}
-                  aria-invalid={errors.surname ? "true" : "false"}
-                  aria-describedby={errors.surname ? "cognome-error" : undefined}
+                  onChange={(e) => setCustomerData({ ...customerData, surname: e.target.value })}
+                  className="w-full px-3 py-2.5 text-[14px] border border-[#D0D0D0] rounded focus:outline-none focus:ring-2 focus:ring-[#3E2723] focus:border-transparent transition-all"
+                  placeholder=""
                 />
-                {errors.surname && (
-                  <p id="cognome-error" className="text-xs text-red-600">{errors.surname}</p>
-                )}
               </div>
             </div>
 
-            <div className="space-y-2 mb-4">
-              <label htmlFor="email" className="block text-sm font-medium text-[#333333]">
-                Email *
-              </label>
+            <div className="mb-4">
+              <label className="block text-[13px] font-medium text-[#333333] mb-1.5">Email *</label>
               <input
-                id="email"
                 type="email"
                 value={customerData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                className={`w-full px-4 py-3 text-[14px] border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3E2723] focus:border-transparent transition-all ${
-                  errors.email ? "border-red-500" : "border-[#D0D0D0]"
-                }`}
-                placeholder="tuaemail@esempio.com"
-                aria-invalid={errors.email ? "true" : "false"}
-                aria-describedby={errors.email ? "email-error" : undefined}
+                onChange={(e) => setCustomerData({ ...customerData, email: e.target.value })}
+                className="w-full px-3 py-2.5 text-[14px] border border-[#D0D0D0] rounded focus:outline-none focus:ring-2 focus:ring-[#3E2723] focus:border-transparent transition-all"
+                placeholder=""
               />
-              {errors.email && (
-                <p id="email-error" className="text-xs text-red-600">{errors.email}</p>
-              )}
             </div>
 
-            <div className="space-y-2 mb-4">
-              <label htmlFor="telefono" className="block text-sm font-medium text-[#333333]">
-                Telefono *
-              </label>
+            <div className="mb-4">
+              <label className="block text-[13px] font-medium text-[#333333] mb-1.5">Telefono *</label>
               <input
-                id="telefono"
                 type="tel"
                 value={customerData.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
-                className={`w-full px-4 py-3 text-[14px] border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3E2723] focus:border-transparent transition-all ${
-                  errors.phone ? "border-red-500" : "border-[#D0D0D0]"
-                }`}
-                placeholder="+39 123 456 7890"
-                aria-invalid={errors.phone ? "true" : "false"}
-                aria-describedby={errors.phone ? "telefono-error" : undefined}
+                onChange={(e) => setCustomerData({ ...customerData, phone: e.target.value })}
+                className="w-full px-3 py-2.5 text-[14px] border border-[#D0D0D0] rounded focus:outline-none focus:ring-2 focus:ring-[#3E2723] focus:border-transparent transition-all"
+                placeholder=""
               />
-              {errors.phone && (
-                <p id="telefono-error" className="text-xs text-red-600">{errors.phone}</p>
-              )}
             </div>
 
-            <div className="space-y-2 mb-4">
-              <label htmlFor="citta" className="block text-sm font-medium text-[#333333]">
-                Città *
-              </label>
+            <div className="mb-4">
+              <label className="block text-[13px] font-medium text-[#333333] mb-1.5">Città *</label>
               <input
-                id="citta"
                 type="text"
                 value={customerData.city}
-                onChange={(e) => handleInputChange("city", e.target.value)}
-                className={`w-full px-4 py-3 text-[14px] border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3E2723] focus:border-transparent transition-all ${
-                  errors.city ? "border-red-500" : "border-[#D0D0D0]"
-                }`}
-                placeholder="Es. Milano"
-                aria-invalid={errors.city ? "true" : "false"}
-                aria-describedby={errors.city ? "citta-error" : undefined}
+                onChange={(e) => setCustomerData({ ...customerData, city: e.target.value })}
+                className="w-full px-3 py-2.5 text-[14px] border border-[#D0D0D0] rounded focus:outline-none focus:ring-2 focus:ring-[#3E2723] focus:border-transparent transition-all"
+                placeholder=""
               />
-              {errors.city && (
-                <p id="citta-error" className="text-xs text-red-600">{errors.city}</p>
-              )}
             </div>
 
-            <div className="space-y-2 mb-4">
-              <label htmlFor="indirizzo" className="block text-sm font-medium text-[#333333]">
-                Indirizzo *
-              </label>
+            <div className="mb-4">
+              <label className="block text-[13px] font-medium text-[#333333] mb-1.5">Indirizzo *</label>
               <input
-                id="indirizzo"
                 type="text"
                 value={customerData.address}
-                onChange={(e) => handleInputChange("address", e.target.value)}
-                className={`w-full px-4 py-3 text-[14px] border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3E2723] focus:border-transparent transition-all ${
-                  errors.address ? "border-red-500" : "border-[#D0D0D0]"
-                }`}
-                placeholder="Via, Numero Civico"
-                aria-invalid={errors.address ? "true" : "false"}
-                aria-describedby={errors.address ? "indirizzo-error" : undefined}
+                onChange={(e) => setCustomerData({ ...customerData, address: e.target.value })}
+                className="w-full px-3 py-2.5 text-[14px] border border-[#D0D0D0] rounded focus:outline-none focus:ring-2 focus:ring-[#3E2723] focus:border-transparent transition-all"
+                placeholder=""
               />
-              {errors.address && (
-                <p id="indirizzo-error" className="text-xs text-red-600">{errors.address}</p>
-              )}
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="note" className="block text-sm font-medium text-[#333333]">
-                Note (opzionali)
-              </label>
+            <div>
+              <label className="block text-[13px] font-medium text-[#333333] mb-1.5">Note (opzionali)</label>
               <textarea
-                id="note"
                 value={customerData.notes}
-                onChange={(e) => handleInputChange("notes", e.target.value)}
+                onChange={(e) => setCustomerData({ ...customerData, notes: e.target.value })}
                 rows={3}
-                className="w-full px-4 py-3 text-[14px] border border-[#D0D0D0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3E2723] focus:border-transparent transition-all resize-none"
+                className="w-full px-3 py-2.5 text-[14px] border border-[#D0D0D0] rounded focus:outline-none focus:ring-2 focus:ring-[#3E2723] focus:border-transparent transition-all resize-none"
                 placeholder="Eventuali richieste specifiche..."
               />
             </div>
           </div>
 
           {/* COLONNA DESTRA: PREFERENZE CONTATTO */}
-          <div className="bg-white rounded-xl border border-[#E8E8E8] p-8 shadow-sm">
-            <h2 className="text-2xl font-bold text-[#333333] mb-2">Preferenze di Contatto</h2>
-            <p className="text-[#666666] mb-6">
+          <div className="bg-white rounded-lg border border-[#E8E8E8] p-6 shadow-sm">
+            <h2 className="text-2xl font-bold text-[#3E2723] mb-2">Preferenze di Contatto</h2>
+            <p className="text-base text-[#666666] mb-5">
               Scegli come preferisci essere contattato per il preventivo
             </p>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* OPZIONE EMAIL */}
               <div
                 onClick={() => setContactPreference("email")}
-                className={`relative flex items-center space-x-4 p-6 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
+                className={`relative flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 transform ${
                   contactPreference === "email"
-                    ? "border-[#3E2723] bg-gradient-to-br from-[#3E2723]/15 to-[#3E2723]/25 ring-2 ring-[#3E2723]/30 shadow-lg scale-105"
-                    : "border-[#D0D0D0] bg-white hover:border-[#3E2723]/60 hover:shadow-md hover:scale-105"
+                    ? "border-[#3E2723] bg-gradient-to-br from-[#3E2723]/10 to-[#3E2723]/20 ring-2 ring-[#3E2723]/30 shadow-lg scale-105"
+                    : "border-[#E0E0E0] hover:border-[#999999] bg-white hover:shadow-md hover:scale-105"
                 }`}
               >
+                {/* Badge Checkmark */}
                 {contactPreference === "email" && (
                   <div className="absolute -top-2 -right-2 bg-[#3E2723] text-white rounded-full p-1.5 shadow-lg">
                     <BadgeCheckIcon />
@@ -573,26 +438,25 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
                   type="radio"
                   checked={contactPreference === "email"}
                   onChange={() => setContactPreference("email")}
-                  className="w-5 h-5 flex-shrink-0 accent-[#3E2723] scale-125"
+                  className="mt-0.5 w-[18px] h-[18px] flex-shrink-0 accent-[#3E2723]"
                 />
-                <label className="cursor-pointer flex-1 flex items-center gap-3">
-                  <span className="text-2xl">📧</span>
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#333333]">Email</h3>
-                    <p className="text-sm text-[#666666]">Ricevi il preventivo via email</p>
-                  </div>
-                </label>
+                <span className="text-[24px] leading-none">📧</span>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-[15px] text-[#333333] mb-0.5">Email</h3>
+                  <p className="text-[13px] text-[#666666]">Ricevi il preventivo via email</p>
+                </div>
               </div>
 
               {/* OPZIONE TELEFONO */}
               <div
                 onClick={() => setContactPreference("telefono")}
-                className={`relative flex items-center space-x-4 p-6 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
+                className={`relative flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 transform ${
                   contactPreference === "telefono"
-                    ? "border-[#3E2723] bg-gradient-to-br from-[#3E2723]/15 to-[#3E2723]/25 ring-2 ring-[#3E2723]/30 shadow-lg scale-105"
-                    : "border-[#D0D0D0] bg-white hover:border-[#3E2723]/60 hover:shadow-md hover:scale-105"
+                    ? "border-[#3E2723] bg-gradient-to-br from-[#3E2723]/10 to-[#3E2723]/20 ring-2 ring-[#3E2723]/30 shadow-lg scale-105"
+                    : "border-[#E0E0E0] hover:border-[#999999] bg-white hover:shadow-md hover:scale-105"
                 }`}
               >
+                {/* Badge Checkmark */}
                 {contactPreference === "telefono" && (
                   <div className="absolute -top-2 -right-2 bg-[#3E2723] text-white rounded-full p-1.5 shadow-lg">
                     <BadgeCheckIcon />
@@ -602,26 +466,25 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
                   type="radio"
                   checked={contactPreference === "telefono"}
                   onChange={() => setContactPreference("telefono")}
-                  className="w-5 h-5 flex-shrink-0 accent-[#3E2723] scale-125"
+                  className="mt-0.5 w-[18px] h-[18px] flex-shrink-0 accent-[#3E2723]"
                 />
-                <label className="cursor-pointer flex-1 flex items-center gap-3">
-                  <span className="text-2xl">📞</span>
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#333333]">Telefono</h3>
-                    <p className="text-sm text-[#666666]">Chiamata diretta per discutere il preventivo</p>
-                  </div>
-                </label>
+                <span className="text-[24px] leading-none">📞</span>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-[15px] text-[#333333] mb-0.5">Telefono</h3>
+                  <p className="text-[13px] text-[#666666]">Chiamata diretta per discutere il preventivo</p>
+                </div>
               </div>
 
               {/* OPZIONE WHATSAPP */}
               <div
                 onClick={() => setContactPreference("whatsapp")}
-                className={`relative flex items-center space-x-4 p-6 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
+                className={`relative flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 transform ${
                   contactPreference === "whatsapp"
-                    ? "border-[#3E2723] bg-gradient-to-br from-[#3E2723]/15 to-[#3E2723]/25 ring-2 ring-[#3E2723]/30 shadow-lg scale-105"
-                    : "border-[#D0D0D0] bg-white hover:border-[#3E2723]/60 hover:shadow-md hover:scale-105"
+                    ? "border-[#3E2723] bg-gradient-to-br from-[#3E2723]/10 to-[#3E2723]/20 ring-2 ring-[#3E2723]/30 shadow-lg scale-105"
+                    : "border-[#E0E0E0] hover:border-[#999999] bg-white hover:shadow-md hover:scale-105"
                 }`}
               >
+                {/* Badge Checkmark */}
                 {contactPreference === "whatsapp" && (
                   <div className="absolute -top-2 -right-2 bg-[#3E2723] text-white rounded-full p-1.5 shadow-lg">
                     <BadgeCheckIcon />
@@ -631,78 +494,49 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
                   type="radio"
                   checked={contactPreference === "whatsapp"}
                   onChange={() => setContactPreference("whatsapp")}
-                  className="w-5 h-5 flex-shrink-0 accent-[#3E2723] scale-125"
+                  className="mt-0.5 w-[18px] h-[18px] flex-shrink-0 accent-[#3E2723]"
                 />
-                <label className="cursor-pointer flex-1 flex items-center gap-3">
-                  <span className="text-2xl">💬</span>
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#333333]">WhatsApp</h3>
-                    <p className="text-sm text-[#666666]">Chat veloce e comoda su WhatsApp</p>
-                  </div>
-                </label>
+                <span className="text-[24px] leading-none">💬</span>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-[15px] text-[#333333] mb-0.5">WhatsApp</h3>
+                  <p className="text-[13px] text-[#666666]">Chat veloce e comoda su WhatsApp</p>
+                </div>
               </div>
             </div>
 
             {/* PRIVACY CHECKBOX */}
-            <div className="mt-6 pt-6 border-t border-[#E8E8E8] space-y-4">
-              <div className="flex items-start space-x-3">
+            <div className="mt-5 pt-5 border-t border-[#E8E8E8]">
+              <label className="flex items-start gap-2.5 cursor-pointer">
                 <input
                   type="checkbox"
-                  id="privacy_consent"
                   checked={privacyAccepted}
-                  onChange={(e) => {
-                    setPrivacyAccepted(e.target.checked)
-                    if (errors.privacy_consent && e.target.checked) {
-                      setErrors({ ...errors, privacy_consent: undefined })
-                    }
-                  }}
-                  className={`mt-1 w-5 h-5 flex-shrink-0 accent-[#3E2723] ${
-                    errors.privacy_consent ? "border-red-500" : ""
-                  }`}
-                  aria-invalid={errors.privacy_consent ? "true" : "false"}
-                  aria-describedby={errors.privacy_consent ? "privacy-error" : undefined}
+                  onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                  className="mt-0.5 w-[18px] h-[18px] flex-shrink-0 accent-[#3E2723]"
                 />
-                <div className="space-y-1">
-                  <label htmlFor="privacy_consent" className="text-sm cursor-pointer text-[#333333]">
-                    Acconsento al trattamento dei miei dati personali *
-                  </label>
-                  <p className="text-xs text-[#666666]">
-                    Accetto che i miei dati vengano utilizzati per l'invio del preventivo e per eventuali comunicazioni commerciali. 
-                    I dati saranno trattati secondo la{" "}
-                    <a href="/privacy-policy" target="_blank" className="text-[#3E2723] hover:underline">
-                      Privacy Policy
-                    </a>{" "}
-                    in conformità al GDPR (UE 2016/679).
-                  </p>
-                </div>
-              </div>
-              {errors.privacy_consent && (
-                <p id="privacy-error" className="text-xs text-red-600 ml-8">{errors.privacy_consent}</p>
-              )}
+                <span className="text-[13px] text-[#666666] leading-relaxed">
+                  Acconsento al trattamento dei miei dati personali *
+                  <br />
+                  <span className="text-[12px]">
+                    Accetto l'informativa sulla privacy e autorizzo il trattamento per l'invio del preventivo. 
+                    Dati trattati in conformità al GDPR (UE 2016/679).
+                  </span>
+                </span>
+              </label>
             </div>
 
             {/* PULSANTE INVIO */}
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="w-full mt-6 bg-[#3E2723] hover:bg-[#2C1810] text-white py-4 rounded-xl text-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+              className="w-full mt-5 bg-[#3E2723] hover:bg-[#2C1810] text-white py-3.5 rounded-lg text-[15px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? "Invio in corso..." : "Invia Richiesta Preventivo"}
             </button>
-            <p className="text-center text-sm text-[#666666] mt-3">
+            <p className="text-center text-[12px] text-[#666666] mt-2.5">
               Riceverai un preventivo personalizzato entro 24 ore
             </p>
           </div>
         </div>
-
-        {/* MESSAGGIO VALIDAZIONE CONDIZIONALE (NUOVO - dallo spec) */}
-        {!isFormValid() && (
-          <div className="text-center mt-6">
-            <p className="text-[#666666] text-lg">
-              ℹ️ Completa tutti i campi obbligatori e accetta il consenso privacy per continuare
-            </p>
-          </div>
-        )}
       </div>
     </div>
   )
