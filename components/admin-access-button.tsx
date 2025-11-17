@@ -1,8 +1,8 @@
 "use client"
 
+// Admin button: fixed bottom-right corner, icon only
 import Link from "next/link"
 import { SimpleIcons } from "@/components/ui/simple-icons"
-import { Button } from "@/components/ui/button"
 
 export function AdminAccessButton() {
   return (
