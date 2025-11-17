@@ -138,6 +138,10 @@ export default function ModelsPage() {
     try {
       setLoading(true)
       
+      // Usa tabella diversa in base al configuratore
+      const tableName = configuratorType === 'legno' ? 'carport_legno_models' : 'carport_models'
+      const structureTableName = configuratorType === 'legno' ? 'carport_legno_structure_types' : 'carport_structure_types'
+      
       // Get structure type IDs for current configurator
       const structureTypeIds = structureTypes.map(st => st.id)
       
@@ -148,10 +152,10 @@ export default function ModelsPage() {
       }
 
       const { data, error } = await supabase
-        .from('carport_models')
+        .from(tableName)
         .select(`
           *,
-          structure_type:carport_structure_types!carport_models_structure_type_id_fkey(id, name, structure_category)
+          structure_type:${structureTableName}(id, name)
         `)
         .in('structure_type_id', structureTypeIds)
         .order('name')
@@ -184,8 +188,9 @@ export default function ModelsPage() {
         created_at: new Date().toISOString(),
       }))
 
+      const tableName = configuratorType === 'legno' ? 'carport_legno_models' : 'carport_models'
       const { error } = await supabase
-        .from('carport_models')
+        .from(tableName)
         .insert(demoData)
 
       if (error) throw error
@@ -240,10 +245,12 @@ export default function ModelsPage() {
         updated_at: new Date().toISOString(),
       }
 
+      const tableName = configuratorType === 'legno' ? 'carport_legno_models' : 'carport_models'
+      
       if (editingModel.id) {
         // Update existing
         const { error } = await supabase
-          .from('carport_models')
+          .from(tableName)
           .update(modelData)
           .eq('id', editingModel.id)
 
@@ -251,7 +258,7 @@ export default function ModelsPage() {
       } else {
         // Create new
         const { error } = await supabase
-          .from('carport_models')
+          .from(tableName)
           .insert([modelData])
 
         if (error) throw error
@@ -292,8 +299,9 @@ export default function ModelsPage() {
         return
       }
 
+      const tableName = configuratorType === 'legno' ? 'carport_legno_models' : 'carport_models'
       const { error } = await supabase
-        .from('carport_models')
+        .from(tableName)
         .delete()
         .eq('id', id)
 
