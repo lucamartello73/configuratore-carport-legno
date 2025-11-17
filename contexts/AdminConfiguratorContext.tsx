@@ -14,6 +14,7 @@ interface ThemeColors {
 
 interface AdminConfiguratorContextType {
   configuratorType: ConfiguratorType
+  configuratorTypeUpper: 'LEGNO' | 'FERRO'
   setConfiguratorType: (type: ConfiguratorType) => void
   theme: ThemeColors
   tablePrefix: string
@@ -73,6 +74,7 @@ export function AdminConfiguratorProvider({ children }: { children: ReactNode })
 
   const value: AdminConfiguratorContextType = {
     configuratorType,
+    configuratorTypeUpper: configuratorType.toUpperCase() as 'LEGNO' | 'FERRO',
     setConfiguratorType,
     theme: themes[configuratorType],
     tablePrefix: tablePrefixes[configuratorType],

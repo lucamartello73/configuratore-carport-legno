@@ -44,7 +44,7 @@ export default function ColorsPage() {
   const [session, setSession] = useState<any>(null)
   
   // Data state
-  const { configuratorType, theme } = useAdminConfigurator()
+  const { configuratorType, configuratorTypeUpper, theme } = useAdminConfigurator()
   const [colors, setColors] = useState<Color[]>([])
   const [loading, setLoading] = useState(true)
   
@@ -82,7 +82,7 @@ export default function ColorsPage() {
       const { data, error } = await supabase
         .from('carport_colors')
         .select('*')
-        .eq('configurator_type', configuratorType)
+        .eq('configurator_type', configuratorTypeUpper)
         .order('order_index')
         .order('name')
 
@@ -101,7 +101,7 @@ export default function ColorsPage() {
       setIsSaving(true)
       const demoColors = DEMO_COLORS.map(color => ({
         ...color,
-        configurator_type: configuratorType
+        configurator_type: configuratorTypeUpper
       }))
 
       const { error } = await supabase
@@ -111,7 +111,7 @@ export default function ColorsPage() {
       if (error) throw error
       
       await fetchColors()
-      alert(`${DEMO_COLORS.length} colori demo creati per ${configuratorType}`)
+      alert(`${DEMO_COLORS.length} colori demo creati per ${configuratorTypeUpper}`)
     } catch (error) {
       console.error('Errore creazione demo:', error)
       alert('Errore nella creazione dei colori demo')
@@ -124,7 +124,7 @@ export default function ColorsPage() {
     try {
       setIsUploading(true)
       const fileExt = file.name.split('.').pop()
-      const fileName = `${configuratorType.toLowerCase()}-color-${Date.now()}.${fileExt}`
+      const fileName = `${configuratorType}-color-${Date.now()}.${fileExt}`
       const filePath = `colors/${fileName}`
 
       const { error: uploadError, data } = await supabase.storage
