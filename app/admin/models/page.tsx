@@ -153,15 +153,20 @@ export default function ModelsPage() {
 
       const { data, error } = await supabase
         .from(tableName)
-        .select(`
-          *,
-          structure_type:${structureTableName}(id, name)
-        `)
+        .select('*')
         .in('structure_type_id', structureTypeIds)
         .order('name')
 
       if (error) throw error
-      setModels(data || [])
+      
+      // Mappa i dati per compatibilità tra tabelle LEGNO e FERRO
+      const mappedData = (data || []).map(model => ({
+        ...model,
+        base_price: model.base_price || parseFloat(model.price_supplement || '0'),
+        attivo: model.attivo !== undefined ? model.attivo : model.is_active
+      }))
+      
+      setModels(mappedData)
     } catch (error) {
       console.error('Errore caricamento modelli:', error)
       alert('Errore nel caricamento dei modelli')
