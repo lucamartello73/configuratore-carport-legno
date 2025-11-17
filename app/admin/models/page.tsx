@@ -20,10 +20,10 @@ interface Model {
   base_price: number
   image: string
   structure_type_id: string | null
-  configurator_type: 'FERRO' | 'LEGNO'
   order_index: number
   created_at: string
   structure_type?: {
+    id: string
     name: string
     structure_category: string
   }
@@ -36,35 +36,35 @@ interface StructureType {
 }
 
 // Demo models for quick setup
-const DEMO_MODELS: Omit<Model, 'id' | 'created_at' | 'configurator_type' | 'structure_type'>[] = [
+const getDemoModels = (configuratorType: 'FERRO' | 'LEGNO') => [
   { 
-    name: 'Carport Standard 3x5', 
+    name: `Carport Standard 3x5 ${configuratorType}`, 
     description: 'Carport base con struttura robusta, ideale per 1 auto',
-    base_price: 2500, 
+    base_price: configuratorType === 'FERRO' ? 2500 : 2800, 
     image: '',
     structure_type_id: null,
     order_index: 1
   },
   { 
-    name: 'Carport Premium 4x6', 
+    name: `Carport Premium 4x6 ${configuratorType}`, 
     description: 'Carport di fascia alta con finiture premium, protezione completa',
-    base_price: 4200, 
+    base_price: configuratorType === 'FERRO' ? 4200 : 4600, 
     image: '',
     structure_type_id: null,
     order_index: 2
   },
   { 
-    name: 'Carport Doppio 6x6', 
+    name: `Carport Doppio 6x6 ${configuratorType}`, 
     description: 'Carport doppio per 2 auto, struttura rinforzata',
-    base_price: 6800, 
+    base_price: configuratorType === 'FERRO' ? 6800 : 7200, 
     image: '',
     structure_type_id: null,
     order_index: 3
   },
   { 
-    name: 'Carport Addossato 3x4.5', 
+    name: `Carport Addossato 3x4.5 ${configuratorType}`, 
     description: 'Carport da parete, ottimizza lo spazio laterale',
-    base_price: 2100, 
+    base_price: configuratorType === 'FERRO' ? 2100 : 2400, 
     image: '',
     structure_type_id: null,
     order_index: 4
@@ -107,33 +107,15 @@ export default function ModelsPage() {
   // Fetch models and structure types
   useEffect(() => {
     if (session) {
-      fetchModels()
       fetchStructureTypes()
     }
   }, [configuratorType, session])
 
-  async function fetchModels() {
-    try {
-      setLoading(true)
-      const { data, error } = await supabase
-        .from('carport_models')
-        .select(`
-          *,
-          structure_type:carport_structure_types!carport_models_structure_type_id_fkey(name, structure_category)
-        `)
-        .eq('configurator_type', configuratorType)
-        .order('order_index')
-        .order('name')
-
-      if (error) throw error
-      setModels(data || [])
-    } catch (error) {
-      console.error('Errore caricamento modelli:', error)
-      alert('Errore nel caricamento dei modelli')
-    } finally {
-      setLoading(false)
+  useEffect(() => {
+    if (structureTypes.length > 0) {
+      fetchModels()
     }
-  }
+  }, [structureTypes, configuratorType])
 
   async function fetchStructureTypes() {
     try {
@@ -148,6 +130,40 @@ export default function ModelsPage() {
       setStructureTypes(data || [])
     } catch (error) {
       console.error('Errore caricamento tipi struttura:', error)
+      setStructureTypes([])
+    }
+  }
+
+  async function fetchModels() {
+    try {
+      setLoading(true)
+      
+      // Get structure type IDs for current configurator
+      const structureTypeIds = structureTypes.map(st => st.id)
+      
+      if (structureTypeIds.length === 0) {
+        setModels([])
+        setLoading(false)
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('carport_models')
+        .select(`
+          *,
+          structure_type:carport_structure_types!carport_models_structure_type_id_fkey(id, name, structure_category)
+        `)
+        .in('structure_type_id', structureTypeIds)
+        .order('name')
+
+      if (error) throw error
+      setModels(data || [])
+    } catch (error) {
+      console.error('Errore caricamento modelli:', error)
+      alert('Errore nel caricamento dei modelli')
+      setModels([])
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -155,9 +171,16 @@ export default function ModelsPage() {
     try {
       setIsSaving(true)
       
-      const demoData = DEMO_MODELS.map(model => ({
+      // Get first available structure type for current configurator
+      if (structureTypes.length === 0) {
+        alert('⚠️ Nessun tipo di struttura disponibile per ' + configuratorType + '. Crea prima almeno un tipo di struttura.')
+        return
+      }
+
+      const defaultStructureTypeId = structureTypes[0].id
+      const demoData = getDemoModels(configuratorType).map(model => ({
         ...model,
-        configurator_type: configuratorType,
+        structure_type_id: defaultStructureTypeId,
         created_at: new Date().toISOString(),
       }))
 
@@ -167,11 +190,11 @@ export default function ModelsPage() {
 
       if (error) throw error
       
-      alert(`✅ ${DEMO_MODELS.length} modelli demo creati con successo!`)
+      alert(`✅ ${demoData.length} modelli demo creati con successo!`)
       fetchModels()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Errore creazione demo:', error)
-      alert('Errore nella creazione dei modelli demo')
+      alert('Errore nella creazione dei modelli demo: ' + (error.message || 'Unknown error'))
     } finally {
       setIsSaving(false)
     }
@@ -183,9 +206,8 @@ export default function ModelsPage() {
       description: '',
       base_price: 0,
       image: '',
-      structure_type_id: null,
+      structure_type_id: structureTypes.length > 0 ? structureTypes[0].id : null,
       order_index: models.length + 1,
-      configurator_type: configuratorType,
     })
     setIsModalOpen(true)
   }
@@ -201,6 +223,11 @@ export default function ModelsPage() {
       return
     }
 
+    if (!editingModel?.structure_type_id) {
+      alert('⚠️ Seleziona un tipo di struttura per questo modello')
+      return
+    }
+
     try {
       setIsSaving(true)
 
@@ -209,9 +236,7 @@ export default function ModelsPage() {
         description: editingModel.description || '',
         base_price: editingModel.base_price,
         image: editingModel.image || '',
-        structure_type_id: editingModel.structure_type_id || null,
-        order_index: editingModel.order_index || models.length + 1,
-        configurator_type: configuratorType,
+        structure_type_id: editingModel.structure_type_id,
         updated_at: new Date().toISOString(),
       }
 
@@ -235,9 +260,9 @@ export default function ModelsPage() {
       setIsModalOpen(false)
       setEditingModel(null)
       fetchModels()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Errore salvataggio modello:', error)
-      alert('Errore nel salvataggio del modello')
+      alert('Errore nel salvataggio del modello: ' + (error.message || 'Unknown error'))
     } finally {
       setIsSaving(false)
     }
@@ -312,7 +337,7 @@ export default function ModelsPage() {
         </div>
         
         <div className="flex gap-3">
-          {models.length === 0 && (
+          {models.length === 0 && structureTypes.length > 0 && (
             <ModernButton
               variant="outline"
               onClick={handleCreateDemo}
@@ -321,12 +346,38 @@ export default function ModelsPage() {
               ✨ Crea Demo
             </ModernButton>
           )}
-          <ModernButton onClick={openCreateModal}>
+          <ModernButton 
+            onClick={openCreateModal}
+            disabled={structureTypes.length === 0}
+          >
             <PlusIcon className="w-5 h-5 mr-2" />
             Nuovo Modello
           </ModernButton>
         </div>
       </div>
+
+      {/* Warning se non ci sono structure types */}
+      {structureTypes.length === 0 && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-yellow-800">
+                Nessun tipo di struttura disponibile
+              </h3>
+              <div className="mt-2 text-sm text-yellow-700">
+                <p>
+                  Per creare modelli per <strong>{configuratorType}</strong>, devi prima creare almeno un tipo di struttura nella sezione "Tipi Struttura".
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats Badge */}
       <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg border border-blue-200">
@@ -356,16 +407,23 @@ export default function ModelsPage() {
             Nessun modello trovato
           </h3>
           <p className="text-gray-500 mb-6">
-            Crea il primo modello per {configuratorType} o importa i dati demo
+            {structureTypes.length === 0 
+              ? `Crea prima un tipo di struttura per ${configuratorType}`
+              : `Crea il primo modello per ${configuratorType} o importa i dati demo`
+            }
           </p>
           <div className="flex gap-3 justify-center">
-            <ModernButton variant="outline" onClick={handleCreateDemo}>
-              ✨ Crea Demo
-            </ModernButton>
-            <ModernButton onClick={openCreateModal}>
-              <PlusIcon className="w-5 h-5 mr-2" />
-              Nuovo Modello
-            </ModernButton>
+            {structureTypes.length > 0 && (
+              <>
+                <ModernButton variant="outline" onClick={handleCreateDemo}>
+                  ✨ Crea Demo
+                </ModernButton>
+                <ModernButton onClick={openCreateModal}>
+                  <PlusIcon className="w-5 h-5 mr-2" />
+                  Nuovo Modello
+                </ModernButton>
+              </>
+            )}
           </div>
         </div>
       ) : (
@@ -462,25 +520,17 @@ export default function ModelsPage() {
 
           {/* Tipo Struttura */}
           <ModernSelect
-            label="Tipo Struttura"
+            label="Tipo Struttura *"
             value={editingModel?.structure_type_id || ''}
             onChange={(e) => setEditingModel(prev => prev ? { ...prev, structure_type_id: e.target.value || null } : null)}
             options={[
-              { value: '', label: 'Nessun tipo assegnato' },
+              { value: '', label: 'Seleziona tipo struttura...' },
               ...structureTypes.map(st => ({
                 value: st.id,
-                label: `${st.name} (${st.structure_category})`
+                label: st.name
               }))
             ]}
-          />
-
-          {/* Order Index */}
-          <ModernInput
-            label="Ordine Visualizzazione"
-            type="number"
-            value={editingModel?.order_index || models.length + 1}
-            onChange={(e) => setEditingModel(prev => prev ? { ...prev, order_index: parseInt(e.target.value) } : null)}
-            placeholder="1"
+            required
           />
 
           {/* Image Upload */}
@@ -508,7 +558,7 @@ export default function ModelsPage() {
             </ModernButton>
             <ModernButton
               onClick={handleSave}
-              disabled={isSaving || isUploading || !editingModel?.name || !editingModel?.base_price}
+              disabled={isSaving || isUploading || !editingModel?.name || !editingModel?.base_price || !editingModel?.structure_type_id}
             >
               {isSaving ? 'Salvataggio...' : (editingModel?.id ? 'Salva Modifiche' : 'Crea Modello')}
             </ModernButton>
