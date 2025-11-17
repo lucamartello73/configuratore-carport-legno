@@ -87,9 +87,17 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
     setIsSubmitting(true)
 
     try {
+      // Mappa contact_preference: 'telefono' → 'phone' per DB
+      const contactPreferenceMap: Record<string, string> = {
+        'email': 'email',
+        'telefono': 'phone',    // ⚠️ DB usa 'phone', non 'telefono'
+        'whatsapp': 'whatsapp'
+      }
+      const dbContactPreference = contactPreferenceMap[contactPreference] || 'email'
+
+      // Campi comuni base
       let configurationData: any = {
         configurator_type: configuratorType,
-        structure_type: configuration.structureType || configuration.structureTypeId || "",
         model_id: configuration.modelId,
         width: configuration.width || 0,
         depth: configuration.depth || 0,
@@ -100,21 +108,30 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
         customer_phone: customerData.phone,
         customer_address: customerData.address,
         customer_city: customerData.city,
-        customer_cap: "",
-        customer_province: "",
-        package_type: selectedPackage,
-        contact_preference: contactPreference,
+        contact_preference: dbContactPreference,  // ✅ Mapped value
         total_price: 0,
         status: "submitted",
+        notes: customerData.notes || "",
       }
 
       if (configuratorType === 'acciaio') {
+        // ACCIAIO-specific fields
+        configurationData.structure_type = configuration.structureType || ""
         configurationData.structure_color = configuration.structureColor
         configurationData.coverage_color = configuration.coverageColor
         configurationData.surface_id = configuration.surfaceId
-      } else {
+        configurationData.customer_cap = ""        // ACCIAIO usa customer_cap
+        configurationData.customer_province = ""   // ACCIAIO ha province
+        configurationData.package_type = selectedPackage  // ACCIAIO usa package_type stringa
+      } else if (configuratorType === 'legno') {
+        // LEGNO-specific fields
+        configurationData.structure_type_id = configuration.structureTypeId || ""
         configurationData.color_id = configuration.colorId
         configurationData.surface_id = configuration.surfaceId
+        configurationData.customer_postal_code = ""  // ✅ LEGNO usa customer_postal_code
+        configurationData.package_id = null           // ✅ LEGNO usa package_id (FK UUID)
+        // ❌ NO customer_province per LEGNO
+        // ❌ NO package_type per LEGNO (usa package_id)
       }
 
       const result = await saveConfiguration(configurationData)

@@ -9,17 +9,15 @@ interface BaseConfigurationData {
   width: number
   depth: number
   height: number
-  package_type: string
   customer_name: string
   customer_email: string
   customer_phone: string
   customer_address: string
   customer_city: string
-  customer_cap: string
-  customer_province: string
   contact_preference: string
   total_price: number
   status: string
+  notes?: string
 }
 
 // Interfaccia specifica per ACCIAIO
@@ -30,6 +28,9 @@ interface AcciaioConfigurationData extends BaseConfigurationData {
   coverage_id: string
   structure_color: string // Colore struttura acciaio (nome o UUID)
   surface_id?: string
+  customer_cap: string // ACCIAIO usa customer_cap
+  customer_province?: string // ACCIAIO può avere province
+  package_type?: string // ACCIAIO può usare package_type stringa
 }
 
 // Interfaccia specifica per LEGNO
@@ -40,6 +41,8 @@ interface LegnoConfigurationData extends BaseConfigurationData {
   coverage_id: string
   color_id: string // UUID colore legno
   surface_id: string // UUID superficie (obbligatorio per legno)
+  customer_postal_code: string // LEGNO usa customer_postal_code (non customer_cap!)
+  package_id?: string | null // LEGNO usa package_id (FK UUID, non stringa!)
 }
 
 export type ConfigurationData = AcciaioConfigurationData | LegnoConfigurationData
@@ -59,15 +62,21 @@ async function prepareEmailData(
     customerPhone: originalData.customer_phone,
     customerAddress: originalData.customer_address,
     customerCity: originalData.customer_city,
-    customerCap: originalData.customer_cap,
-    customerProvince: originalData.customer_province,
+    customerCap: configuratorType === 'acciaio' 
+      ? (originalData as AcciaioConfigurationData).customer_cap
+      : (originalData as LegnoConfigurationData).customer_postal_code,
+    customerProvince: configuratorType === 'acciaio' 
+      ? (originalData as AcciaioConfigurationData).customer_province
+      : '',
     contactPreference: originalData.contact_preference,
     dimensions: {
       width: originalData.width,
       depth: originalData.depth,
       height: originalData.height,
     },
-    packageType: originalData.package_type,
+    packageType: configuratorType === 'acciaio'
+      ? (originalData as AcciaioConfigurationData).package_type || ''
+      : (originalData as LegnoConfigurationData).package_id || '',
     totalPrice: originalData.total_price,
   }
 
@@ -110,7 +119,7 @@ export async function saveConfiguration(configData: ConfigurationData) {
     const supabase = await createClient()
     const configurationsTable = getTableName(configuratorType, 'configurations')
 
-    // Campi comuni base (senza CAP - gestito per tipo configuratore)
+    // Campi comuni base
     let dbData: any = {
       width: configData.width,
       depth: configData.depth,
@@ -118,28 +127,25 @@ export async function saveConfiguration(configData: ConfigurationData) {
       model_id: configData.model_id,
       coverage_id: configData.coverage_id,
       surface_id: configData.surface_id || null,
-      package_type: configData.package_type,
       customer_name: configData.customer_name,
       customer_email: configData.customer_email,
       customer_phone: configData.customer_phone,
       customer_address: configData.customer_address,
       customer_city: configData.customer_city,
-      customer_province: configData.customer_province,
       contact_preference: configData.contact_preference,
       total_price: configData.total_price,
       status: configData.status,
-    }
-
-    // Campo CAP: nome diverso tra acciaio e legno
-    if (configuratorType === 'acciaio') {
-      dbData.customer_cap = configData.customer_cap
-    } else if (configuratorType === 'legno') {
-      dbData.customer_postal_code = configData.customer_cap
+      notes: configData.notes || null,
     }
 
     // Gestione CONFIGURATORE ACCIAIO
     if (configuratorType === 'acciaio') {
       const acciaioData = configData as AcciaioConfigurationData
+      
+      // Campi specifici ACCIAIO
+      dbData.customer_cap = acciaioData.customer_cap
+      dbData.customer_province = acciaioData.customer_province || null
+      dbData.package_type = acciaioData.package_type || null
       
       let structure_color_id = null
       
@@ -186,12 +192,15 @@ export async function saveConfiguration(configData: ConfigurationData) {
         surface_id: legnoData.surface_id,
       })
 
-      dbData = {
-        ...dbData,
-        structure_type_id: legnoData.structure_type_id,
-        color_id: legnoData.color_id,
-        surface_id: legnoData.surface_id, // Obbligatorio per legno
-      }
+      // Campi specifici LEGNO
+      dbData.customer_postal_code = legnoData.customer_postal_code  // ⚠️ NOT customer_cap!
+      dbData.package_id = legnoData.package_id || null              // ⚠️ FK UUID, NOT package_type!
+      dbData.structure_type_id = legnoData.structure_type_id
+      dbData.color_id = legnoData.color_id
+      dbData.surface_id = legnoData.surface_id // Obbligatorio per legno
+      
+      // ❌ NON aggiungere customer_province (non esiste nel DB LEGNO)
+      // ❌ NON aggiungere package_type (LEGNO usa package_id FK)
     }
 
     console.log(`[${configuratorType}] Attempting to insert into ${configurationsTable}:`, dbData)
