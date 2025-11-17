@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { AdminLayout } from "@/components/admin/admin-layout"
+import { ModernAdminWrapper } from "@/components/admin/modern-admin-wrapper"
 import { createClient } from "@/lib/supabase/client"
 import { Plus, Edit, Trash2 } from "lucide-react"
 import bcrypt from "bcryptjs"
@@ -121,14 +121,14 @@ export default function UsersPage() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <ModernAdminWrapper title="Utenti Admin">
         <div className="text-center py-8 text-green-600">Caricamento utenti...</div>
-      </AdminLayout>
+      </ModernAdminWrapper>
     )
   }
 
   return (
-    <AdminLayout>
+    <ModernAdminWrapper title="Utenti Admin">
       <div className="space-y-6">
         {/* Add/Edit Form */}
         {isEditing && (
@@ -252,6 +252,6 @@ export default function UsersPage() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </ModernAdminWrapper>
   )
 }

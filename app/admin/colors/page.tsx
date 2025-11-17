@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { AdminLayout } from "@/components/admin/admin-layout"
+import { ModernAdminWrapper } from "@/components/admin/modern-admin-wrapper"
 import { PlusIcon, EditIcon, TrashIcon } from "@/components/ui/simple-icons"
 import { createClient } from "@/lib/supabase/client"
 
@@ -222,14 +222,14 @@ export default function ColorsPage() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <ModernAdminWrapper title="Colori">
         <div className="text-center py-8 text-green-600">Caricamento colori...</div>
-      </AdminLayout>
+      </ModernAdminWrapper>
     )
   }
 
   return (
-    <AdminLayout>
+    <ModernAdminWrapper title="Colori">
       <div className="space-y-6">
         <Card>
           <CardHeader>
@@ -431,6 +431,6 @@ export default function ColorsPage() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </ModernAdminWrapper>
   )
 }

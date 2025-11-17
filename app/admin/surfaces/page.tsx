@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { AdminLayout } from "@/components/admin/admin-layout"
+import { ModernAdminWrapper } from "@/components/admin/modern-admin-wrapper"
 import { createClient } from "@/lib/supabase/client"
 import { Plus, Edit, Trash2, ImageIcon } from "lucide-react"
 import { ImageUpload } from "@/components/admin/image-upload"
@@ -127,14 +127,14 @@ export default function SurfacesPage() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <ModernAdminWrapper title="Superfici">
         <div className="text-center py-8 text-green-600">Caricamento superfici...</div>
-      </AdminLayout>
+      </ModernAdminWrapper>
     )
   }
 
   return (
-    <AdminLayout>
+    <ModernAdminWrapper title="Superfici">
       <div className="space-y-6">
         {/* Add/Edit Form */}
         {isEditing && (
@@ -244,6 +244,6 @@ export default function SurfacesPage() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </ModernAdminWrapper>
   )
 }

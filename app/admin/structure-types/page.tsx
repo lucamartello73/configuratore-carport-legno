@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { AdminLayout } from "@/components/admin/admin-layout"
+import { ModernAdminWrapper } from "@/components/admin/modern-admin-wrapper"
 import { createClient } from "@/lib/supabase/client"
 import { Plus, Edit, Trash2, Save, X } from "lucide-react"
 import { ImageUpload } from "@/components/admin/image-upload"
@@ -203,14 +203,14 @@ export default function StructureTypesPage() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <ModernAdminWrapper title="Tipi Struttura">
         <div className="text-center py-8 text-green-600">Caricamento tipi di struttura...</div>
-      </AdminLayout>
+      </ModernAdminWrapper>
     )
   }
 
   return (
-    <AdminLayout>
+    <ModernAdminWrapper title="Tipi Struttura">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -423,6 +423,6 @@ export default function StructureTypesPage() {
           ))}
         </div>
       </div>
-    </AdminLayout>
+    </ModernAdminWrapper>
   )
 }

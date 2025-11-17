@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { AdminLayout } from "@/components/admin/admin-layout"
+import { ModernAdminWrapper } from "@/components/admin/modern-admin-wrapper"
 import { createClient } from "@/lib/supabase/client"
 import { Plus, Edit, Trash2, Save, X } from "lucide-react"
 import { ImageUpload } from "@/components/admin/image-upload"
@@ -203,14 +203,14 @@ export default function CoverageTypesPage() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <ModernAdminWrapper title="Tipi Copertura">
         <div className="text-center py-8 text-green-600">Caricamento tipi di copertura...</div>
-      </AdminLayout>
+      </ModernAdminWrapper>
     )
   }
 
   return (
-    <AdminLayout>
+    <ModernAdminWrapper title="Tipi Copertura">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -367,6 +367,6 @@ export default function CoverageTypesPage() {
           ))}
         </div>
       </div>
-    </AdminLayout>
+    </ModernAdminWrapper>
   )
 }

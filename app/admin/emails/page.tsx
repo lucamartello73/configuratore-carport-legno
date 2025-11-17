@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { AdminLayout } from "@/components/admin/admin-layout"
+import { ModernAdminWrapper } from "@/components/admin/modern-admin-wrapper"
 import { sendEmail } from "@/lib/email/sendwith"
 import { Mail, Send } from "lucide-react"
 
@@ -90,7 +90,7 @@ export default function EmailsPage() {
   }
 
   return (
-    <AdminLayout>
+    <ModernAdminWrapper title="Email">
       <div className="space-y-6">
         {/* Email Templates */}
         <Card>
@@ -178,6 +178,6 @@ export default function EmailsPage() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </ModernAdminWrapper>
   )
 }

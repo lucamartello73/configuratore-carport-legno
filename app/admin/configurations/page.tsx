@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { AdminLayout } from "@/components/admin/admin-layout"
+import { ModernAdminWrapper } from "@/components/admin/modern-admin-wrapper"
 import { createClient } from "@/lib/supabase/client"
 import { deleteConfiguration } from "@/app/actions/delete-configuration"
 import { Eye, Mail, Search, Trash2 } from "lucide-react"
@@ -169,14 +169,14 @@ export default function ConfigurationsPage() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <ModernAdminWrapper title="Configurazioni">
         <div className="text-center py-8 text-green-600">Caricamento configurazioni...</div>
-      </AdminLayout>
+      </ModernAdminWrapper>
     )
   }
 
   return (
-    <AdminLayout>
+    <ModernAdminWrapper title="Configurazioni">
       <div className="space-y-6">
         {/* Filters */}
         <Card>
@@ -349,6 +349,6 @@ export default function ConfigurationsPage() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </ModernAdminWrapper>
   )
 }

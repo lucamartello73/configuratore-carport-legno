@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { AdminLayout } from "@/components/admin/admin-layout"
+import { ModernAdminWrapper } from "@/components/admin/modern-admin-wrapper"
 import { createClient } from "@/lib/supabase/client"
 import { Plus, Edit, Trash2 } from "lucide-react"
 import { ImageUpload } from "@/components/admin/image-upload"
@@ -173,14 +173,14 @@ export default function ModelsPage() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <ModernAdminWrapper title="Modelli">
         <div className="text-center py-8 text-green-600">Caricamento modelli...</div>
-      </AdminLayout>
+      </ModernAdminWrapper>
     )
   }
 
   return (
-    <AdminLayout>
+    <ModernAdminWrapper title="Modelli">
       <div className="space-y-6">
         {isEditing && (
           <Card>
@@ -307,6 +307,6 @@ export default function ModelsPage() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </ModernAdminWrapper>
   )
 }
