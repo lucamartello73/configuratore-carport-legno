@@ -119,13 +119,22 @@ export default function ModelsPage() {
 
   async function fetchStructureTypes() {
     try {
-      const { data, error } = await supabase
-        .from('carport_structure_types')
-        .select('id, name, structure_category')
-        .eq('structure_category', configuratorTypeUpper)
-        .eq('attivo', true)
+      // Usa tabella diversa in base al configuratore
+      const tableName = configuratorType === 'legno' ? 'carport_legno_structure_types' : 'carport_structure_types'
+      const activeField = configuratorType === 'legno' ? 'is_active' : 'attivo'
+      
+      const query = supabase
+        .from(tableName)
+        .select('id, name')
+        .eq(activeField, true)
         .order('name')
+      
+      // Solo per FERRO filtra per structure_category
+      if (configuratorType === 'ferro') {
+        query.eq('structure_category', configuratorTypeUpper)
+      }
 
+      const { data, error } = await query
       if (error) throw error
       setStructureTypes(data || [])
     } catch (error) {
