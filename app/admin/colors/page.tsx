@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useConfigurator } from '@/contexts/ConfiguratorContext'
+import { useAdminConfigurator } from '@/contexts/AdminConfiguratorContext'
 import { createClient } from '@/lib/supabase/client'
 import { getAdminSession } from '@/lib/auth/admin-auth'
 import { PlusIcon, Edit2Icon, Trash2Icon } from 'lucide-react'
@@ -12,6 +12,7 @@ import { ModernInput } from '@/components/admin/ui/ModernInput'
 import { ModernSelect } from '@/components/admin/ui/ModernSelect'
 import { ModernModal } from '@/components/admin/ui/ModernModal'
 import { ImageUploadDragDrop } from '@/components/admin/ui/ImageUploadDragDrop'
+import { ConfiguratorSwitch } from '@/components/admin/ConfiguratorSwitch'
 
 interface Color {
   id: string
@@ -43,7 +44,7 @@ export default function ColorsPage() {
   const [session, setSession] = useState<any>(null)
   
   // Data state
-  const { configuratorType } = useConfigurator()
+  const { configuratorType, theme } = useAdminConfigurator()
   const [colors, setColors] = useState<Color[]>([])
   const [loading, setLoading] = useState(true)
   
@@ -253,25 +254,25 @@ export default function ColorsPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F5F1E8', padding: '24px' }}>
+    <div style={{ minHeight: '100vh', background: theme.bgGradient, padding: '24px' }}>
       {/* Header Card */}
       <ModernCard className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Gestione Colori</h1>
-            <p className="text-gray-600 mt-2">
-              Configuratore: <span className={`font-semibold ${configuratorType === 'FERRO' ? 'text-[#525252]' : 'text-[#5A3A1A]'}`}>
-                {configuratorType}
-              </span>
-            </p>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold" style={{ color: theme.primary }}>Gestione Colori</h1>
           </div>
-          <ModernButton
-            onClick={() => handleEdit()}
-            icon={<PlusIcon className="w-5 h-5" />}
-            size="lg"
-          >
-            Nuovo Colore
-          </ModernButton>
+          <div className="flex-shrink-0">
+            <ConfiguratorSwitch />
+          </div>
+          <div className="flex-1 flex justify-end">
+            <ModernButton
+              onClick={() => handleEdit()}
+              icon={<PlusIcon className="w-5 h-5" />}
+              size="lg"
+            >
+              Nuovo Colore
+            </ModernButton>
+          </div>
         </div>
       </ModernCard>
 
