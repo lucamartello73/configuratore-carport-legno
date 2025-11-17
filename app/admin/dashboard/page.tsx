@@ -7,6 +7,8 @@ import { FileText, Package, TrendingUp, Palette, Settings, Users, Mail, DollarSi
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { clearAdminSession, getAdminSession } from "@/lib/auth/admin-auth"
+import { ConfiguratorSwitch } from "@/components/admin/ConfiguratorSwitch"
+import { useAdminConfigurator } from "@/contexts/AdminConfiguratorContext"
 
 interface Configuration {
   id: string
@@ -54,6 +56,7 @@ const navigation = [
 
 export default function AdminDashboardPage() {
   const router = useRouter()
+  const { theme } = useAdminConfigurator()
   const [session, setSession] = useState(getAdminSession())
   const [stats, setStats] = useState<Stats>({
     totalConfigurations: 0,
@@ -153,7 +156,7 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F5F1E8' }}>
+    <div style={{ minHeight: '100vh', background: theme.bgGradient }}>
       {/* Header con pulsanti */}
       <div style={{ 
         backgroundColor: 'white', 
@@ -166,14 +169,33 @@ export default function AdminDashboardPage() {
           padding: '0 24px',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          gap: '16px',
+          flexWrap: 'wrap'
         }}>
-          <div>
-            <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827' }}>
+          <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
+            <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: theme.primary }}>
               Admin Panel - Carport Configurator
             </h1>
           </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
+          
+          {/* Switch Configuratore al centro */}
+          <div style={{ 
+            flex: '0 0 auto',
+            display: 'flex',
+            justifyContent: 'center'
+          }}>
+            <ConfiguratorSwitch />
+          </div>
+
+          <div style={{ 
+            flex: '1 1 auto', 
+            minWidth: '200px',
+            display: 'flex', 
+            gap: '12px',
+            justifyContent: 'flex-end',
+            alignItems: 'center'
+          }}>
             <Link href="/configura">
               <button style={{
                 display: 'flex',
