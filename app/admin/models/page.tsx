@@ -1,16 +1,17 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { ModernAdminWrapper } from "@/components/admin/modern-admin-wrapper"
-import { createClient } from "@/lib/supabase/client"
-import { Plus, Edit, Trash2 } from "lucide-react"
-import { ImageUpload } from "@/components/admin/image-upload"
-import Image from "next/image"
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useConfigurator } from '@/contexts/ConfiguratorContext'
+import { createClient } from '@/lib/supabase/client'
+import { getAdminSession } from '@/lib/auth/admin-auth'
+import { PlusIcon, Edit2Icon, Trash2Icon, PackageIcon } from 'lucide-react'
+import { ModernCard } from '@/components/admin/ui/ModernCard'
+import { ModernButton } from '@/components/admin/ui/ModernButton'
+import { ModernInput } from '@/components/admin/ui/ModernInput'
+import { ModernSelect } from '@/components/admin/ui/ModernSelect'
+import { ModernModal } from '@/components/admin/ui/ModernModal'
+import { ImageUploadDragDrop } from '@/components/admin/ui/ImageUploadDragDrop'
 
 interface Model {
   id: string
@@ -19,7 +20,10 @@ interface Model {
   base_price: number
   image: string
   structure_type_id: string | null
-  structure_type: {
+  configurator_type: 'FERRO' | 'LEGNO'
+  order_index: number
+  created_at: string
+  structure_type?: {
     name: string
     structure_category: string
   }
@@ -31,282 +35,486 @@ interface StructureType {
   structure_category: string
 }
 
+// Demo models for quick setup
+const DEMO_MODELS: Omit<Model, 'id' | 'created_at' | 'configurator_type' | 'structure_type'>[] = [
+  { 
+    name: 'Carport Standard 3x5', 
+    description: 'Carport base con struttura robusta, ideale per 1 auto',
+    base_price: 2500, 
+    image: '',
+    structure_type_id: null,
+    order_index: 1
+  },
+  { 
+    name: 'Carport Premium 4x6', 
+    description: 'Carport di fascia alta con finiture premium, protezione completa',
+    base_price: 4200, 
+    image: '',
+    structure_type_id: null,
+    order_index: 2
+  },
+  { 
+    name: 'Carport Doppio 6x6', 
+    description: 'Carport doppio per 2 auto, struttura rinforzata',
+    base_price: 6800, 
+    image: '',
+    structure_type_id: null,
+    order_index: 3
+  },
+  { 
+    name: 'Carport Addossato 3x4.5', 
+    description: 'Carport da parete, ottimizza lo spazio laterale',
+    base_price: 2100, 
+    image: '',
+    structure_type_id: null,
+    order_index: 4
+  },
+]
+
 export default function ModelsPage() {
+  // Auth and routing
+  const router = useRouter()
+  const [mounted, setMounted] = useState(false)
+  const [session, setSession] = useState<any>(null)
+  
+  // Data state
+  const { configuratorType } = useConfigurator()
   const [models, setModels] = useState<Model[]>([])
   const [structureTypes, setStructureTypes] = useState<StructureType[]>([])
   const [loading, setLoading] = useState(true)
-  const [isEditing, setIsEditing] = useState(false)
-  const [editingModel, setEditingModel] = useState<Partial<Model>>({})
+  
+  // UI state
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingModel, setEditingModel] = useState<Partial<Model> | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  
+  const supabase = createClient()
 
+  // Handle SSR - mount check
   useEffect(() => {
-    fetchModels()
-    fetchStructureTypes()
-  }, [])
-
-  const fetchStructureTypes = async () => {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from("carport_structure_types")
-      .select("id, name, structure_category")
-      .eq("is_active", true)
-      .order("name")
-
-    if (error) {
-      console.error("Error fetching structure types:", error)
-    } else {
-      setStructureTypes(data || [])
-    }
-  }
-
-  const fetchModels = async () => {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from("carport_models")
-      .select(`
-        *,
-        structure_type:carport_structure_types!carport_models_structure_type_id_fkey(name, structure_category)
-      `)
-      .order("name")
-
-    if (error) {
-      console.error("Error fetching models:", error)
-    } else {
-      setModels(data || [])
-    }
-    setLoading(false)
-  }
-
-  const handleSave = async () => {
-    const supabase = createClient()
-
-    if (editingModel.id) {
-      const { error } = await supabase
-        .from("carport_models")
-        .update({
-          name: editingModel.name,
-          description: editingModel.description,
-          base_price: editingModel.base_price,
-          image: editingModel.image,
-          structure_type_id: editingModel.structure_type_id || null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", editingModel.id)
-
-      if (error) {
-        console.error("Error updating model:", error)
-        return
-      }
-    } else {
-      const { error } = await supabase.from("carport_models").insert([
-        {
-          name: editingModel.name,
-          description: editingModel.description,
-          base_price: editingModel.base_price,
-          image: editingModel.image,
-          structure_type_id: editingModel.structure_type_id || null,
-        },
-      ])
-
-      if (error) {
-        console.error("Error creating model:", error)
-        return
-      }
-    }
-
-    setIsEditing(false)
-    setEditingModel({})
-    fetchModels()
-  }
-
-  const handleEdit = (model: Model) => {
-    setEditingModel(model)
-    setIsEditing(true)
-  }
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("Sei sicuro di voler eliminare questo modello?")) return
-
-    const supabase = createClient()
-
-    const { data: configurationsUsingModel, error: checkError } = await supabase
-      .from("carport_configurations")
-      .select("id, customer_name")
-      .eq("model_id", id)
-      .limit(5)
-
-    if (checkError) {
-      console.error("Error checking model usage:", checkError)
-      alert("Errore durante la verifica dell'utilizzo del modello")
+    setMounted(true)
+    const adminSession = getAdminSession()
+    
+    if (!adminSession) {
+      router.push('/admin/login')
       return
     }
+    
+    setSession(adminSession)
+  }, [router])
 
-    if (configurationsUsingModel && configurationsUsingModel.length > 0) {
-      const customerNames = configurationsUsingModel.map((config) => config.customer_name).join(", ")
-      const moreText = configurationsUsingModel.length === 5 ? " e altri..." : ""
-      alert(
-        `Impossibile eliminare il modello. È utilizzato in ${configurationsUsingModel.length} configurazione/i di: ${customerNames}${moreText}.\n\nElimina prima le configurazioni che utilizzano questo modello.`,
-      )
-      return
-    }
-
-    const { error } = await supabase.from("carport_models").delete().eq("id", id)
-
-    if (error) {
-      console.error("Error deleting model:", error)
-      alert("Errore durante l'eliminazione del modello")
-    } else {
+  // Fetch models and structure types
+  useEffect(() => {
+    if (session) {
       fetchModels()
+      fetchStructureTypes()
+    }
+  }, [configuratorType, session])
+
+  async function fetchModels() {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('carport_models')
+        .select(`
+          *,
+          structure_type:carport_structure_types!carport_models_structure_type_id_fkey(name, structure_category)
+        `)
+        .eq('configurator_type', configuratorType)
+        .order('order_index')
+        .order('name')
+
+      if (error) throw error
+      setModels(data || [])
+    } catch (error) {
+      console.error('Errore caricamento modelli:', error)
+      alert('Errore nel caricamento dei modelli')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleCancel = () => {
-    setIsEditing(false)
-    setEditingModel({})
-  }
+  async function fetchStructureTypes() {
+    try {
+      const { data, error } = await supabase
+        .from('carport_structure_types')
+        .select('id, name, structure_category')
+        .eq('structure_category', configuratorType)
+        .eq('is_active', true)
+        .order('name')
 
-  const getStructureTypeName = (model: any) => {
-    if (model.structure_type) {
-      return `${model.structure_type.name} (${model.structure_type.structure_category})`
+      if (error) throw error
+      setStructureTypes(data || [])
+    } catch (error) {
+      console.error('Errore caricamento tipi struttura:', error)
     }
-    return "Nessun tipo assegnato"
   }
 
-  if (loading) {
+  async function handleCreateDemo() {
+    try {
+      setIsSaving(true)
+      
+      const demoData = DEMO_MODELS.map(model => ({
+        ...model,
+        configurator_type: configuratorType,
+        created_at: new Date().toISOString(),
+      }))
+
+      const { error } = await supabase
+        .from('carport_models')
+        .insert(demoData)
+
+      if (error) throw error
+      
+      alert(`✅ ${DEMO_MODELS.length} modelli demo creati con successo!`)
+      fetchModels()
+    } catch (error) {
+      console.error('Errore creazione demo:', error)
+      alert('Errore nella creazione dei modelli demo')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  function openCreateModal() {
+    setEditingModel({
+      name: '',
+      description: '',
+      base_price: 0,
+      image: '',
+      structure_type_id: null,
+      order_index: models.length + 1,
+      configurator_type: configuratorType,
+    })
+    setIsModalOpen(true)
+  }
+
+  function openEditModal(model: Model) {
+    setEditingModel({ ...model })
+    setIsModalOpen(true)
+  }
+
+  async function handleSave() {
+    if (!editingModel?.name || !editingModel?.base_price) {
+      alert('Compila i campi obbligatori: Nome e Prezzo Base')
+      return
+    }
+
+    try {
+      setIsSaving(true)
+
+      const modelData = {
+        name: editingModel.name,
+        description: editingModel.description || '',
+        base_price: editingModel.base_price,
+        image: editingModel.image || '',
+        structure_type_id: editingModel.structure_type_id || null,
+        order_index: editingModel.order_index || models.length + 1,
+        configurator_type: configuratorType,
+        updated_at: new Date().toISOString(),
+      }
+
+      if (editingModel.id) {
+        // Update existing
+        const { error } = await supabase
+          .from('carport_models')
+          .update(modelData)
+          .eq('id', editingModel.id)
+
+        if (error) throw error
+      } else {
+        // Create new
+        const { error } = await supabase
+          .from('carport_models')
+          .insert([modelData])
+
+        if (error) throw error
+      }
+
+      setIsModalOpen(false)
+      setEditingModel(null)
+      fetchModels()
+    } catch (error) {
+      console.error('Errore salvataggio modello:', error)
+      alert('Errore nel salvataggio del modello')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  async function handleDelete(id: string, name: string) {
+    if (!confirm(`Sei sicuro di voler eliminare il modello "${name}"?`)) return
+
+    try {
+      // Check if model is used in configurations
+      const { data: usageCheck, error: checkError } = await supabase
+        .from('carport_configurations')
+        .select('id, customer_name')
+        .eq('model_id', id)
+        .limit(5)
+
+      if (checkError) throw checkError
+
+      if (usageCheck && usageCheck.length > 0) {
+        const customerNames = usageCheck.map(c => c.customer_name).join(', ')
+        const moreText = usageCheck.length === 5 ? ' e altri...' : ''
+        alert(
+          `❌ Impossibile eliminare il modello.\n\n` +
+          `È utilizzato in ${usageCheck.length} configurazione/i di:\n${customerNames}${moreText}\n\n` +
+          `Elimina prima le configurazioni che lo utilizzano.`
+        )
+        return
+      }
+
+      const { error } = await supabase
+        .from('carport_models')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+      
+      fetchModels()
+    } catch (error) {
+      console.error('Errore eliminazione modello:', error)
+      alert('Errore durante l\'eliminazione del modello')
+    }
+  }
+
+  function handleImageUpload(url: string) {
+    setEditingModel(prev => prev ? { ...prev, image: url } : null)
+  }
+
+  // Loading state during SSR
+  if (!mounted || !session) {
     return (
-      <ModernAdminWrapper title="Modelli">
-        <div className="text-center py-8 text-green-600">Caricamento modelli...</div>
-      </ModernAdminWrapper>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <PackageIcon className="w-12 h-12 mx-auto mb-4 text-gray-400 animate-pulse" />
+          <p className="text-gray-500">Caricamento...</p>
+        </div>
+      </div>
     )
   }
 
   return (
-    <ModernAdminWrapper title="Modelli">
-      <div className="space-y-6">
-        {isEditing && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-green-800">{editingModel.id ? "Modifica Modello" : "Nuovo Modello"}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="name">Nome</Label>
-                <Input
-                  id="name"
-                  value={editingModel.name || ""}
-                  onChange={(e) => setEditingModel({ ...editingModel, name: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="description">Descrizione</Label>
-                <Textarea
-                  id="description"
-                  value={editingModel.description || ""}
-                  onChange={(e) => setEditingModel({ ...editingModel, description: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="base_price">Prezzo Base (€)</Label>
-                <Input
-                  id="base_price"
-                  type="number"
-                  value={editingModel.base_price || ""}
-                  onChange={(e) => setEditingModel({ ...editingModel, base_price: Number(e.target.value) })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="structure_type">Tipo di Struttura</Label>
-                <select
-                  id="structure_type"
-                  value={editingModel.structure_type_id || ""}
-                  onChange={(e) => setEditingModel({ ...editingModel, structure_type_id: e.target.value || null })}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                >
-                  <option value="">Seleziona tipo di struttura</option>
-                  {structureTypes.map((structureType) => (
-                    <option key={structureType.id} value={structureType.id}>
-                      {structureType.name} ({structureType.structure_category})
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  Collega questo modello a un tipo di struttura per filtrare le opzioni nel configuratore
-                </p>
-              </div>
-              <div>
-                <ImageUpload
-                  currentImage={editingModel.image}
-                  onImageUploaded={(url) => setEditingModel({ ...editingModel, image: url })}
-                  folder="models"
-                  label="Immagine Modello"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={handleSave} className="bg-orange-500 hover:bg-orange-600 text-white">
-                  Salva
-                </Button>
-                <Button variant="outline" onClick={handleCancel} className="bg-transparent">
-                  Annulla
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-green-800">Modelli ({models.length})</CardTitle>
-              <Button
-                onClick={() => setIsEditing(true)}
-                className="bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Nuovo Modello
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {models.map((model) => (
-                <div key={model.id} className="border rounded-lg p-4 bg-green-50">
-                  <Image
-                    src={model.image || "/placeholder.svg?height=200&width=300&query=carport model"}
-                    alt={model.name}
-                    width={300}
-                    height={200}
-                    className="w-full h-48 object-cover rounded-lg mb-4"
-                    placeholder="blur"
-                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement
-                      target.src = "/placeholder.svg?height=200&width=300"
-                    }}
-                  />
-                  <h3 className="font-semibold text-green-800 mb-2">{model.name}</h3>
-                  <p className="text-green-600 text-sm mb-3">{model.description}</p>
-                  <p className="text-xs text-gray-600 mb-2">
-                    <strong>Tipo:</strong> {getStructureTypeName(model)}
-                  </p>
-                  <p className="font-semibold text-green-800 mb-4">€{model.base_price.toLocaleString()}</p>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(model)} className="bg-transparent">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleDelete(model.id)}
-                      className="bg-transparent text-red-600 border-red-300 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+    <div className="p-6 max-w-7xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <PackageIcon className="w-8 h-8 text-blue-600" />
+            <h1 className="text-3xl font-bold text-gray-900">Modelli Carport</h1>
+          </div>
+          <p className="mt-2 text-gray-600">
+            Gestisci i modelli di carport disponibili per {configuratorType}
+          </p>
+        </div>
+        
+        <div className="flex gap-3">
+          {models.length === 0 && (
+            <ModernButton
+              variant="outline"
+              onClick={handleCreateDemo}
+              disabled={isSaving}
+            >
+              ✨ Crea Demo
+            </ModernButton>
+          )}
+          <ModernButton onClick={openCreateModal}>
+            <PlusIcon className="w-5 h-5 mr-2" />
+            Nuovo Modello
+          </ModernButton>
+        </div>
       </div>
-    </ModernAdminWrapper>
+
+      {/* Stats Badge */}
+      <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg border border-blue-200">
+        <PackageIcon className="w-5 h-5 text-blue-600" />
+        <span className="text-sm font-medium text-blue-900">
+          {models.length} modelli per <span className="font-bold">{configuratorType}</span>
+        </span>
+      </div>
+
+      {/* Models Grid */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="animate-pulse">
+              <div className="bg-gray-200 rounded-lg h-48" />
+              <div className="mt-4 space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-3/4" />
+                <div className="h-3 bg-gray-200 rounded w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : models.length === 0 ? (
+        <div className="text-center py-16 border-2 border-dashed border-gray-300 rounded-lg">
+          <PackageIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">
+            Nessun modello trovato
+          </h3>
+          <p className="text-gray-500 mb-6">
+            Crea il primo modello per {configuratorType} o importa i dati demo
+          </p>
+          <div className="flex gap-3 justify-center">
+            <ModernButton variant="outline" onClick={handleCreateDemo}>
+              ✨ Crea Demo
+            </ModernButton>
+            <ModernButton onClick={openCreateModal}>
+              <PlusIcon className="w-5 h-5 mr-2" />
+              Nuovo Modello
+            </ModernButton>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {models.map(model => (
+            <ModernCard
+              key={model.id}
+              title={model.name}
+              description={model.description}
+              image={model.image}
+              badge={
+                <span className={`px-2 py-1 text-xs font-semibold rounded ${
+                  configuratorType === 'FERRO' 
+                    ? 'bg-gray-100 text-gray-800' 
+                    : 'bg-amber-100 text-amber-800'
+                }`}>
+                  {configuratorType}
+                </span>
+              }
+              metadata={[
+                { label: 'Prezzo Base', value: `€ ${model.base_price.toFixed(2)}` },
+                { 
+                  label: 'Tipo Struttura', 
+                  value: model.structure_type?.name || 'Non assegnato' 
+                },
+              ]}
+              actions={
+                <>
+                  <ModernButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => openEditModal(model)}
+                  >
+                    <Edit2Icon className="w-4 h-4" />
+                  </ModernButton>
+                  <ModernButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(model.id, model.name)}
+                  >
+                    <Trash2Icon className="w-4 h-4 text-red-500" />
+                  </ModernButton>
+                </>
+              }
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Modal Create/Edit */}
+      <ModernModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false)
+          setEditingModel(null)
+        }}
+        title={editingModel?.id ? 'Modifica Modello' : 'Nuovo Modello'}
+        size="lg"
+      >
+        <div className="space-y-6">
+          {/* Nome */}
+          <ModernInput
+            label="Nome Modello *"
+            value={editingModel?.name || ''}
+            onChange={(e) => setEditingModel(prev => prev ? { ...prev, name: e.target.value } : null)}
+            placeholder="es: Carport Standard 3x5"
+            required
+          />
+
+          {/* Descrizione */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Descrizione
+            </label>
+            <textarea
+              value={editingModel?.description || ''}
+              onChange={(e) => setEditingModel(prev => prev ? { ...prev, description: e.target.value } : null)}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Descrizione dettagliata del modello..."
+            />
+          </div>
+
+          {/* Prezzo Base */}
+          <ModernInput
+            label="Prezzo Base (€) *"
+            type="number"
+            step="0.01"
+            value={editingModel?.base_price || 0}
+            onChange={(e) => setEditingModel(prev => prev ? { ...prev, base_price: parseFloat(e.target.value) } : null)}
+            placeholder="2500.00"
+            required
+          />
+
+          {/* Tipo Struttura */}
+          <ModernSelect
+            label="Tipo Struttura"
+            value={editingModel?.structure_type_id || ''}
+            onChange={(e) => setEditingModel(prev => prev ? { ...prev, structure_type_id: e.target.value || null } : null)}
+            options={[
+              { value: '', label: 'Nessun tipo assegnato' },
+              ...structureTypes.map(st => ({
+                value: st.id,
+                label: `${st.name} (${st.structure_category})`
+              }))
+            ]}
+          />
+
+          {/* Order Index */}
+          <ModernInput
+            label="Ordine Visualizzazione"
+            type="number"
+            value={editingModel?.order_index || models.length + 1}
+            onChange={(e) => setEditingModel(prev => prev ? { ...prev, order_index: parseInt(e.target.value) } : null)}
+            placeholder="1"
+          />
+
+          {/* Image Upload */}
+          <ImageUploadDragDrop
+            label="Immagine Modello"
+            value={editingModel?.image || ''}
+            onChange={handleImageUpload}
+            isUploading={isUploading}
+            onUploadStart={() => setIsUploading(true)}
+            onUploadComplete={() => setIsUploading(false)}
+            description="Trascina un'immagine qui o clicca per selezionare (consigliato 800x600px)"
+          />
+
+          {/* Actions */}
+          <div className="flex gap-3 justify-end pt-4 border-t">
+            <ModernButton
+              variant="outline"
+              onClick={() => {
+                setIsModalOpen(false)
+                setEditingModel(null)
+              }}
+              disabled={isSaving || isUploading}
+            >
+              Annulla
+            </ModernButton>
+            <ModernButton
+              onClick={handleSave}
+              disabled={isSaving || isUploading || !editingModel?.name || !editingModel?.base_price}
+            >
+              {isSaving ? 'Salvataggio...' : (editingModel?.id ? 'Salva Modifiche' : 'Crea Modello')}
+            </ModernButton>
+          </div>
+        </div>
+      </ModernModal>
+    </div>
   )
 }
