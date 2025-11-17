@@ -15,7 +15,7 @@ import { ModernModal } from '@/components/admin/ui/ModernModal'
 import { ImageUploadDragDrop } from '@/components/admin/ui/ImageUploadDragDrop'
 import { useConfigurator } from '@/contexts/ConfiguratorContext'
 import { createClient } from '@/lib/supabase/client'
-import { PlusIcon, EditIcon, TrashIcon } from 'lucide-react'
+import { PlusIcon, Edit2Icon, Trash2Icon } from 'lucide-react'
 
 interface Color {
   id: string
@@ -26,30 +26,32 @@ interface Color {
   category: string
   image_url?: string
   configurator_type: 'FERRO' | 'LEGNO'
-  order_index?: number
+  order_index: number
   created_at: string
 }
 
-interface Model {
-  id: string
-  name: string
-}
+const DEMO_COLORS = [
+  { name: 'Nero Opaco', code: 'RAL 9005', category: 'Struttura', hex_color: '#000000', price_modifier: 0, order_index: 1 },
+  { name: 'Grigio Antracite', code: 'RAL 7016', category: 'Struttura', hex_color: '#1C1F24', price_modifier: 20, order_index: 2 },
+  { name: 'Bianco Puro', code: 'RAL 9010', category: 'Struttura', hex_color: '#FFFFFF', price_modifier: 0, order_index: 3 },
+  { name: 'Marrone Cioccolato', code: 'RAL 8017', category: 'Struttura', hex_color: '#3E2723', price_modifier: 30, order_index: 4 },
+  { name: 'Legno Naturale', code: '–', category: 'Copertura', hex_color: '#C49A6C', price_modifier: 50, order_index: 5 },
+  { name: 'Verde Muschio', code: 'RAL 6005', category: 'Copertura', hex_color: '#114232', price_modifier: 40, order_index: 6 }
+]
 
 export default function ColorsPage() {
   const { configuratorType } = useConfigurator()
   const [colors, setColors] = useState<Color[]>([])
-  const [models, setModels] = useState<Model[]>([])
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingColor, setEditingColor] = useState<Partial<Color> | null>(null)
   const [saving, setSaving] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
 
   const supabase = createClient()
 
-  // Carica colori e modelli
   useEffect(() => {
     loadColors()
-    loadModels()
   }, [configuratorType])
 
   async function loadColors() {
@@ -59,8 +61,7 @@ export default function ColorsPage() {
         .from('carport_colors')
         .select('*')
         .eq('configurator_type', configuratorType)
-        .order('category')
-        .order('order_index', { nullsFirst: false })
+        .order('order_index')
         .order('name')
 
       if (error) throw error
@@ -73,18 +74,80 @@ export default function ColorsPage() {
     }
   }
 
-  async function loadModels() {
+  async function createDemoColors() {
     try {
-      const tableName = configuratorType === 'FERRO' ? 'carport_models' : 'carport_legno_models'
-      const { data, error } = await supabase
-        .from(tableName)
-        .select('id, name')
-        .order('name')
+      setSaving(true)
+      const demoData = DEMO_COLORS.map(color => ({
+        ...color,
+        configurator_type: configuratorType
+      }))
+
+      const { error } = await supabase
+        .from('carport_colors')
+        .insert(demoData)
 
       if (error) throw error
-      setModels(data || [])
+      await loadColors()
+      alert(`${DEMO_COLORS.length} colori demo creati per ${configuratorType}`)
     } catch (error) {
-      console.error('Errore caricamento modelli:', error)
+      console.error('Errore creazione demo:', error)
+      alert('Errore nella creazione dei colori demo')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function uploadImageToSupabase(file: File): Promise<string> {
+    try {
+      setUploadingImage(true)
+      
+      // Genera nome file unico
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${configuratorType.toLowerCase()}-color-${Date.now()}.${fileExt}`
+      const filePath = `colors/${fileName}`
+
+      // Upload a Supabase Storage
+      const { error: uploadError, data } = await supabase.storage
+        .from('configurator-images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (uploadError) throw uploadError
+
+      // Ottieni URL pubblico
+      const { data: { publicUrl } } = supabase.storage
+        .from('configurator-images')
+        .getPublicUrl(filePath)
+
+      return publicUrl
+    } catch (error) {
+      console.error('Errore upload immagine:', error)
+      throw error
+    } finally {
+      setUploadingImage(false)
+    }
+  }
+
+  async function handleImageChange(urlOrFile: string) {
+    // Se è un file (blob/base64), fai upload
+    if (urlOrFile.startsWith('data:image') || urlOrFile.startsWith('blob:')) {
+      try {
+        // Converti base64 in File
+        const response = await fetch(urlOrFile)
+        const blob = await response.blob()
+        const file = new File([blob], 'color-image.jpg', { type: blob.type })
+        
+        const publicUrl = await uploadImageToSupabase(file)
+        setEditingColor({ ...editingColor, image_url: publicUrl })
+      } catch (error) {
+        console.error('Errore conversione immagine:', error)
+        alert('Errore nel caricamento dell\'immagine')
+      }
+    } else {
+      // È già un URL, salvalo direttamente
+      setEditingColor({ ...editingColor, image_url: urlOrFile })
     }
   }
 
@@ -109,7 +172,6 @@ export default function ColorsPage() {
       }
 
       if (editingColor.id) {
-        // Update
         const { error } = await supabase
           .from('carport_colors')
           .update(colorData)
@@ -117,7 +179,6 @@ export default function ColorsPage() {
 
         if (error) throw error
       } else {
-        // Insert
         const { error } = await supabase
           .from('carport_colors')
           .insert([colorData])
@@ -157,239 +218,258 @@ export default function ColorsPage() {
     setEditingColor(color || { 
       configurator_type: configuratorType,
       price_modifier: 0,
-      order_index: 0
+      order_index: colors.length + 1,
+      category: 'Struttura'
     })
     setIsModalOpen(true)
   }
 
   return (
     <ModernAdminWrapper title="Gestione Colori">
-      <main className="space-y-8">
-        {/* Header Info */}
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Gestione Colori</h1>
+            <p className="text-gray-600 mt-2">
+              Configuratore: <span className={`font-semibold ${
+                configuratorType === 'FERRO' ? 'text-[#525252]' : 'text-[#5A3A1A]'
+              }`}>{configuratorType}</span>
+            </p>
+          </div>
+          <ModernButton
+            onClick={() => openModal()}
+            icon={<PlusIcon className="w-5 h-5" />}
+            size="lg"
+          >
+            Nuovo Colore
+          </ModernButton>
+        </div>
+      </div>
+
+      {/* Loading */}
+      {loading ? (
         <ModernCard>
-          <ModernCardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <ModernCardTitle>Colori Configuratore</ModernCardTitle>
-                <p className="text-sm text-gray-600 mt-2">
-                  Gestisci i colori disponibili per il configuratore{' '}
-                  <span className={`font-semibold ${
-                    configuratorType === 'FERRO' ? 'text-[#525252]' : 'text-[#5A3A1A]'
-                  }`}>
-                    {configuratorType}
-                  </span>
-                </p>
-              </div>
-              <ModernButton
-                onClick={() => openModal()}
-                icon={<PlusIcon className="w-5 h-5" />}
+          <ModernCardContent className="py-16 text-center">
+            <div className="inline-flex items-center gap-3 text-gray-600">
+              <svg className="animate-spin h-6 w-6" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              <span>Caricamento colori...</span>
+            </div>
+          </ModernCardContent>
+        </ModernCard>
+      ) : colors.length === 0 ? (
+        /* Empty State */
+        <ModernCard>
+          <ModernCardContent className="py-16 text-center">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Nessun colore disponibile
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Inizia creando colori manualmente o carica i colori demo
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              <ModernButton onClick={() => openModal()}>
+                Crea Nuovo Colore
+              </ModernButton>
+              <ModernButton 
+                variant="secondary" 
+                onClick={createDemoColors}
+                loading={saving}
               >
-                Nuovo Colore
+                Carica Colori Demo
               </ModernButton>
             </div>
-          </ModernCardHeader>
+          </ModernCardContent>
         </ModernCard>
-
-        {/* Loading State */}
-        {loading ? (
-          <ModernCard>
-            <ModernCardContent className="py-12 text-center text-gray-500">
-              <div className="flex items-center justify-center gap-3">
-                <svg className="animate-spin h-6 w-6 text-blue-600" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                <span>Caricamento colori...</span>
-              </div>
-            </ModernCardContent>
-          </ModernCard>
-        ) : colors.length === 0 ? (
-          /* Empty State */
-          <ModernCard>
-            <ModernCardContent className="py-12 text-center">
-              <div className="space-y-4">
-                <p className="text-gray-600 font-medium">
-                  Nessun colore trovato per {configuratorType}
-                </p>
-                <p className="text-sm text-gray-500">
-                  Inizia creando il primo colore
-                </p>
-                <div className="pt-2">
-                  <ModernButton onClick={() => openModal()}>
-                    Crea Primo Colore
-                  </ModernButton>
+      ) : (
+        /* Grid Colori */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {colors.map((color) => (
+            <ModernCard key={color.id} className="hover:shadow-lg transition-shadow">
+              <ModernCardContent className="p-0">
+                {/* Immagine o Fallback Hex */}
+                <div className="relative h-48 rounded-t-xl overflow-hidden bg-gray-50">
+                  {color.image_url ? (
+                    <img
+                      src={color.image_url}
+                      alt={color.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback a hex se immagine fallisce
+                        e.currentTarget.style.display = 'none'
+                        if (e.currentTarget.nextElementSibling) {
+                          (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex'
+                        }
+                      }}
+                    />
+                  ) : null}
+                  <div 
+                    className={`w-full h-full ${color.image_url ? 'hidden' : 'flex'} items-center justify-center text-white text-4xl font-bold`}
+                    style={{ backgroundColor: color.hex_color || '#CCCCCC' }}
+                  >
+                    {!color.image_url && color.hex_color && (
+                      <span className="text-sm bg-black bg-opacity-50 px-3 py-1 rounded">
+                        {color.hex_color}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Badge Tipo */}
+                  <div className="absolute top-3 right-3">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold shadow-lg ${
+                      color.configurator_type === 'FERRO' 
+                        ? 'bg-gray-900 text-white' 
+                        : 'bg-amber-700 text-white'
+                    }`}>
+                      {color.configurator_type}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </ModernCardContent>
-          </ModernCard>
-        ) : (
-          /* Grid Colori */
-          <section>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {colors.map((color) => (
-                <ModernCard key={color.id}>
-                  <ModernCardHeader>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <ModernCardTitle className="truncate">{color.name}</ModernCardTitle>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            color.configurator_type === 'FERRO' 
-                              ? 'bg-gray-100 text-gray-800' 
-                              : 'bg-amber-100 text-amber-800'
-                          }`}>
-                            {color.configurator_type}
-                          </span>
-                          <span className="text-xs text-gray-500">{color.category}</span>
-                        </div>
-                        {color.code && (
-                          <p className="text-xs text-gray-400 mt-1">Codice: {color.code}</p>
-                        )}
-                      </div>
-                      {color.hex_color && (
-                        <div
-                          className="w-14 h-14 rounded-lg border-2 border-gray-200 shadow-sm flex-shrink-0"
-                          style={{ backgroundColor: color.hex_color }}
-                          title={color.hex_color}
-                        />
-                      )}
+
+                {/* Info */}
+                <div className="p-5 space-y-3">
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-lg">{color.name}</h3>
+                    {color.code && (
+                      <p className="text-sm text-gray-500">{color.code}</p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">{color.category}</span>
+                    <span className="font-semibold text-gray-900">
+                      {color.price_modifier > 0 ? '+' : ''}
+                      {color.price_modifier}€
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <span className="text-xs text-gray-400">
+                      Ordine: {color.order_index}
+                    </span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => openModal(color)}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Modifica"
+                      >
+                        <Edit2Icon className="w-4 h-4 text-gray-600" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(color.id)}
+                        className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Elimina"
+                      >
+                        <Trash2Icon className="w-4 h-4 text-red-600" />
+                      </button>
                     </div>
-                  </ModernCardHeader>
-                  <ModernCardContent>
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                      <div>
-                        <span className="text-sm font-semibold text-gray-900">
-                          {color.price_modifier > 0 && '+'}
-                          {color.price_modifier}€
-                        </span>
-                        {color.order_index !== undefined && (
-                          <span className="text-xs text-gray-400 ml-2">
-                            Ordine: {color.order_index}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        <ModernButton
-                          size="sm"
-                          variant="ghost"
-                          icon={<EditIcon className="w-4 h-4" />}
-                          onClick={() => openModal(color)}
-                        >
-                          Modifica
-                        </ModernButton>
-                        <ModernButton
-                          size="sm"
-                          variant="danger"
-                          icon={<TrashIcon className="w-4 h-4" />}
-                          onClick={() => handleDelete(color.id)}
-                        >
-                          Elimina
-                        </ModernButton>
-                      </div>
-                    </div>
-                  </ModernCardContent>
-                </ModernCard>
-              ))}
-            </div>
-          </section>
-        )}
+                  </div>
+                </div>
+              </ModernCardContent>
+            </ModernCard>
+          ))}
+        </div>
+      )}
 
-        {/* Modal Crea/Modifica */}
-        <ModernModal
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false)
-            setEditingColor(null)
-          }}
-          title={editingColor?.id ? 'Modifica Colore' : 'Nuovo Colore'}
-          size="lg"
-        >
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <ModernInput
-                label="Nome Colore"
-                value={editingColor?.name || ''}
-                onChange={(e) => setEditingColor({ ...editingColor, name: e.target.value })}
-                required
-                placeholder="es. Nero Opaco"
-              />
-
-              <ModernInput
-                label="Codice (RAL/altro)"
-                value={editingColor?.code || ''}
-                onChange={(e) => setEditingColor({ ...editingColor, code: e.target.value })}
-                placeholder="es. RAL 9005"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <ModernInput
-                label="Categoria"
-                value={editingColor?.category || ''}
-                onChange={(e) => setEditingColor({ ...editingColor, category: e.target.value })}
-                required
-                placeholder="es. Struttura, Copertura"
-              />
-
-              <ModernInput
-                label="Colore Esadecimale"
-                type="text"
-                value={editingColor?.hex_color || ''}
-                onChange={(e) => setEditingColor({ ...editingColor, hex_color: e.target.value })}
-                placeholder="#000000"
-                helperText="Formato: #RRGGBB"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <ModernInput
-                label="Supplemento Prezzo (€)"
-                type="number"
-                step="0.01"
-                value={editingColor?.price_modifier || 0}
-                onChange={(e) => setEditingColor({ ...editingColor, price_modifier: parseFloat(e.target.value) || 0 })}
-                helperText="Aggiunta o riduzione sul prezzo base"
-              />
-
-              <ModernInput
-                label="Ordine Visualizzazione"
-                type="number"
-                value={editingColor?.order_index || 0}
-                onChange={(e) => setEditingColor({ ...editingColor, order_index: parseInt(e.target.value) || 0 })}
-                helperText="Ordine di visualizzazione (0 = primo)"
-              />
-            </div>
-
-            <ImageUploadDragDrop
-              label="Immagine Campione Colore"
-              value={editingColor?.image_url || ''}
-              onChange={(url) => setEditingColor({ ...editingColor, image_url: url })}
-              helperText="Carica un'immagine del colore o inserisci un URL"
+      {/* Modal Crea/Modifica */}
+      <ModernModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false)
+          setEditingColor(null)
+        }}
+        title={editingColor?.id ? 'Modifica Colore' : 'Nuovo Colore'}
+        size="lg"
+      >
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <ModernInput
+              label="Nome Colore"
+              value={editingColor?.name || ''}
+              onChange={(e) => setEditingColor({ ...editingColor, name: e.target.value })}
+              required
+              placeholder="es. Nero Opaco"
             />
 
-            <div className="flex gap-3 pt-6 border-t border-gray-200">
-              <ModernButton
-                onClick={handleSave}
-                loading={saving}
-                className="flex-1"
-              >
-                {editingColor?.id ? 'Salva Modifiche' : 'Crea Colore'}
-              </ModernButton>
-              <ModernButton
-                variant="secondary"
-                onClick={() => {
-                  setIsModalOpen(false)
-                  setEditingColor(null)
-                }}
-                className="flex-1"
-                disabled={saving}
-              >
-                Annulla
-              </ModernButton>
-            </div>
+            <ModernInput
+              label="Codice (RAL/altro)"
+              value={editingColor?.code || ''}
+              onChange={(e) => setEditingColor({ ...editingColor, code: e.target.value })}
+              placeholder="es. RAL 9005"
+            />
           </div>
-        </ModernModal>
-      </main>
+
+          <div className="grid grid-cols-2 gap-4">
+            <ModernSelect
+              label="Categoria"
+              value={editingColor?.category || 'Struttura'}
+              onChange={(e) => setEditingColor({ ...editingColor, category: e.target.value })}
+              required
+              options={[
+                { value: 'Struttura', label: 'Struttura' },
+                { value: 'Copertura', label: 'Copertura' },
+                { value: 'Altro', label: 'Altro' }
+              ]}
+            />
+
+            <ModernInput
+              label="Colore Esadecimale"
+              value={editingColor?.hex_color || ''}
+              onChange={(e) => setEditingColor({ ...editingColor, hex_color: e.target.value })}
+              placeholder="#000000"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <ModernInput
+              label="Supplemento Prezzo (€)"
+              type="number"
+              step="0.01"
+              value={editingColor?.price_modifier || 0}
+              onChange={(e) => setEditingColor({ ...editingColor, price_modifier: parseFloat(e.target.value) || 0 })}
+            />
+
+            <ModernInput
+              label="Ordine Visualizzazione"
+              type="number"
+              value={editingColor?.order_index || 0}
+              onChange={(e) => setEditingColor({ ...editingColor, order_index: parseInt(e.target.value) || 0 })}
+            />
+          </div>
+
+          <ImageUploadDragDrop
+            label="Immagine Colore"
+            value={editingColor?.image_url || ''}
+            onChange={handleImageChange}
+            helperText={uploadingImage ? 'Caricamento in corso...' : 'Carica immagine o inserisci URL'}
+          />
+
+          <div className="flex gap-3 pt-4">
+            <ModernButton
+              onClick={handleSave}
+              loading={saving || uploadingImage}
+              disabled={uploadingImage}
+              className="flex-1"
+            >
+              {editingColor?.id ? 'Salva Modifiche' : 'Crea Colore'}
+            </ModernButton>
+            <ModernButton
+              variant="secondary"
+              onClick={() => {
+                setIsModalOpen(false)
+                setEditingColor(null)
+              }}
+              className="flex-1"
+              disabled={saving || uploadingImage}
+            >
+              Annulla
+            </ModernButton>
+          </div>
+        </div>
+      </ModernModal>
     </ModernAdminWrapper>
   )
 }
