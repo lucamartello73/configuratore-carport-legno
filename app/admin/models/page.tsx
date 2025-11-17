@@ -123,7 +123,7 @@ export default function ModelsPage() {
         .from('carport_structure_types')
         .select('id, name, structure_category')
         .eq('structure_category', configuratorType)
-        .eq('is_active', true)
+        .eq('attivo', true)
         .order('name')
 
       if (error) throw error
