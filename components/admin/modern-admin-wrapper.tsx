@@ -17,7 +17,8 @@ import {
   ArrowLeft 
 } from "lucide-react"
 import { getAdminSession, clearAdminSession } from "@/lib/auth/admin-auth"
-import { ConfiguratorSelector } from "@/components/admin/ui/ConfiguratorSelector"
+import { ConfiguratorSwitch } from "@/components/admin/ConfiguratorSwitch"
+import { useAdminConfigurator } from "@/contexts/AdminConfiguratorContext"
 
 interface ModernAdminWrapperProps {
   children: React.ReactNode
@@ -40,6 +41,7 @@ const navigation = [
 export function ModernAdminWrapper({ children, title }: ModernAdminWrapperProps) {
   const router = useRouter()
   const [session, setSession] = useState(getAdminSession())
+  const { theme } = useAdminConfigurator()
 
   useEffect(() => {
     const adminSession = getAdminSession()
@@ -57,14 +59,14 @@ export function ModernAdminWrapper({ children, title }: ModernAdminWrapperProps)
 
   if (!session) {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: '#F5F1E8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ color: '#6B7280' }}>Caricamento...</div>
+      <div style={{ minHeight: '100vh', background: theme.bgGradient, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: theme.secondary }}>Caricamento...</div>
       </div>
     )
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F5F1E8' }}>
+    <div style={{ minHeight: '100vh', background: theme.bgGradient }}>
       {/* Header con pulsanti */}
       <div style={{ 
         backgroundColor: 'white', 
@@ -77,14 +79,33 @@ export function ModernAdminWrapper({ children, title }: ModernAdminWrapperProps)
           padding: '0 24px',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          gap: '16px',
+          flexWrap: 'wrap'
         }}>
-          <div>
-            <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827' }}>
+          <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
+            <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: theme.primary }}>
               Admin Panel - {title}
             </h1>
           </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
+          
+          {/* Switch Configuratore al centro */}
+          <div style={{ 
+            flex: '0 0 auto',
+            display: 'flex',
+            justifyContent: 'center'
+          }}>
+            <ConfiguratorSwitch />
+          </div>
+
+          <div style={{ 
+            flex: '1 1 auto', 
+            minWidth: '200px',
+            display: 'flex', 
+            gap: '12px',
+            justifyContent: 'flex-end',
+            alignItems: 'center'
+          }}>
             <Link href="/configura">
               <button style={{
                 display: 'flex',
@@ -92,29 +113,37 @@ export function ModernAdminWrapper({ children, title }: ModernAdminWrapperProps)
                 gap: '8px',
                 padding: '8px 16px',
                 backgroundColor: 'white',
-                border: '1px solid #D1D5DB',
+                border: `1px solid ${theme.secondary}`,
                 borderRadius: '12px',
                 fontSize: '14px',
                 fontWeight: '500',
-                color: '#374151',
+                color: theme.primary,
                 cursor: 'pointer',
-                transition: 'background-color 0.2s'
+                transition: 'all 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F3F4F6'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = `${theme.primary}10`
+                e.currentTarget.style.borderColor = theme.primary
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white'
+                e.currentTarget.style.borderColor = theme.secondary
+              }}
               >
                 <ArrowLeft style={{ width: '16px', height: '16px' }} />
-                Vai al Configuratore
+                <span style={{ display: 'inline' }} className="hidden-mobile">Configuratore</span>
               </button>
             </Link>
             <span style={{ 
               display: 'flex', 
               alignItems: 'center',
               fontSize: '14px', 
-              color: '#6B7280',
+              color: theme.secondary,
               padding: '0 12px'
-            }}>
-              Benvenuto, {session?.name}
+            }}
+            className="hidden-mobile"
+            >
+              {session?.name}
             </span>
             <button 
               onClick={handleLogout}
@@ -124,19 +153,25 @@ export function ModernAdminWrapper({ children, title }: ModernAdminWrapperProps)
                 gap: '8px',
                 padding: '8px 16px',
                 backgroundColor: 'white',
-                border: '1px solid #D1D5DB',
+                border: `1px solid ${theme.secondary}`,
                 borderRadius: '12px',
                 fontSize: '14px',
                 fontWeight: '500',
-                color: '#374151',
+                color: theme.primary,
                 cursor: 'pointer',
-                transition: 'background-color 0.2s'
+                transition: 'all 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F3F4F6'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = `${theme.primary}10`
+                e.currentTarget.style.borderColor = theme.primary
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white'
+                e.currentTarget.style.borderColor = theme.secondary
+              }}
             >
               <LogOut style={{ width: '16px', height: '16px' }} />
-              Logout
+              <span style={{ display: 'inline' }} className="hidden-mobile">Logout</span>
             </button>
           </div>
         </div>
@@ -148,17 +183,12 @@ export function ModernAdminWrapper({ children, title }: ModernAdminWrapperProps)
         <h1 style={{ 
           fontSize: '30px', 
           fontWeight: 'bold', 
-          color: '#111827', 
+          color: theme.primary, 
           textAlign: 'center',
           marginBottom: '48px'
         }}>
           {title}
         </h1>
-
-        {/* Selettore Configuratore */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
-          <ConfiguratorSelector />
-        </div>
 
         {/* Barra navigazione orizzontale */}
         <div style={{
@@ -189,7 +219,7 @@ export function ModernAdminWrapper({ children, title }: ModernAdminWrapperProps)
                   textDecoration: 'none',
                   transition: 'color 0.2s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#5A3A1A'}
+                onMouseEnter={(e) => e.currentTarget.style.color = theme.primary}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#374151'}
               >
                 <Icon style={{ width: '20px', height: '20px' }} />
@@ -204,6 +234,14 @@ export function ModernAdminWrapper({ children, title }: ModernAdminWrapperProps)
           {children}
         </div>
       </div>
+
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .hidden-mobile {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }
