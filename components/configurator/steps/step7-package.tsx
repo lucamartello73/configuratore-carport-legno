@@ -74,8 +74,11 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
     setCustomerData(newCustomerData)
     
     // Clear error quando user digita (SPEC requirement)
-    if (errors[field as keyof FormErrors]) {
-      setErrors({ ...errors, [field]: undefined })
+    const errorKey = field as keyof FormErrors
+    if (errors[errorKey]) {
+      const newErrors = { ...errors }
+      delete newErrors[errorKey]
+      setErrors(newErrors)
     }
   }
 
