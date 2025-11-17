@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useConfigurator } from '@/contexts/ConfiguratorContext'
+import { useAdminConfigurator } from '@/contexts/AdminConfiguratorContext'
 import { createClient } from '@/lib/supabase/client'
 import { getAdminSession } from '@/lib/auth/admin-auth'
 import { PlusIcon, Edit2Icon, Trash2Icon, PackageIcon } from 'lucide-react'
@@ -78,7 +78,7 @@ export default function ModelsPage() {
   const [session, setSession] = useState<any>(null)
   
   // Data state
-  const { configuratorType } = useConfigurator()
+  const { configuratorType, configuratorTypeUpper } = useAdminConfigurator()
   const [models, setModels] = useState<Model[]>([])
   const [structureTypes, setStructureTypes] = useState<StructureType[]>([])
   const [loading, setLoading] = useState(true)
@@ -122,7 +122,7 @@ export default function ModelsPage() {
       const { data, error } = await supabase
         .from('carport_structure_types')
         .select('id, name, structure_category')
-        .eq('structure_category', configuratorType)
+        .eq('structure_category', configuratorTypeUpper)
         .eq('attivo', true)
         .order('name')
 
