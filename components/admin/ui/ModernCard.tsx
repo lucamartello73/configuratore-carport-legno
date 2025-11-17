@@ -48,12 +48,13 @@ export function ModernCard({
     >
       {/* Image */}
       {image && (
-        <div className="relative h-48 bg-gray-200">
+        <div className="relative w-full h-48 bg-gray-200">
           <Image
             src={image}
             alt={title || 'Image'}
-            fill
-            className="object-cover"
+            width={800}
+            height={600}
+            className="w-full h-full object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         </div>
