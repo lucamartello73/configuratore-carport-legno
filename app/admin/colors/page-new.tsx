@@ -7,7 +7,8 @@ import { ModernInput } from '@/components/admin/ui/ModernInput'
 import { ModernButton } from '@/components/admin/ui/ModernButton'
 import { useConfigurator } from '@/contexts/ConfiguratorContext'
 import { createClient } from '@/lib/supabase/client'
-import { PlusIcon, EditIcon, TrashIcon, XIcon } from 'lucide-react'
+import { PlusIcon, EditIcon, TrashIcon } from 'lucide-react'
+import { ModernModal } from '@/components/admin/ui/ModernModal'
 
 interface Color {
   id: string
@@ -208,24 +209,13 @@ export default function ColorsPageNew() {
       )}
 
       {/* Modal Modifica/Crea */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <ModernCard className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <ModernCardHeader>
-              <div className="flex items-center justify-between">
-                <ModernCardTitle>
-                  {editingColor?.id ? 'Modifica Colore' : 'Nuovo Colore'}
-                </ModernCardTitle>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <XIcon className="w-6 h-6" />
-                </button>
-              </div>
-            </ModernCardHeader>
-            <ModernCardContent>
-              <div className="space-y-4">
+      <ModernModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingColor?.id ? 'Modifica Colore' : 'Nuovo Colore'}
+        size="md"
+      >
+        <div className="space-y-4">
                 <ModernInput
                   label="Nome"
                   value={editingColor?.name || ''}
@@ -290,10 +280,7 @@ export default function ColorsPageNew() {
                   </ModernButton>
                 </div>
               </div>
-            </ModernCardContent>
-          </ModernCard>
-        </div>
-      )}
+      </ModernModal>
     </ModernAdminWrapper>
   )
 }
