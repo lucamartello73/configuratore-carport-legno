@@ -20,5 +20,6 @@ export interface ConfigurationData {
   customerCap: string
   customerProvince: string
   contactPreference: string // Added contact preference field
+  privacyAccepted?: boolean // Privacy acceptance for GDPR compliance
   accessories?: string[] // Array di ID accessori selezionati (solo per legno)
 }
