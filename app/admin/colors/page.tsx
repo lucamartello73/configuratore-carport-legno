@@ -1,3 +1,4 @@
+// Force rebuild: Modern UI - 20251117_170500
 "use client"
 
 import { useEffect, useState } from 'react'
@@ -473,4 +474,3 @@ export default function ColorsPage() {
     </ModernAdminWrapper>
   )
 }
-// Force rebuild: Modern UI deployed - 20251117_165127
