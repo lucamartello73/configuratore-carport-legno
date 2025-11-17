@@ -1,8 +1,18 @@
 import Link from "next/link"
+import Image from "next/image"
 
 export function FooterMartello1930() {
   return (
     <footer className="main-footer">
+      <div className="footer-logo-section">
+        <Image
+          src="/logo-martello.jpg"
+          alt="Logo Martello 1930"
+          width={150}
+          height={100}
+          className="footer-logo"
+        />
+      </div>
       <div className="footer-container">
         <div className="footer-column">
           <h4 className="footer-title">Sede e Showroom</h4>

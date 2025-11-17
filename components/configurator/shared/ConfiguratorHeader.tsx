@@ -15,10 +15,10 @@ export function ConfiguratorHeader({ title, configuratorType }: ConfiguratorHead
         <div className="header-left">
           <Link href="/">
             <Image
-              src="https://www.genspark.ai/api/files/s/b9y2WFTPti"
+              src="/logo-martello.jpg"
               alt="Logo Martello 1930"
-              width={100}
-              height={50}
+              width={120}
+              height={80}
               className="header-logo"
               priority
             />
