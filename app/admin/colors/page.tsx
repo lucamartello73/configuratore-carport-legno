@@ -473,3 +473,4 @@ export default function ColorsPage() {
     </ModernAdminWrapper>
   )
 }
+// Force rebuild: Modern UI deployed - 20251117_165127
