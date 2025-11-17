@@ -1,9 +1,18 @@
 "use client"
 
 // Admin button: fixed bottom-right corner, icon only
+// NASCOSTO nell'admin panel per evitare conflitti
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 export function AdminAccessButton() {
+  const pathname = usePathname()
+  
+  // NON mostrare il pulsante se siamo già nell'admin panel
+  if (pathname?.startsWith('/admin')) {
+    return null
+  }
+  
   return (
     <Link 
       href="/admin/login"
