@@ -2,18 +2,55 @@
 
 // Admin button: fixed bottom-right corner, icon only
 import Link from "next/link"
-import { SimpleIcons } from "@/components/ui/simple-icons"
 
 export function AdminAccessButton() {
   return (
-    <div className="fixed bottom-6 right-6 z-50">
-      <Link 
-        href="/admin/login"
-        className="w-12 h-12 bg-gray-800 hover:bg-gray-900 text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
-        title="Area Admin"
+    <Link 
+      href="/admin/login"
+      style={{
+        position: 'fixed',
+        bottom: '24px',
+        right: '24px',
+        width: '48px',
+        height: '48px',
+        backgroundColor: '#1f2937',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+        zIndex: 9999,
+        transition: 'all 0.3s ease',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = '#111827'
+        e.currentTarget.style.transform = 'scale(1.1)'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = '#1f2937'
+        e.currentTarget.style.transform = 'scale(1)'
+      }}
+      title="Area Admin"
+    >
+      <svg 
+        width="20" 
+        height="20" 
+        fill="none" 
+        stroke="white" 
+        strokeWidth="2"
+        viewBox="0 0 24 24"
       >
-        <SimpleIcons.Settings className="h-5 w-5" />
-      </Link>
-    </div>
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+        />
+        <path 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
+        />
+      </svg>
+    </Link>
   )
 }
