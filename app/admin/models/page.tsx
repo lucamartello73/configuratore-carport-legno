@@ -169,11 +169,17 @@ export default function ModelsPage() {
       if (error) throw error
       
       // Mappa i dati per compatibilità tra tabelle LEGNO e FERRO
-      const mappedData = (data || []).map(model => ({
-        ...model,
-        base_price: model.base_price || parseFloat(model.price_supplement || '0'),
-        attivo: model.attivo !== undefined ? model.attivo : model.is_active
-      }))
+      const mappedData = (data || []).map(model => {
+        // Trova il tipo struttura corrispondente
+        const structureType = structureTypes.find(st => st.id === model.structure_type_id)
+        
+        return {
+          ...model,
+          base_price: model.base_price || parseFloat(model.price_supplement || '0'),
+          attivo: model.attivo !== undefined ? model.attivo : model.is_active,
+          structure_type: structureType ? { name: structureType.name } : null
+        }
+      })
       
       setModels(mappedData)
     } catch (error) {
