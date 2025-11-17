@@ -6,16 +6,13 @@ import { Button } from "@/components/ui/button"
 
 export function AdminAccessButton() {
   return (
-    <div className="fixed top-4 right-4 z-50">
-      <Link href="/admin/login">
-        <Button
-          variant="outline"
-          size="sm"
-          className="bg-white/90 backdrop-blur-sm border-gray-300 hover:bg-gray-50 shadow-sm"
-        >
-          <SimpleIcons.Settings className="h-4 w-4 mr-2" />
-          Admin
-        </Button>
+    <div className="fixed bottom-6 right-6 z-50">
+      <Link 
+        href="/admin/login"
+        className="w-12 h-12 bg-gray-800 hover:bg-gray-900 text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
+        title="Area Admin"
+      >
+        <SimpleIcons.Settings className="h-5 w-5" />
       </Link>
     </div>
   )
