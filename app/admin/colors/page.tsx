@@ -79,14 +79,22 @@ export default function ColorsPage() {
   async function fetchColors() {
     try {
       setLoading(true)
-      const { data, error } = await supabase
-        .from('carport_colors')
+      
+      // Usa tabelle separate per Legno e Ferro
+      const tableName = configuratorType === 'legno' 
+        ? 'carport_legno_colors' 
+        : 'carport_colors'
+      
+      console.log(`[Admin] Fetching from ${tableName} for ${configuratorType}`)
+      
+      const { data, error} = await supabase
+        .from(tableName)
         .select('*')
-        .eq('configurator_type', configuratorTypeUpper)
-        .order('order_index')
+        .order('display_order', { ascending: true })
         .order('name')
 
       if (error) throw error
+      console.log(`[Admin] Loaded ${data?.length || 0} colors:`, data)
       setColors(data || [])
     } catch (error) {
       console.error('Errore caricamento colori:', error)
