@@ -207,23 +207,18 @@ export default function ColorsPage() {
           /* Empty State */
           <ModernCard>
             <ModernCardContent className="py-12 text-center">
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                  </svg>
+              <div className="space-y-4">
+                <p className="text-gray-600 font-medium">
+                  Nessun colore trovato per {configuratorType}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Inizia creando il primo colore
+                </p>
+                <div className="pt-2">
+                  <ModernButton onClick={() => openModal()}>
+                    Crea Primo Colore
+                  </ModernButton>
                 </div>
-                <div>
-                  <p className="text-gray-600 font-medium">
-                    Nessun colore trovato per {configuratorType}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Inizia creando il primo colore
-                  </p>
-                </div>
-                <ModernButton onClick={() => openModal()}>
-                  Crea Primo Colore
-                </ModernButton>
               </div>
             </ModernCardContent>
           </ModernCard>
