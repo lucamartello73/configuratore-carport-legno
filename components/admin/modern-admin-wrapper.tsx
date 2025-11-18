@@ -14,7 +14,8 @@ import {
   Users, 
   Mail, 
   LogOut, 
-  ArrowLeft 
+  ArrowLeft,
+  BarChart3
 } from "lucide-react"
 import { getAdminSession, clearAdminSession } from "@/lib/auth/admin-auth"
 import { ConfiguratorSwitch } from "@/components/admin/ConfiguratorSwitch"
@@ -35,6 +36,7 @@ const navigation = [
   { name: "Colori", href: "/admin/colors", icon: Palette },
   { name: "Superfici", href: "/admin/surfaces", icon: Settings },
   { name: "Prezzi", href: "/admin/pricing", icon: DollarSign },
+  { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Utenti Admin", href: "/admin/users", icon: Users },
   { name: "Email", href: "/admin/emails", icon: Mail },
 ]

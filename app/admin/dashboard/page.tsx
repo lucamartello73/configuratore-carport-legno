@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Badge } from "@/components/ui/badge"
-import { FileText, Package, TrendingUp, Palette, Settings, Users, Mail, DollarSign, Shield, LayoutDashboard, LogOut, ArrowLeft } from "lucide-react"
+import { FileText, Package, TrendingUp, Palette, Settings, Users, Mail, DollarSign, Shield, LayoutDashboard, LogOut, ArrowLeft, BarChart3 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { clearAdminSession, getAdminSession } from "@/lib/auth/admin-auth"
@@ -51,6 +51,7 @@ const navigation = [
   { name: "Colori", href: "/admin/colors", icon: Palette },
   { name: "Superfici", href: "/admin/surfaces", icon: Settings },
   { name: "Prezzi", href: "/admin/pricing", icon: DollarSign },
+  { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Utenti Admin", href: "/admin/users", icon: Users },
   { name: "Email", href: "/admin/emails", icon: Mail },
 ]

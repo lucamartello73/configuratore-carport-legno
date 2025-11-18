@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Suspense } from "react"
+import { Analytics } from "@vercel/analytics/react"
 import { AdminAccessButton } from "@/components/admin-access-button"
 import "./globals.css"
 
@@ -35,6 +36,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <AdminAccessButton />
         <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+        <Analytics />
       </body>
     </html>
   )
