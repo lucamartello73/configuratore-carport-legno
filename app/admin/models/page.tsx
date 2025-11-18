@@ -472,6 +472,7 @@ export default function ModelsPage() {
           {models.map(model => (
             <ModernCard
               key={model.id}
+              compact={true}
               title={model.name}
               description={model.description}
               image={model.image}
