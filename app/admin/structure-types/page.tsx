@@ -22,7 +22,6 @@ interface StructureType {
   structure_category?: string
   is_active?: boolean
   attivo?: boolean
-  display_order?: number
   ordine?: number
   created_at: string
   updated_at: string
@@ -40,7 +39,7 @@ export default function StructureTypesPage() {
     image: "",
     base_price: 0,
     is_active: true,
-    display_order: 0,
+    ordine: 0,
   })
 
   useEffect(() => {
@@ -61,13 +60,15 @@ export default function StructureTypesPage() {
     let query = supabase
       .from(tableName)
       .select("*")
-      .order("display_order", { ascending: true })
-      .order("created_at", { ascending: false })
     
     // Per ferro, filtra per structure_category
     if (configuratorType === 'ferro') {
       query = query.eq('structure_category', 'FERRO')
     }
+    
+    // Ordina per ordine (campo italiano) o created_at
+    query = query.order("ordine", { ascending: true, nullsFirst: false })
+                 .order("created_at", { ascending: false })
 
     const { data, error } = await query
 
@@ -92,7 +93,7 @@ export default function StructureTypesPage() {
       description: formData.description,
       image: formData.image,
       base_price: formData.base_price,
-      display_order: formData.display_order,
+      ordine: formData.ordine,
     }
     
     // Aggiungi campi specifici per tabella
@@ -159,7 +160,7 @@ export default function StructureTypesPage() {
       image: structureType.image || structureType.image_url || "",
       base_price: Number(structureType.base_price) || 0,
       is_active: structureType.is_active ?? structureType.attivo ?? true,
-      display_order: structureType.display_order ?? structureType.ordine ?? 0,
+      ordine: structureType.ordine ?? 0,
     })
     setIsCreating(false)
   }
@@ -173,7 +174,7 @@ export default function StructureTypesPage() {
       image: "",
       base_price: 0,
       is_active: true,
-      display_order: 0,
+      ordine: 0,
     })
   }
 
@@ -258,8 +259,8 @@ export default function StructureTypesPage() {
                   <label className="block text-sm font-medium mb-2">Ordine di visualizzazione</label>
                   <Input
                     type="number"
-                    value={formData.display_order}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, display_order: Number(e.target.value) }))}
+                    value={formData.ordine}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, ordine: Number(e.target.value) }))}
                     placeholder="0"
                   />
                 </div>
