@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 
+// ModernCard v2.0 - Compact layout by default
 interface ModernCardProps {
   children?: ReactNode
   className?: string
