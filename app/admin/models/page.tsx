@@ -6,7 +6,7 @@ import { useAdminConfigurator } from '@/contexts/AdminConfiguratorContext'
 import { createClient } from '@/lib/supabase/client'
 import { getAdminSession } from '@/lib/auth/admin-auth'
 import { PlusIcon, Edit2Icon, Trash2Icon, PackageIcon } from 'lucide-react'
-import { ModernCard } from '@/components/admin/ui/ModernCard'
+import { CompactModelCard } from '@/components/admin/ui/CompactModelCard'
 import { ModernButton } from '@/components/admin/ui/ModernButton'
 import { ModernInput } from '@/components/admin/ui/ModernInput'
 import { ModernSelect } from '@/components/admin/ui/ModernSelect'
@@ -470,9 +470,8 @@ export default function ModelsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {models.map(model => (
-            <ModernCard
+            <CompactModelCard
               key={model.id}
-              compact={true}
               title={model.name}
               description={model.description}
               image={model.image}
