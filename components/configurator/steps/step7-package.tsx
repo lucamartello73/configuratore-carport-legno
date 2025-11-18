@@ -6,6 +6,7 @@ import { saveConfiguration } from "@/app/actions/save-configuration"
 import { trackConfiguratorSubmit } from "@/lib/analytics/gtag"
 import { trackConfigurationCompleted, trackQuoteRequested, trackStepCompleted } from "@/lib/analytics/events"
 import { trackQuoteRequestConversion, trackConfigurationCompleteConversion } from "@/lib/analytics/conversions"
+import { completeConfigurationTracking } from "@/lib/tracking/configuration-tracking"
 
 interface Step7Props {
   configuration: Partial<ConfigurationData>
@@ -219,6 +220,16 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
         configuration.structureType || '',
       ])
       trackQuoteRequestConversion(configType)
+      
+      // Complete advanced tracking
+      await completeConfigurationTracking({
+        cliente_nome: `${customerData.name} ${customerData.surname}`,
+        cliente_email: customerData.email,
+        cliente_telefono: customerData.phone,
+        cliente_citta: customerData.city,
+        cliente_indirizzo: customerData.address,
+        cliente_note: customerData.notes,
+      })
 
       if (result.data?.id) {
         try {

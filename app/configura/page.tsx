@@ -21,6 +21,7 @@ import { Step7Package } from "@/components/configurator/steps/step7-package"
 import type { ConfigurationData } from "@/types/configuration"
 import { initializeGoogleAnalytics, trackConfiguratorStep, setupAbandonTracking } from "@/lib/analytics/gtag"
 import { trackConfigurationStarted } from "@/lib/analytics/events"
+import { startConfigurationTracking, updateConfigurationTracking } from "@/lib/tracking/configuration-tracking"
 
 export type { ConfigurationData }
 
@@ -47,7 +48,10 @@ export default function ConfiguratoreLegnoPage() {
     trackConfiguratorStep(`legno_step_${currentStep}_${steps[currentStep - 1].title.toLowerCase().replace(/ /g, "_")}`)
     
     // Track configuration started
-    trackConfigurationStarted('LEGNO')
+    trackConfigurationStarted('FERRO')
+    
+    // Start advanced tracking
+    startConfigurationTracking()
     
     const cleanup = setupAbandonTracking(
       () => `legno_step_${currentStep}_${steps[currentStep - 1].title.toLowerCase().replace(/ /g, "_")}`,
@@ -106,7 +110,30 @@ export default function ConfiguratoreLegnoPage() {
   }
 
   const updateConfiguration = useCallback((data: Partial<ConfigurationData>) => {
-    setConfiguration((prev) => ({ ...prev, ...data }))
+    setConfiguration((prev) => {
+      const newConfig = { ...prev, ...data }
+      
+      // Track configuration update
+      updateConfigurationTracking({
+        tipo_struttura: newConfig.structureTypeId,
+        modello_id: newConfig.modelId,
+        modello_nome: newConfig.modelName,
+        dimensioni_lunghezza: newConfig.width,
+        dimensioni_larghezza: newConfig.depth,
+        copertura_id: newConfig.coverageId,
+        copertura_nome: newConfig.coverageName,
+        colore_struttura_id: newConfig.colorId,
+        colore_struttura_nome: newConfig.colorName,
+        pavimentazione_id: newConfig.surfaceId,
+        pavimentazione_nome: newConfig.surfaceName,
+        pacchetto_id: newConfig.packageId,
+        pacchetto_nome: newConfig.packageName,
+        prezzo_totale: newConfig.totalPrice,
+        configurazione_data: newConfig,
+      })
+      
+      return newConfig
+    })
     setShowValidationError(false)
     setValidationError("")
   }, [])
@@ -121,6 +148,11 @@ export default function ConfiguratoreLegnoPage() {
     }
 
     if (currentStep < 7) {
+      // Track step completion
+      updateConfigurationTracking({
+        step_reached: currentStep + 1,
+      })
+      
       setCurrentStep(currentStep + 1)
       setShowValidationError(false)
       setValidationError("")
