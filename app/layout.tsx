@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Suspense } from "react"
 import { Analytics } from "@vercel/analytics/react"
 import { AdminAccessButton } from "@/components/admin-access-button"
+import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -35,6 +36,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased">
         <AdminAccessButton />
+        <AnalyticsProvider />
         <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
         <Analytics />
       </body>

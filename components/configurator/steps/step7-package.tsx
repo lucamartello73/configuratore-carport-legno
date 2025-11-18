@@ -5,6 +5,7 @@ import type { ConfigurationData } from "@/types/configuration"
 import { saveConfiguration } from "@/app/actions/save-configuration"
 import { trackConfiguratorSubmit } from "@/lib/analytics/gtag"
 import { trackConfigurationCompleted, trackQuoteRequested, trackStepCompleted } from "@/lib/analytics/events"
+import { trackQuoteRequestConversion, trackConfigurationCompleteConversion } from "@/lib/analytics/conversions"
 
 interface Step7Props {
   configuration: Partial<ConfigurationData>
@@ -210,6 +211,14 @@ export function Step7Package({ configuration, updateConfiguration, onValidationE
         customerData.email,
         configuratorType === 'legno' ? 'LEGNO' : 'FERRO'
       )
+      
+      // Track conversions (Pro plan)
+      const configType = configuratorType === 'legno' ? 'LEGNO' : 'FERRO'
+      trackConfigurationCompleteConversion(configType, [
+        configuration.modelName || '',
+        configuration.structureType || '',
+      ])
+      trackQuoteRequestConversion(configType)
 
       if (result.data?.id) {
         try {
