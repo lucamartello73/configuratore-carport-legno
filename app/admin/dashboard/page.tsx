@@ -41,11 +41,12 @@ interface Stats {
   totalColors: number
 }
 
+// Menu navigation - ordinato per corrispondere agli step del configuratore
 const navigation = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { name: "Configurazioni", href: "/admin/configurations", icon: FileText },
-  { name: "Modelli", href: "/admin/models", icon: Package },
   { name: "Tipi Struttura", href: "/admin/structure-types", icon: Settings },
+  { name: "Modelli", href: "/admin/models", icon: Package },
   { name: "Tipi Copertura", href: "/admin/coverage-types", icon: Shield },
   { name: "Colori", href: "/admin/colors", icon: Palette },
   { name: "Superfici", href: "/admin/surfaces", icon: Settings },
