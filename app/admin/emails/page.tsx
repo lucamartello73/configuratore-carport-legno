@@ -95,7 +95,7 @@ export default function EmailsPage() {
         {/* Email Templates */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-green-800 flex items-center gap-2">
+            <CardTitle className="text-gray-900 flex items-center gap-2">
               <Mail className="w-5 h-5" />
               Template Email
             </CardTitle>
@@ -103,9 +103,9 @@ export default function EmailsPage() {
           <CardContent>
             <div className="grid md:grid-cols-2 gap-4">
               {emailTemplates.map((template, index) => (
-                <div key={index} className="border rounded-lg p-4 bg-green-50">
-                  <h3 className="font-semibold text-green-800 mb-2">{template.name}</h3>
-                  <p className="text-green-600 text-sm mb-3">{template.subject}</p>
+                <div key={index} className="border rounded-lg p-3 bg-white hover:bg-gray-50 transition-colors">
+                  <h3 className="font-semibold text-gray-900 mb-2 text-sm">{template.name}</h3>
+                  <p className="text-gray-600 text-xs mb-2">{template.subject}</p>
                   <Button
                     size="sm"
                     onClick={() => loadTemplate(template)}
@@ -122,7 +122,7 @@ export default function EmailsPage() {
         {/* Send Email Form */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-green-800">Invia Email</CardTitle>
+            <CardTitle className="text-gray-900">Invia Email</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -159,7 +159,7 @@ export default function EmailsPage() {
               <div
                 className={`p-4 rounded-lg ${
                   result.success
-                    ? "bg-green-50 text-green-700 border border-green-200"
+                    ? "bg-blue-50 text-blue-700 border border-blue-200"
                     : "bg-red-50 text-red-700 border border-red-200"
                 }`}
               >

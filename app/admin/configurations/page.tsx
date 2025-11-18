@@ -181,13 +181,13 @@ export default function ConfigurationsPage() {
         {/* Filters */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-green-800">Filtri</CardTitle>
+            <CardTitle className="text-gray-900">Filtri</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex gap-4">
               <div className="flex-1">
                 <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-green-600" />
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Cerca per nome o email..."
                     value={searchTerm}
@@ -215,20 +215,20 @@ export default function ConfigurationsPage() {
         {/* Configurations List */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-green-800">Configurazioni ({filteredConfigurations.length})</CardTitle>
+            <CardTitle className="text-gray-900">Configurazioni ({filteredConfigurations.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {filteredConfigurations.map((config) => (
-                <div key={config.id} className="border rounded-lg p-4 bg-green-50">
+                <div key={config.id} className="border rounded-lg p-3 bg-white hover:bg-gray-50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-4 mb-3">
-                        <h3 className="font-semibold text-green-800">{config.customer_name}</h3>
+                        <h3 className="font-semibold text-gray-900">{config.customer_name}</h3>
                         {getStatusBadge(config.status)}
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-green-600 mb-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 mb-2">
                         <div>
                           <span className="font-medium">Email:</span> {config.customer_email}
                         </div>
@@ -256,9 +256,9 @@ export default function ConfigurationsPage() {
                         </div>
                       </div>
 
-                      <div className="bg-white p-3 rounded border mb-3">
-                        <h4 className="font-medium text-green-800 mb-2">Dettagli Configurazione:</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-green-700">
+                      <div className="bg-gray-50 p-2 rounded border mb-2">
+                        <h4 className="font-medium text-gray-900 text-xs mb-1">Dettagli Configurazione</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-gray-700">
                           <div>
                             <span className="font-medium">Modello:</span> {config.model_name}
                           </div>

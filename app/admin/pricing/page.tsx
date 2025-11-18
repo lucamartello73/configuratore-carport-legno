@@ -111,7 +111,7 @@ export default function PricingPage() {
   if (loading) {
     return (
       <ModernAdminWrapper title="Prezzi">
-        <div className="text-center py-8 text-green-600">Caricamento regole di prezzo...</div>
+        <div className="text-center py-8 text-gray-600">Caricamento regole di prezzo...</div>
       </ModernAdminWrapper>
     )
   }
@@ -123,7 +123,7 @@ export default function PricingPage() {
         {isEditing && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-green-800">
+              <CardTitle className="text-gray-900">
                 {editingRule.id ? "Modifica Regola di Prezzo" : "Nuova Regola di Prezzo"}
               </CardTitle>
             </CardHeader>
@@ -205,8 +205,7 @@ export default function PricingPage() {
         {/* Rules List */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-green-800">Regole di Prezzo ({rules.length})</CardTitle>
+            <div className="flex items-center justify-between">              <CardTitle className="text-gray-900">Regole di Prezzo ({rules.length})</CardTitle>
               <Button
                 onClick={() => setIsEditing(true)}
                 className="bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-2"
@@ -219,23 +218,23 @@ export default function PricingPage() {
           <CardContent>
             <div className="space-y-4">
               {rules.map((rule) => (
-                <div key={rule.id} className="border rounded-lg p-4 bg-green-50">
+                <div key={rule.id} className="border rounded-lg p-3 bg-white hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                         <div>
-                          <span className="font-medium text-green-800">Tipo:</span>
-                          <p className="text-green-600">{rule.rule_type}</p>
+                          <span className="font-medium text-gray-900 text-xs">Tipo:</span>
+                          <p className="text-gray-700 text-sm">{rule.rule_type}</p>
                         </div>
                         <div>
-                          <span className="font-medium text-green-800">Condizione:</span>
-                          <p className="text-green-600">
+                          <span className="font-medium text-gray-900 text-xs">Condizione:</span>
+                          <p className="text-gray-700 text-sm">
                             {rule.condition_key} {rule.condition_value}
                           </p>
                         </div>
                         <div>
-                          <span className="font-medium text-green-800">Modificatore:</span>
-                          <p className="text-green-600">
+                          <span className="font-medium text-gray-900 text-xs">Modificatore:</span>
+                          <p className="text-gray-700 text-sm">
                             {rule.modifier_type === "percentuale"
                               ? `${rule.price_modifier}%`
                               : `€${rule.price_modifier}`}

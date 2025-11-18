@@ -122,7 +122,7 @@ export default function UsersPage() {
   if (loading) {
     return (
       <ModernAdminWrapper title="Utenti Admin">
-        <div className="text-center py-8 text-green-600">Caricamento utenti...</div>
+        <div className="text-center py-8 text-gray-600">Caricamento utenti...</div>
       </ModernAdminWrapper>
     )
   }
@@ -134,7 +134,7 @@ export default function UsersPage() {
         {isEditing && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-green-800">{editingUser.id ? "Modifica Utente" : "Nuovo Utente"}</CardTitle>
+              <CardTitle className="text-gray-900">{editingUser.id ? "Modifica Utente" : "Nuovo Utente"}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
@@ -199,7 +199,7 @@ export default function UsersPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-green-800">Utenti Admin ({users.length})</CardTitle>
+              <CardTitle className="text-gray-900">Utenti Admin ({users.length})</CardTitle>
               <Button
                 onClick={() => setIsEditing(true)}
                 className="bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-2"
@@ -212,21 +212,21 @@ export default function UsersPage() {
           <CardContent>
             <div className="space-y-4">
               {users.map((user) => (
-                <div key={user.id} className="border rounded-lg p-4 bg-green-50">
+                <div key={user.id} className="border rounded-lg p-3 bg-white hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                          <h3 className="font-semibold text-green-800">{user.name}</h3>
-                          <p className="text-green-600 text-sm">{user.email}</p>
+                          <h3 className="font-semibold text-gray-900 text-sm">{user.name}</h3>
+                          <p className="text-gray-700 text-sm">{user.email}</p>
                         </div>
                         <div>
-                          <span className="font-medium text-green-800">Ruolo:</span>
-                          <p className="text-green-600">{user.role}</p>
+                          <span className="font-medium text-gray-900 text-xs">Ruolo:</span>
+                          <p className="text-gray-700">{user.role}</p>
                         </div>
                         <div>
-                          <span className="font-medium text-green-800">Creato:</span>
-                          <p className="text-green-600 text-sm">
+                          <span className="font-medium text-gray-900 text-xs">Creato:</span>
+                          <p className="text-gray-700 text-sm">
                             {new Date(user.created_at).toLocaleDateString("it-IT")}
                           </p>
                         </div>
