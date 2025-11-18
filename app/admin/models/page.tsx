@@ -12,6 +12,7 @@ import { ModernInput } from '@/components/admin/ui/ModernInput'
 import { ModernSelect } from '@/components/admin/ui/ModernSelect'
 import { ModernModal } from '@/components/admin/ui/ModernModal'
 import { ImageUploadDragDrop } from '@/components/admin/ui/ImageUploadDragDrop'
+import { trackAdminEvent } from '@/lib/analytics/events'
 
 interface Model {
   id: string
@@ -275,6 +276,12 @@ export default function ModelsPage() {
           .eq('id', editingModel.id)
 
         if (error) throw error
+        
+        // Track update
+        trackAdminEvent('model_updated', {
+          model_name: editingModel.name,
+          configurator_type: configuratorType
+        })
       } else {
         // Create new
         const { error } = await supabase
@@ -282,6 +289,12 @@ export default function ModelsPage() {
           .insert([modelData])
 
         if (error) throw error
+        
+        // Track creation
+        trackAdminEvent('model_created', {
+          model_name: editingModel.name,
+          configurator_type: configuratorType
+        })
       }
 
       setIsModalOpen(false)

@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { ModernAdminWrapper } from "@/components/admin/modern-admin-wrapper"
 import { sendEmail } from "@/lib/email/sendwith"
 import { Mail, Send } from "lucide-react"
+import { trackEmailSent } from "@/lib/analytics/events"
 
 export default function EmailsPage() {
   const [emailData, setEmailData] = useState({
@@ -33,6 +34,10 @@ export default function EmailsPage() {
 
       if (response.success) {
         setResult({ success: true, message: "Email inviata con successo!" })
+        
+        // Track email sent
+        trackEmailSent(emailData.to, emailData.subject)
+        
         setEmailData({ to: "", subject: "", html: "" })
       } else {
         setResult({ success: false, message: response.error || "Errore nell'invio dell'email" })

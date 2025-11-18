@@ -22,15 +22,15 @@ const MINIMUM_DIMENSIONS = {
 }
 
 // Colore brand (marrone legno)
-const BRAND_COLOR = '#5A3A1A'
-const BRAND_DARK = '#3E2914'
+const BRAND_COLOR = '#525252'
+const BRAND_DARK = '#3A3A3A'
 
 // Icona auto più piccola (max-width: 38px) per pulsanti
 const CarIcon = ({ isSelected }: { isSelected: boolean }) => (
   <svg 
     style={{ maxWidth: '38px', width: '38px', height: 'auto' }} 
     viewBox="0 0 24 24" 
-    fill={isSelected ? '#FFFFFF' : '#5A3A1A'} 
+    fill={isSelected ? '#FFFFFF' : '#525252'} 
     xmlns="http://www.w3.org/2000/svg"
   >
     <path d="M5 11l1.5-4.5h11L19 11m-1.5 5a1.5 1.5 0 01-1.5-1.5 1.5 1.5 0 011.5-1.5 1.5 1.5 0 011.5 1.5 1.5 1.5 0 01-1.5 1.5m-11 0A1.5 1.5 0 015 14.5 1.5 1.5 0 016.5 13 1.5 1.5 0 018 14.5 1.5 1.5 0 016.5 16M18.92 6c-.2-.58-.76-1-1.42-1h-11c-.66 0-1.22.42-1.42 1L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-6z" />
@@ -209,8 +209,8 @@ export function Step3Dimensions({
                 width: '110px',
                 height: '110px',
                 borderRadius: '999px',
-                background: isSelected ? '#5A3A1A' : '#FFFFFF',
-                border: isSelected ? '3px solid #3E2914' : '3px solid #5A3A1A',
+                background: isSelected ? '#525252' : '#FFFFFF',
+                border: isSelected ? '3px solid #3A3A3A' : '3px solid #525252',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
@@ -218,7 +218,7 @@ export function Step3Dimensions({
                 gap: '6px',
                 fontSize: '14px',
                 fontWeight: '600',
-                color: isSelected ? '#FFFFFF' : '#5A3A1A',
+                color: isSelected ? '#FFFFFF' : '#525252',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 boxShadow: isSelected ? '0 6px 14px rgba(0,0,0,0.35)' : 'none'
@@ -244,7 +244,7 @@ export function Step3Dimensions({
             maxWidth: '650px',
             width: '100%',
             height: '180px', // Aumentato di 30px come richiesto
-            border: '2px solid #5A3A1A',
+            border: '2px solid #525252',
             backgroundColor: '#F5F5F5',
             borderRadius: '8px',
             position: 'relative',
@@ -306,7 +306,7 @@ export function Step3Dimensions({
             <div style={{ fontSize: '14px', fontWeight: '500', color: '#6B7280', marginBottom: '8px' }}>
               Area Copertura
             </div>
-            <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#5A3A1A', marginBottom: '8px' }}>
+            <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#525252', marginBottom: '8px' }}>
               {currentWidth} × {currentDepth} cm
             </div>
             <div style={{ fontSize: '14px', color: '#6B7280' }}>
@@ -381,7 +381,7 @@ export function Step3Dimensions({
             style={{ 
               fontSize: '14px', 
               fontWeight: '600', 
-              color: '#3E2914',
+              color: '#3A3A3A',
               display: 'block',
               marginBottom: '5px'
             }}
@@ -397,14 +397,14 @@ export function Step3Dimensions({
             style={{ 
               width: '100%',
               maxWidth: '240px',
-              border: '2px solid #5A3A1A',
+              border: '2px solid #525252',
               borderRadius: '6px',
               padding: '10px',
               fontSize: '15px',
               marginTop: '5px',
               marginBottom: '12px',
               backgroundColor: widthError ? '#fee2e2' : 'white',
-              borderColor: widthError ? '#ef4444' : '#5A3A1A'
+              borderColor: widthError ? '#ef4444' : '#525252'
             }}
           />
           {widthError && (
@@ -422,7 +422,7 @@ export function Step3Dimensions({
             style={{ 
               fontSize: '14px', 
               fontWeight: '600', 
-              color: '#3E2914',
+              color: '#3A3A3A',
               display: 'block',
               marginBottom: '5px'
             }}
@@ -438,14 +438,14 @@ export function Step3Dimensions({
             style={{ 
               width: '100%',
               maxWidth: '240px',
-              border: '2px solid #5A3A1A',
+              border: '2px solid #525252',
               borderRadius: '6px',
               padding: '10px',
               fontSize: '15px',
               marginTop: '5px',
               marginBottom: '12px',
               backgroundColor: depthError ? '#fee2e2' : 'white',
-              borderColor: depthError ? '#ef4444' : '#5A3A1A'
+              borderColor: depthError ? '#ef4444' : '#525252'
             }}
           />
           {depthError && (
@@ -463,7 +463,7 @@ export function Step3Dimensions({
             style={{ 
               fontSize: '14px', 
               fontWeight: '600', 
-              color: '#3E2914',
+              color: '#3A3A3A',
               display: 'block',
               marginBottom: '5px'
             }}
@@ -482,7 +482,7 @@ export function Step3Dimensions({
             style={{ 
               width: '100%',
               maxWidth: '240px',
-              border: '2px solid #5A3A1A',
+              border: '2px solid #525252',
               borderRadius: '6px',
               padding: '10px',
               fontSize: '15px',
@@ -499,7 +499,7 @@ export function Step3Dimensions({
         onClick={handleConfirm}
         disabled={!!widthError || !!depthError}
         style={{
-          background: (widthError || depthError) ? '#9ca3af' : '#5A3A1A',
+          background: (widthError || depthError) ? '#9ca3af' : '#525252',
           color: 'white',
           fontSize: '16px',
           fontWeight: '600',
@@ -520,7 +520,7 @@ export function Step3Dimensions({
         }}
         onMouseLeave={(e) => {
           if (!widthError && !depthError) {
-            e.currentTarget.style.background = '#5A3A1A'
+            e.currentTarget.style.background = '#525252'
             e.currentTarget.style.transform = 'translateY(0)'
           }
         }}

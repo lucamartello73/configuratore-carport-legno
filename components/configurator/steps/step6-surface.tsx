@@ -5,6 +5,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { ImageOff } from "lucide-react"
 import { useConfiguratorData, getImageUrlOrPlaceholder, getDescriptionOrFallback } from "@/lib/supabase/fetchConfiguratorData"
 import type { ConfigurationData } from "@/types/configuration"
+import { trackSurfaceSelected, trackStepCompleted } from "@/lib/analytics/events"
 
 interface Step6Props {
   onAutoAdvance?: () => void
@@ -30,13 +31,20 @@ export function Step6Surface({ configuration, updateConfiguration, onAutoAdvance
     configuration.width && configuration.depth ? (configuration.width * configuration.depth) / 10000 : 0
 
   const { data: surfaces, isLoading, error } = useConfiguratorData<Surface>({
-    material: 'legno',
+    material: 'acciaio',
     table: 'surfaces',
   })
 
   useEffect(() => {
     if (selectedSurface) {
+      const selectedSurfaceData = surfaces.find((s) => s.id === selectedSurface)
       updateConfiguration({ surfaceId: selectedSurface })
+      
+      // Track selection
+      if (selectedSurfaceData) {
+        trackSurfaceSelected(selectedSurface, selectedSurfaceData.name)
+        trackStepCompleted(6, 'Pavimentazione')
+      }
       
       // Auto-avanzamento dopo selezione
       if (onAutoAdvance) {

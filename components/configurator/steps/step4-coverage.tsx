@@ -5,6 +5,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { ImageOff } from "lucide-react"
 import { useConfiguratorData, getImageUrlOrPlaceholder, getDescriptionOrFallback } from "@/lib/supabase/fetchConfiguratorData"
 import type { ConfigurationData } from "@/types/configuration"
+import { trackCoverageSelected, trackStepCompleted } from "@/lib/analytics/events"
 
 interface Step4Props {
   onAutoAdvance?: () => void
@@ -26,13 +27,20 @@ export function Step4Coverage({ configuration, updateConfiguration, onAutoAdvanc
   const [selectedCoverage, setSelectedCoverage] = useState(configuration.coverageId || "")
 
   const { data: coverageTypes, isLoading, error } = useConfiguratorData<CoverageType>({
-    material: 'legno',
+    material: 'acciaio',
     table: 'coverage_types',
   })
 
   useEffect(() => {
     if (selectedCoverage) {
+      const selectedCoverageData = coverageTypes.find((c) => c.id === selectedCoverage)
       updateConfiguration({ coverageId: selectedCoverage })
+      
+      // Track selection
+      if (selectedCoverageData) {
+        trackCoverageSelected(selectedCoverage, selectedCoverageData.name)
+        trackStepCompleted(4, 'Copertura')
+      }
       
       // Auto-avanzamento dopo selezione
       if (onAutoAdvance) {

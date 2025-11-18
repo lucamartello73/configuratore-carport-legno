@@ -6,6 +6,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { ImageOff } from "lucide-react"
 import { useConfiguratorData, getImageUrlOrPlaceholder, getDescriptionOrFallback } from "@/lib/supabase/fetchConfiguratorData"
 import type { ConfigurationData } from "@/types/configuration"
+import { trackModelSelected, trackStepCompleted } from "@/lib/analytics/events"
 
 interface Step2Props {
   configuration: Partial<ConfigurationData>
@@ -17,7 +18,7 @@ interface Model {
   id: string
   name: string
   description: string
-  image: string
+  image_url: string
   base_price: number
   structure_type_id: string
   attivo: boolean
@@ -28,7 +29,7 @@ export function Step2Model({ configuration, updateConfiguration, onAutoAdvance }
   const [isUpdating, setIsUpdating] = useState(false)
 
   const { data: allModels, isLoading, error } = useConfiguratorData<Model>({
-    material: 'legno',
+    material: 'acciaio',
     table: 'models',
   })
 
@@ -45,6 +46,13 @@ export function Step2Model({ configuration, updateConfiguration, onAutoAdvance }
           modelId: selectedModel,
           modelName: selectedModelData?.name || selectedModel,
         })
+        
+        // Track selection
+        if (selectedModelData) {
+          trackModelSelected(selectedModel, selectedModelData.name)
+          trackStepCompleted(2, 'Modello')
+        }
+        
         setIsUpdating(false)
         
         // Auto-avanzamento dopo selezione (con delay per feedback visivo)
@@ -123,7 +131,7 @@ export function Step2Model({ configuration, updateConfiguration, onAutoAdvance }
 
       <div className="product-grid">
         {models.map((model) => {
-          const imageUrl = getImageUrlOrPlaceholder(model.image)
+          const imageUrl = getImageUrlOrPlaceholder(model.image_url)
           const description = getDescriptionOrFallback(model.description)
           
           return (

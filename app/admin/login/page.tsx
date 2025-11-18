@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { ErrorMessage } from "@/components/ui/error-message"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { Shield, Lock, ArrowRight } from "lucide-react"
+import { trackAdminLogin } from "@/lib/analytics/events"
 
 export default function AdminLoginPage() {
   const [password, setPassword] = useState("")
@@ -36,6 +37,9 @@ export default function AdminLoginPage() {
 
         // Store session in localStorage
         localStorage.setItem("adminSession", JSON.stringify(sessionData))
+        
+        // Track admin login
+        trackAdminLogin(sessionData.email)
 
         // Redirect to admin dashboard
         router.push("/admin/dashboard")

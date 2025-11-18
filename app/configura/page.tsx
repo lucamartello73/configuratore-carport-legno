@@ -20,6 +20,7 @@ import { Step7Package } from "@/components/configurator/steps/step7-package"
 
 import type { ConfigurationData } from "@/types/configuration"
 import { initializeGoogleAnalytics, trackConfiguratorStep, setupAbandonTracking } from "@/lib/analytics/gtag"
+import { trackConfigurationStarted } from "@/lib/analytics/events"
 
 export type { ConfigurationData }
 
@@ -36,7 +37,7 @@ const steps = [
 export default function ConfiguratoreLegnoPage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [configuration, setConfiguration] = useState<Partial<ConfigurationData>>({
-    configuratorType: 'legno',
+    configuratorType: 'acciaio',
   })
   const [validationError, setValidationError] = useState<string>("")
   const [showValidationError, setShowValidationError] = useState(false)
@@ -44,6 +45,10 @@ export default function ConfiguratoreLegnoPage() {
   useEffect(() => {
     initializeGoogleAnalytics("G-8BW6WP9PR1")
     trackConfiguratorStep(`legno_step_${currentStep}_${steps[currentStep - 1].title.toLowerCase().replace(/ /g, "_")}`)
+    
+    // Track configuration started
+    trackConfigurationStarted('LEGNO')
+    
     const cleanup = setupAbandonTracking(
       () => `legno_step_${currentStep}_${steps[currentStep - 1].title.toLowerCase().replace(/ /g, "_")}`,
     )
@@ -166,7 +171,7 @@ export default function ConfiguratoreLegnoPage() {
   return (
     <>
       <ConfiguratorHeader 
-        title="Configuratore Coperture Auto in Legno"
+        title="Configuratore Coperture Auto in Ferro"
         configuratorType="legno"
       />
 

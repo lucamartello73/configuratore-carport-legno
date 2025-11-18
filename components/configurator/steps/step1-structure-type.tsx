@@ -6,6 +6,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { ImageOff } from "lucide-react"
 import { useConfiguratorData, getImageUrlOrPlaceholder, getDescriptionOrFallback } from "@/lib/supabase/fetchConfiguratorData"
 import type { ConfigurationData } from "@/types/configuration"
+import { trackStructureTypeSelected, trackStepCompleted } from "@/lib/analytics/events"
 
 interface Step1Props {
   configuration: Partial<ConfigurationData>
@@ -17,7 +18,7 @@ interface StructureType {
   id: string
   name: string
   description: string
-  image: string
+  image_url: string
   features: string[]
   attivo: boolean
   base_price?: number
@@ -28,8 +29,11 @@ export function Step1StructureType({ configuration, updateConfiguration, onAutoA
   const [isUpdating, setIsUpdating] = useState(false)
 
   const { data: structureTypes, isLoading, error } = useConfiguratorData<StructureType>({
-    material: 'legno',
+    material: 'acciaio',
     table: 'structure_types',
+    filters: {
+      structure_category: 'FERRO'
+    }
   })
 
   useEffect(() => {
@@ -41,6 +45,13 @@ export function Step1StructureType({ configuration, updateConfiguration, onAutoA
           structureTypeId: selectedType,
           structureType: selectedStructure?.name || selectedType,
         })
+        
+        // Track selection
+        if (selectedStructure) {
+          trackStructureTypeSelected(selectedType, selectedStructure.name)
+          trackStepCompleted(1, 'Tipo Struttura')
+        }
+        
         setIsUpdating(false)
         
         // Auto-avanzamento dopo selezione
@@ -72,8 +83,8 @@ export function Step1StructureType({ configuration, updateConfiguration, onAutoA
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-primary mb-2">Seleziona il tipo di copertura in legno</h2>
-        <p className="text-secondary">Scegli tra le diverse soluzioni naturali disponibili</p>
+        <h2 className="text-2xl font-bold text-primary mb-2">Seleziona il tipo di struttura in ferro</h2>
+        <p className="text-secondary">Scegli tra le diverse soluzioni in acciaio disponibili</p>
       </div>
 
       {isUpdating && (
@@ -84,7 +95,7 @@ export function Step1StructureType({ configuration, updateConfiguration, onAutoA
 
       <div className="product-grid">
         {structureTypes.map((type) => {
-          const imageUrl = getImageUrlOrPlaceholder(type.image)
+          const imageUrl = getImageUrlOrPlaceholder(type.image_url)
           const description = getDescriptionOrFallback(type.description)
           
           return (
