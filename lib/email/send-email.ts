@@ -36,6 +36,7 @@ export async function sendConfigurationEmail(
   configuratorType?: string
 ) {
   const adminEmail = process.env.ADMIN_EMAIL || process.env.GMAIL_USER
+  const configType = configuratorType?.toUpperCase() || 'CARPORT'
   
   // Email al cliente
   const customerHtml = `
@@ -49,15 +50,18 @@ export async function sendConfigurationEmail(
         .header { background: #2563eb; color: white; padding: 20px; text-align: center; }
         .content { padding: 30px; background: #f9fafb; }
         .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
+        .badge { display: inline-block; background: #059669; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-bottom: 15px; }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
           <h1>Grazie ${customerName}!</h1>
+          <div class="badge">CONFIGURATORE ${configType}</div>
         </div>
         <div class="content">
-          <p>Abbiamo ricevuto la tua richiesta di preventivo per il configuratore ${configuratorType || 'carport'}.</p>
+          <p><strong>Configuratore:</strong> ${configType}</p>
+          <p>Abbiamo ricevuto la tua richiesta di preventivo per il configuratore carport in ${configuratorType || 'acciaio/legno'}.</p>
           <p>Ti contatteremo al più presto per fornirti un preventivo dettagliato.</p>
           <p><strong>I tuoi dati:</strong></p>
           <ul>
@@ -87,14 +91,17 @@ export async function sendConfigurationEmail(
         .header { background: #059669; color: white; padding: 20px; }
         .content { padding: 20px; background: #fff; border: 1px solid #ddd; }
         .config-details { background: #f3f4f6; padding: 15px; margin: 15px 0; }
+        .badge { display: inline-block; background: #dc2626; color: white; padding: 8px 20px; border-radius: 5px; font-weight: bold; margin-top: 10px; font-size: 16px; }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
-          <h2>Nuova Richiesta Preventivo - ${configuratorType || 'Carport'}</h2>
+          <h2>🔔 Nuova Richiesta Preventivo</h2>
+          <div class="badge">CONFIGURATORE ${configType}</div>
         </div>
         <div class="content">
+          <p style="background: #fef3c7; padding: 10px; border-left: 4px solid #f59e0b;"><strong>📋 Configuratore:</strong> ${configType}</p>
           <h3>Dati Cliente:</h3>
           <ul>
             <li><strong>Nome:</strong> ${customerName}</li>
@@ -113,6 +120,6 @@ export async function sendConfigurationEmail(
   `
   
   // Invia entrambe le email
-  await sendEmail(customerEmail, 'Conferma Ricezione Richiesta', customerHtml)
-  await sendEmail(adminEmail!, `Nuova Richiesta - ${customerName}`, adminHtml)
+  await sendEmail(customerEmail, `Conferma Richiesta - Configuratore ${configType}`, customerHtml)
+  await sendEmail(adminEmail!, `[${configType}] Nuova Richiesta - ${customerName}`, adminHtml)
 }
