@@ -25,6 +25,7 @@ interface ModernAdminWrapperProps {
   title: string
 }
 
+// Menu navigation - ordinato per corrispondere agli step del configuratore
 const navigation = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { name: "Configurazioni", href: "/admin/configurations", icon: FileText },
