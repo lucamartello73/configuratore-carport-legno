@@ -36,7 +36,13 @@ export async function sendConfigurationEmail(
   configuratorType?: string
 ) {
   const adminEmail = process.env.ADMIN_EMAIL || process.env.GMAIL_USER
-  const configType = configuratorType?.toUpperCase() || 'CARPORT'
+  // Mappa tipo configuratore a nome completo
+  const configTypeMap: Record<string, string> = {
+    'ferro': 'CARPORT ACCIAIO',
+    'legno': 'CARPORT LEGNO',
+    'acciaio': 'CARPORT ACCIAIO'
+  }
+  const configType = configTypeMap[configuratorType?.toLowerCase() || ''] || 'CARPORT'
   
   // Email al cliente
   const customerHtml = `
@@ -61,7 +67,7 @@ export async function sendConfigurationEmail(
         </div>
         <div class="content">
           <p><strong>Configuratore:</strong> ${configType}</p>
-          <p>Abbiamo ricevuto la tua richiesta di preventivo per il configuratore carport in ${configuratorType || 'acciaio/legno'}.</p>
+          <p>Abbiamo ricevuto la tua richiesta di preventivo per il <strong>Configuratore ${configType}</strong>.</p>
           <p>Ti contatteremo al più presto per fornirti un preventivo dettagliato.</p>
           <p><strong>I tuoi dati:</strong></p>
           <ul>
@@ -101,7 +107,7 @@ export async function sendConfigurationEmail(
           <div class="badge">CONFIGURATORE ${configType}</div>
         </div>
         <div class="content">
-          <p style="background: #fef3c7; padding: 10px; border-left: 4px solid #f59e0b;"><strong>📋 Configuratore:</strong> ${configType}</p>
+          <p style="background: #fef3c7; padding: 10px; border-left: 4px solid #f59e0b;"><strong>📋 Configuratore:</strong> CONFIGURATORE ${configType}</p>
           <h3>Dati Cliente:</h3>
           <ul>
             <li><strong>Nome:</strong> ${customerName}</li>
