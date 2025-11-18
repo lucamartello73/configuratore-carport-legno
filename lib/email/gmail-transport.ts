@@ -21,3 +21,17 @@ export const createGmailTransport = () => {
     },
   })
 }
+
+/**
+ * Verifica connessione Gmail
+ */
+export async function verifyGmailConnection(): Promise<boolean> {
+  try {
+    const transporter = createGmailTransport()
+    await transporter.verify()
+    return true
+  } catch (error) {
+    console.error('Gmail connection failed:', error)
+    return false
+  }
+}
