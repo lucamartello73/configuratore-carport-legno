@@ -1,17 +1,16 @@
-import { onCLS, onFID, onFCP, onLCP, onTTFB, onINP, Metric } from 'web-vitals'
+import { onCLS, onFCP, onLCP, onTTFB, onINP, Metric } from 'web-vitals'
 import { track } from '@vercel/analytics'
 
 // Web Vitals tracking per Vercel Analytics Pro
 export function reportWebVitals() {
   // Core Web Vitals
   onCLS(sendToAnalytics)
-  onFID(sendToAnalytics)
   onLCP(sendToAnalytics)
+  onINP(sendToAnalytics)
   
   // Additional metrics
   onFCP(sendToAnalytics)
   onTTFB(sendToAnalytics)
-  onINP(sendToAnalytics)
 }
 
 function sendToAnalytics(metric: Metric) {
