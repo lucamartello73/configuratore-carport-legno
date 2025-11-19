@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { AdminSidebar } from '@/components/admin/layout/AdminSidebar'
 import { adminColors } from '@/lib/admin/colors'
+import { AdminConfiguratorProvider } from '@/contexts/AdminConfiguratorContext'
 
 export default function AdminLayout({
   children,
@@ -43,20 +44,22 @@ export default function AdminLayout({
   }
   
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: adminColors.background }}>
-      {/* Sidebar */}
-      <AdminSidebar configuratorType="legno" />
-      
-      {/* Main Content */}
-      <main 
-        className="flex-1"
-        style={{
-          marginLeft: '260px',
-          minHeight: '100vh',
-        }}
-      >
-        {children}
-      </main>
-    </div>
+    <AdminConfiguratorProvider>
+      <div className="flex min-h-screen" style={{ backgroundColor: adminColors.background }}>
+        {/* Sidebar */}
+        <AdminSidebar configuratorType="legno" />
+        
+        {/* Main Content */}
+        <main 
+          className="flex-1"
+          style={{
+            marginLeft: '260px',
+            minHeight: '100vh',
+          }}
+        >
+          {children}
+        </main>
+      </div>
+    </AdminConfiguratorProvider>
   )
 }
