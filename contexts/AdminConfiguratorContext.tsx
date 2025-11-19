@@ -39,13 +39,13 @@ const themes: Record<ConfiguratorType, ThemeColors> = {
 
 const tablePrefixes: Record<ConfiguratorType, string> = {
   legno: 'carport_legno_',
-  ferro: 'carport_coverage_',
+  ferro: 'carport_ferro_',
 }
 
 const AdminConfiguratorContext = createContext<AdminConfiguratorContextType | undefined>(undefined)
 
 export function AdminConfiguratorProvider({ children }: { children: ReactNode }) {
-  const [configuratorType, setConfiguratorTypeState] = useState<ConfiguratorType>('legno')
+  const [configuratorType, setConfiguratorTypeState] = useState<ConfiguratorType>('ferro')
 
   // Carica il tipo dal localStorage all'avvio
   useEffect(() => {
