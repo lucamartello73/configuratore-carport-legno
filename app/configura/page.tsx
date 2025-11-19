@@ -203,7 +203,7 @@ export default function ConfiguratoreLegnoPage() {
   return (
     <>
       <ConfiguratorHeader 
-        title="Configuratore Coperture Auto in Ferro"
+        title="Configuratore Coperture Auto in Legno"
         configuratorType="legno"
       />
 
