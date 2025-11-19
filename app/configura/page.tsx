@@ -38,7 +38,7 @@ const steps = [
 export default function ConfiguratoreLegnoPage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [configuration, setConfiguration] = useState<Partial<ConfigurationData>>({
-    configuratorType: 'acciaio',
+    configuratorType: 'legno',
   })
   const [validationError, setValidationError] = useState<string>("")
   const [showValidationError, setShowValidationError] = useState(false)
@@ -48,7 +48,7 @@ export default function ConfiguratoreLegnoPage() {
     trackConfiguratorStep(`legno_step_${currentStep}_${steps[currentStep - 1].title.toLowerCase().replace(/ /g, "_")}`)
     
     // Track configuration started
-    trackConfigurationStarted('FERRO')
+    trackConfigurationStarted('LEGNO')
     
     // Start advanced tracking
     startConfigurationTracking()
