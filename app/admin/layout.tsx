@@ -1,20 +1,45 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { AdminSidebar } from '@/components/admin/layout/AdminSidebar'
 import { adminColors } from '@/lib/admin/colors'
 
-export default async function AdminLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
+  const router = useRouter()
+  const pathname = usePathname()
   
-  // Check authentication
-  const { data: { user } } = await supabase.auth.getUser()
+  useEffect(() => {
+    // Skip auth check for login page
+    if (pathname === '/admin/login') {
+      return
+    }
+    
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (!user) {
+          router.push('/admin/login')
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
+        router.push('/admin/login')
+      }
+    }
+    
+    checkAuth()
+  }, [pathname, router])
   
-  if (!user) {
-    redirect('/admin/login')
+  // Don't show sidebar on login page
+  if (pathname === '/admin/login') {
+    return <>{children}</>
   }
   
   return (
