@@ -101,16 +101,10 @@ CREATE POLICY "Allow anonymous insert" ON carport_legno_configurazioni_tracking
 CREATE POLICY "Allow session update" ON carport_legno_configurazioni_tracking
   FOR UPDATE USING (true);
 
--- Admin può leggere tutto
+-- Admin può leggere tutto (qualsiasi utente autenticato)
 CREATE POLICY "Admin can read all" ON carport_legno_configurazioni_tracking
   FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM auth.users
-      WHERE auth.users.id = auth.uid()
-      AND auth.users.email IN (
-        SELECT email FROM admin_users
-      )
-    )
+    auth.uid() IS NOT NULL
   );
 
 -- Tabella campagne marketing
@@ -217,24 +211,12 @@ ALTER TABLE carport_legno_tracking_snapshots ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Admin full access campagne" ON carport_legno_campagne_marketing
   FOR ALL USING (
-    EXISTS (
-      SELECT 1 FROM auth.users
-      WHERE auth.users.id = auth.uid()
-      AND auth.users.email IN (
-        SELECT email FROM admin_users
-      )
-    )
+    auth.uid() IS NOT NULL
   );
 
 CREATE POLICY "Admin full access snapshots" ON carport_legno_tracking_snapshots
   FOR ALL USING (
-    EXISTS (
-      SELECT 1 FROM auth.users
-      WHERE auth.users.id = auth.uid()
-      AND auth.users.email IN (
-        SELECT email FROM admin_users
-      )
-    )
+    auth.uid() IS NOT NULL
   );
 
 -- Function per calcolare metriche campagna

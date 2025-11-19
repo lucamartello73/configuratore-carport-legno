@@ -1,611 +1,281 @@
-"use client"
+'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAdminConfigurator } from '@/contexts/AdminConfiguratorContext'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { getAdminSession } from '@/lib/auth/admin-auth'
-import { PlusIcon, Edit2Icon, Trash2Icon, PackageIcon } from 'lucide-react'
-import { CompactModelCard } from '@/components/admin/ui/CompactModelCard'
-import { ModernButton } from '@/components/admin/ui/ModernButton'
-import { ModernInput } from '@/components/admin/ui/ModernInput'
-import { ModernSelect } from '@/components/admin/ui/ModernSelect'
-import { ModernModal } from '@/components/admin/ui/ModernModal'
-import { ImageUploadDragDrop } from '@/components/admin/ui/ImageUploadDragDrop'
-import { trackAdminEvent } from '@/lib/analytics/events'
+import { AdminHeader } from '@/components/admin/layout/AdminHeader'
+import { ConfiguratorSwitch } from '@/components/admin/layout/ConfiguratorSwitch'
+import { DataTable } from '@/components/admin/ui/DataTable'
+import { AdminButton, PillButton } from '@/components/admin/ui/AdminButton'
+import { StatusBadge } from '@/components/admin/ui/Badge'
+import { adminColors, adminRadius, adminShadow, adminSpacing } from '@/lib/admin/colors'
+import Image from 'next/image'
 
 interface Model {
   id: string
   name: string
-  description: string
-  base_price: number
-  image: string
-  structure_type_id: string | null
   order_index: number
+  min_depth: number
+  max_depth: number
+  min_width: number
+  max_width: number
+  structure_material: string
+  base_price: number
+  is_active: boolean
+  image_url: string | null
   created_at: string
-  structure_type?: {
-    id: string
-    name: string
-    structure_category: string
-  }
 }
-
-interface StructureType {
-  id: string
-  name: string
-  structure_category: string
-}
-
-// Demo models for quick setup
-const getDemoModels = (configuratorType: 'FERRO' | 'LEGNO') => [
-  { 
-    name: `Carport Standard 3x5 ${configuratorType}`, 
-    description: 'Carport base con struttura robusta, ideale per 1 auto',
-    base_price: configuratorType === 'FERRO' ? 2500 : 2800, 
-    image: '',
-    structure_type_id: null,
-    order_index: 1
-  },
-  { 
-    name: `Carport Premium 4x6 ${configuratorType}`, 
-    description: 'Carport di fascia alta con finiture premium, protezione completa',
-    base_price: configuratorType === 'FERRO' ? 4200 : 4600, 
-    image: '',
-    structure_type_id: null,
-    order_index: 2
-  },
-  { 
-    name: `Carport Doppio 6x6 ${configuratorType}`, 
-    description: 'Carport doppio per 2 auto, struttura rinforzata',
-    base_price: configuratorType === 'FERRO' ? 6800 : 7200, 
-    image: '',
-    structure_type_id: null,
-    order_index: 3
-  },
-  { 
-    name: `Carport Addossato 3x4.5 ${configuratorType}`, 
-    description: 'Carport da parete, ottimizza lo spazio laterale',
-    base_price: configuratorType === 'FERRO' ? 2100 : 2400, 
-    image: '',
-    structure_type_id: null,
-    order_index: 4
-  },
-]
 
 export default function ModelsPage() {
-  // Auth and routing
-  const router = useRouter()
-  const [mounted, setMounted] = useState(false)
-  const [session, setSession] = useState<any>(null)
-  
-  // Data state
-  const { configuratorType, configuratorTypeUpper } = useAdminConfigurator()
   const [models, setModels] = useState<Model[]>([])
-  const [structureTypes, setStructureTypes] = useState<StructureType[]>([])
   const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
   
-  // UI state
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingModel, setEditingModel] = useState<Partial<Model> | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
+  useEffect(() => {
+    fetchModels()
+  }, [])
   
-  const supabase = createClient()
-
-  // Handle SSR - mount check
-  useEffect(() => {
-    setMounted(true)
-    const adminSession = getAdminSession()
+  const fetchModels = async () => {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('carport_ferro_models')
+      .select('*')
+      .order('order_index', { ascending: true })
     
-    if (!adminSession) {
-      router.push('/admin/login')
-      return
+    if (!error && data) {
+      setModels(data)
     }
+    setLoading(false)
+  }
+  
+  const toggleActive = async (id: string, currentStatus: boolean) => {
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('carport_ferro_models')
+      .update({ is_active: !currentStatus })
+      .eq('id', id)
     
-    setSession(adminSession)
-  }, [router])
-
-  // Fetch models and structure types
-  useEffect(() => {
-    if (session) {
-      fetchStructureTypes()
-    }
-  }, [configuratorType, session])
-
-  useEffect(() => {
-    if (structureTypes.length > 0) {
+    if (!error) {
       fetchModels()
     }
-  }, [structureTypes, configuratorType])
-
-  async function fetchStructureTypes() {
-    try {
-      // Usa tabella diversa in base al configuratore
-      const tableName = configuratorType === 'legno' ? 'carport_legno_structure_types' : 'carport_structure_types'
-      const activeField = configuratorType === 'legno' ? 'is_active' : 'attivo'
-      
-      const query = supabase
-        .from(tableName)
-        .select('id, name')
-        .eq(activeField, true)
-        .order('name')
-      
-      // Solo per FERRO filtra per structure_category
-      if (configuratorType === 'ferro') {
-        query.eq('structure_category', configuratorTypeUpper)
-      }
-
-      const { data, error } = await query
-      if (error) throw error
-      setStructureTypes(data || [])
-    } catch (error) {
-      console.error('Errore caricamento tipi struttura:', error)
-      setStructureTypes([])
-    }
   }
-
-  async function fetchModels() {
-    try {
-      setLoading(true)
-      
-      // Usa tabella diversa in base al configuratore
-      const tableName = configuratorType === 'legno' ? 'carport_legno_models' : 'carport_models'
-      const structureTableName = configuratorType === 'legno' ? 'carport_legno_structure_types' : 'carport_structure_types'
-      
-      // Get structure type IDs for current configurator
-      const structureTypeIds = structureTypes.map(st => st.id)
-      
-      if (structureTypeIds.length === 0) {
-        setModels([])
-        setLoading(false)
-        return
-      }
-
-      const { data, error } = await supabase
-        .from(tableName)
-        .select('*')
-        .in('structure_type_id', structureTypeIds)
-        .order('name')
-
-      if (error) throw error
-      
-      // Mappa i dati per compatibilità tra tabelle LEGNO e FERRO
-      const mappedData = (data || []).map(model => {
-        // Trova il tipo struttura corrispondente
-        const structureType = structureTypes.find(st => st.id === model.structure_type_id)
-        
-        return {
-          ...model,
-          base_price: model.base_price || parseFloat(model.price_supplement || '0'),
-          attivo: model.attivo !== undefined ? model.attivo : model.is_active,
-          structure_type: structureType ? { name: structureType.name } : null
-        }
-      })
-      
-      setModels(mappedData)
-    } catch (error) {
-      console.error('Errore caricamento modelli:', error)
-      alert('Errore nel caricamento dei modelli')
-      setModels([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function handleCreateDemo() {
-    try {
-      setIsSaving(true)
-      
-      // Get first available structure type for current configurator
-      if (structureTypes.length === 0) {
-        alert('⚠️ Nessun tipo di struttura disponibile per ' + configuratorType + '. Crea prima almeno un tipo di struttura.')
-        return
-      }
-
-      const defaultStructureTypeId = structureTypes[0].id
-      const demoData = getDemoModels(configuratorType).map(model => ({
-        ...model,
-        structure_type_id: defaultStructureTypeId,
-        created_at: new Date().toISOString(),
-      }))
-
-      const tableName = configuratorType === 'legno' ? 'carport_legno_models' : 'carport_models'
-      const { error } = await supabase
-        .from(tableName)
-        .insert(demoData)
-
-      if (error) throw error
-      
-      alert(`✅ ${demoData.length} modelli demo creati con successo!`)
+  
+  const deleteModel = async (id: string) => {
+    if (!confirm('Sei sicuro di voler eliminare questo modello?')) return
+    
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('carport_ferro_models')
+      .delete()
+      .eq('id', id)
+    
+    if (!error) {
       fetchModels()
-    } catch (error: any) {
-      console.error('Errore creazione demo:', error)
-      alert('Errore nella creazione dei modelli demo: ' + (error.message || 'Unknown error'))
-    } finally {
-      setIsSaving(false)
     }
   }
-
-  function openCreateModal() {
-    setEditingModel({
-      name: '',
-      description: '',
-      base_price: 0,
-      image: '',
-      structure_type_id: structureTypes.length > 0 ? structureTypes[0].id : null,
-      order_index: models.length + 1,
-    })
-    setIsModalOpen(true)
-  }
-
-  function openEditModal(model: Model) {
-    setEditingModel({ ...model })
-    setIsModalOpen(true)
-  }
-
-  async function handleSave() {
-    if (!editingModel?.name || !editingModel?.base_price) {
-      alert('Compila i campi obbligatori: Nome e Prezzo Base')
-      return
-    }
-
-    if (!editingModel?.structure_type_id) {
-      alert('⚠️ Seleziona un tipo di struttura per questo modello')
-      return
-    }
-
-    try {
-      setIsSaving(true)
-
-      const modelData = {
-        name: editingModel.name,
-        description: editingModel.description || '',
-        base_price: editingModel.base_price,
-        image: editingModel.image || '',
-        structure_type_id: editingModel.structure_type_id,
-        updated_at: new Date().toISOString(),
-      }
-
-      const tableName = configuratorType === 'legno' ? 'carport_legno_models' : 'carport_models'
-      
-      if (editingModel.id) {
-        // Update existing
-        const { error } = await supabase
-          .from(tableName)
-          .update(modelData)
-          .eq('id', editingModel.id)
-
-        if (error) throw error
-        
-        // Track update
-        trackAdminEvent('model_updated', {
-          model_name: editingModel.name,
-          configurator_type: configuratorType
-        })
-      } else {
-        // Create new
-        const { error } = await supabase
-          .from(tableName)
-          .insert([modelData])
-
-        if (error) throw error
-        
-        // Track creation
-        trackAdminEvent('model_created', {
-          model_name: editingModel.name,
-          configurator_type: configuratorType
-        })
-      }
-
-      setIsModalOpen(false)
-      setEditingModel(null)
-      fetchModels()
-    } catch (error: any) {
-      console.error('Errore salvataggio modello:', error)
-      alert('Errore nel salvataggio del modello: ' + (error.message || 'Unknown error'))
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  async function handleDelete(id: string, name: string) {
-    if (!confirm(`Sei sicuro di voler eliminare il modello "${name}"?`)) return
-
-    try {
-      // Check if model is used in configurations
-      const { data: usageCheck, error: checkError } = await supabase
-        .from('carport_configurations')
-        .select('id, customer_name')
-        .eq('model_id', id)
-        .limit(5)
-
-      if (checkError) throw checkError
-
-      if (usageCheck && usageCheck.length > 0) {
-        const customerNames = usageCheck.map(c => c.customer_name).join(', ')
-        const moreText = usageCheck.length === 5 ? ' e altri...' : ''
-        alert(
-          `❌ Impossibile eliminare il modello.\n\n` +
-          `È utilizzato in ${usageCheck.length} configurazione/i di:\n${customerNames}${moreText}\n\n` +
-          `Elimina prima le configurazioni che lo utilizzano.`
-        )
-        return
-      }
-
-      const tableName = configuratorType === 'legno' ? 'carport_legno_models' : 'carport_models'
-      const { error } = await supabase
-        .from(tableName)
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
-      
-      fetchModels()
-    } catch (error) {
-      console.error('Errore eliminazione modello:', error)
-      alert('Errore durante l\'eliminazione del modello')
-    }
-  }
-
-  function handleImageUpload(url: string) {
-    setEditingModel(prev => prev ? { ...prev, image: url } : null)
-  }
-
-  // Loading state during SSR
-  if (!mounted || !session) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <PackageIcon className="w-12 h-12 mx-auto mb-4 text-gray-400 animate-pulse" />
-          <p className="text-gray-500">Caricamento...</p>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <PackageIcon className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Modelli Carport</h1>
-          </div>
-          <p className="mt-2 text-gray-600">
-            Gestisci i modelli di carport disponibili per {configuratorType}
-          </p>
-        </div>
-        
-        <div className="flex gap-3">
-          {models.length === 0 && structureTypes.length > 0 && (
-            <ModernButton
-              variant="outline"
-              onClick={handleCreateDemo}
-              disabled={isSaving}
-            >
-              ✨ Crea Demo
-            </ModernButton>
-          )}
-          <ModernButton 
-            onClick={openCreateModal}
-            disabled={structureTypes.length === 0}
-          >
-            <PlusIcon className="w-5 h-5 mr-2" />
-            Nuovo Modello
-          </ModernButton>
-        </div>
-      </div>
-
-      {/* Warning se non ci sono structure types */}
-      {structureTypes.length === 0 && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+  
+  const columns = [
+    {
+      key: 'order_index',
+      label: 'Ordine',
+      width: '80px',
+      render: (model: Model) => (
+        <span className="font-medium">{model.order_index}</span>
+      ),
+    },
+    {
+      key: 'image',
+      label: 'Immagine',
+      width: '100px',
+      render: (model: Model) => (
+        <div
+          className="relative overflow-hidden"
+          style={{
+            width: '60px',
+            height: '60px',
+            borderRadius: adminRadius.sm,
+            backgroundColor: adminColors.background,
+          }}
+        >
+          {model.image_url ? (
+            <Image
+              src={model.image_url}
+              alt={model.name}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <svg className="w-6 h-6" style={{ color: adminColors.textMuted }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-yellow-800">
-                Nessun tipo di struttura disponibile
-              </h3>
-              <div className="mt-2 text-sm text-yellow-700">
-                <p>
-                  Per creare modelli per <strong>{configuratorType}</strong>, devi prima creare almeno un tipo di struttura nella sezione "Tipi Struttura".
-                </p>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
-      )}
-
-      {/* Stats Badge */}
-      <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg border border-blue-200">
-        <PackageIcon className="w-5 h-5 text-blue-600" />
-        <span className="text-sm font-medium text-blue-900">
-          {models.length} modelli per <span className="font-bold">{configuratorType}</span>
-        </span>
-      </div>
-
-      {/* Models Grid */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="animate-pulse">
-              <div className="bg-gray-200 rounded-lg h-48" />
-              <div className="mt-4 space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
-                <div className="h-3 bg-gray-200 rounded w-1/2" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : models.length === 0 ? (
-        <div className="text-center py-16 border-2 border-dashed border-gray-300 rounded-lg">
-          <PackageIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">
-            Nessun modello trovato
-          </h3>
-          <p className="text-gray-500 mb-6">
-            {structureTypes.length === 0 
-              ? `Crea prima un tipo di struttura per ${configuratorType}`
-              : `Crea il primo modello per ${configuratorType} o importa i dati demo`
-            }
+      ),
+    },
+    {
+      key: 'name',
+      label: 'Nome',
+      render: (model: Model) => (
+        <div>
+          <p className="font-medium">{model.name}</p>
+          <p className="text-xs" style={{ color: adminColors.textSecondary }}>
+            ID: {model.id.slice(0, 8)}
           </p>
-          <div className="flex gap-3 justify-center">
-            {structureTypes.length > 0 && (
-              <>
-                <ModernButton variant="outline" onClick={handleCreateDemo}>
-                  ✨ Crea Demo
-                </ModernButton>
-                <ModernButton onClick={openCreateModal}>
-                  <PlusIcon className="w-5 h-5 mr-2" />
-                  Nuovo Modello
-                </ModernButton>
-              </>
-            )}
-          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {models.map(model => (
-            <CompactModelCard
-              key={model.id}
-              title={model.name}
-              description={model.description}
-              image={model.image}
-              badge={
-                <span className={`px-2 py-1 text-xs font-semibold rounded ${
-                  configuratorType === 'FERRO' 
-                    ? 'bg-gray-100 text-gray-800' 
-                    : 'bg-amber-100 text-amber-800'
-                }`}>
-                  {configuratorType}
-                </span>
-              }
-              metadata={[
-                { label: 'Prezzo Base', value: `€ ${model.base_price.toFixed(2)}` },
-                { 
-                  label: 'Tipo Struttura', 
-                  value: model.structure_type?.name || 'Non assegnato' 
-                },
-              ]}
-              actions={
-                <>
-                  <ModernButton
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => openEditModal(model)}
-                  >
-                    <Edit2Icon className="w-4 h-4" />
-                  </ModernButton>
-                  <ModernButton
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(model.id, model.name)}
-                  >
-                    <Trash2Icon className="w-4 h-4 text-red-500" />
-                  </ModernButton>
-                </>
-              }
-            />
-          ))}
+      ),
+    },
+    {
+      key: 'depth_range',
+      label: 'Range Profondità',
+      render: (model: Model) => (
+        <span className="text-sm">
+          {model.min_depth}m - {model.max_depth}m
+        </span>
+      ),
+    },
+    {
+      key: 'width_range',
+      label: 'Range Larghezza',
+      render: (model: Model) => (
+        <span className="text-sm">
+          {model.min_width}m - {model.max_width}m
+        </span>
+      ),
+    },
+    {
+      key: 'structure_material',
+      label: 'Materiale',
+      render: (model: Model) => (
+        <span className="text-sm">{model.structure_material || 'N/A'}</span>
+      ),
+    },
+    {
+      key: 'base_price',
+      label: 'Prezzo Base',
+      render: (model: Model) => (
+        <span className="font-semibold">€{model.base_price.toFixed(2)}</span>
+      ),
+    },
+    {
+      key: 'is_active',
+      label: 'Stato',
+      width: '120px',
+      render: (model: Model) => (
+        <StatusBadge active={model.is_active} />
+      ),
+    },
+    {
+      key: 'actions',
+      label: 'Azioni',
+      width: '200px',
+      render: (model: Model) => (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => toggleActive(model.id, model.is_active)}
+            className="p-2 rounded-lg transition-colors hover:opacity-80"
+            style={{ 
+              backgroundColor: adminColors.background,
+              color: adminColors.textPrimary,
+            }}
+            title={model.is_active ? 'Disattiva' : 'Attiva'}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {model.is_active ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+              )}
+            </svg>
+          </button>
+          
+          <button
+            onClick={() => {/* TODO: Edit */}}
+            className="p-2 rounded-lg transition-colors hover:opacity-80"
+            style={{ 
+              backgroundColor: adminColors.background,
+              color: adminColors.textPrimary,
+            }}
+            title="Modifica"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
+          
+          <button
+            onClick={() => deleteModel(model.id)}
+            className="p-2 rounded-lg transition-colors hover:opacity-80"
+            style={{ 
+              backgroundColor: '#FEE2E2',
+              color: adminColors.danger,
+            }}
+            title="Elimina"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
         </div>
-      )}
-
-      {/* Modal Create/Edit */}
-      <ModernModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false)
-          setEditingModel(null)
-        }}
-        title={editingModel?.id ? 'Modifica Modello' : 'Nuovo Modello'}
-        size="lg"
+      ),
+    },
+  ]
+  
+  return (
+    <div>
+      {/* Header */}
+      <AdminHeader
+        title="Modelli Carport"
+        subtitle="Gestisci i modelli disponibili nel configuratore"
+        configuratorType="ferro"
+      />
+      
+      {/* Switch & Actions */}
+      <div
+        className="flex items-center justify-between"
+        style={{ padding: adminSpacing.lg, paddingTop: 0 }}
       >
-        <div className="space-y-6">
-          {/* Nome */}
-          <ModernInput
-            label="Nome Modello *"
-            value={editingModel?.name || ''}
-            onChange={(e) => setEditingModel(prev => prev ? { ...prev, name: e.target.value } : null)}
-            placeholder="es: Carport Standard 3x5"
-            required
-          />
-
-          {/* Descrizione */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Descrizione
-            </label>
-            <textarea
-              value={editingModel?.description || ''}
-              onChange={(e) => setEditingModel(prev => prev ? { ...prev, description: e.target.value } : null)}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Descrizione dettagliata del modello..."
+        <ConfiguratorSwitch current="ferro" />
+        
+        <PillButton
+          onClick={() => setShowForm(true)}
+          icon={
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          }
+        >
+          Nuovo Modello
+        </PillButton>
+      </div>
+      
+      {/* Table */}
+      <div style={{ padding: adminSpacing.lg, paddingTop: 0 }}>
+        <div
+          className="overflow-hidden"
+          style={{
+            backgroundColor: adminColors.cardBackground,
+            borderRadius: adminRadius.md,
+            boxShadow: adminShadow.md,
+          }}
+        >
+          {loading ? (
+            <div
+              className="text-center py-12"
+              style={{ color: adminColors.textMuted }}
+            >
+              Caricamento...
+            </div>
+          ) : (
+            <DataTable
+              columns={columns}
+              data={models}
+              keyExtractor={(model) => model.id}
+              emptyMessage="Nessun modello trovato. Clicca su 'Nuovo Modello' per iniziare."
             />
-          </div>
-
-          {/* Prezzo Base */}
-          <ModernInput
-            label="Prezzo Base (€) *"
-            type="number"
-            step="0.01"
-            value={editingModel?.base_price || 0}
-            onChange={(e) => setEditingModel(prev => prev ? { ...prev, base_price: parseFloat(e.target.value) } : null)}
-            placeholder="2500.00"
-            required
-          />
-
-          {/* Tipo Struttura */}
-          <ModernSelect
-            label="Tipo Struttura *"
-            value={editingModel?.structure_type_id || ''}
-            onChange={(e) => setEditingModel(prev => prev ? { ...prev, structure_type_id: e.target.value || null } : null)}
-            options={[
-              { value: '', label: 'Seleziona tipo struttura...' },
-              ...structureTypes.map(st => ({
-                value: st.id,
-                label: st.name
-              }))
-            ]}
-            required
-          />
-
-          {/* Image Upload */}
-          <ImageUploadDragDrop
-            label="Immagine Modello"
-            value={editingModel?.image || ''}
-            onChange={handleImageUpload}
-            isUploading={isUploading}
-            onUploadStart={() => setIsUploading(true)}
-            onUploadComplete={() => setIsUploading(false)}
-            description="Trascina un'immagine qui o clicca per selezionare (consigliato 800x600px)"
-          />
-
-          {/* Actions */}
-          <div className="flex gap-3 justify-end pt-4 border-t">
-            <ModernButton
-              variant="outline"
-              onClick={() => {
-                setIsModalOpen(false)
-                setEditingModel(null)
-              }}
-              disabled={isSaving || isUploading}
-            >
-              Annulla
-            </ModernButton>
-            <ModernButton
-              onClick={handleSave}
-              disabled={isSaving || isUploading || !editingModel?.name || !editingModel?.base_price || !editingModel?.structure_type_id}
-            >
-              {isSaving ? 'Salvataggio...' : (editingModel?.id ? 'Salva Modifiche' : 'Crea Modello')}
-            </ModernButton>
-          </div>
+          )}
         </div>
-      </ModernModal>
+      </div>
     </div>
   )
 }
